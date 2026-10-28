@@ -48,24 +48,51 @@ exports.addEquipment = async (req, res) => {
     } catch (error) { res.status(500).json({ error: error.message }); }
 };
 
+exports.sendToRepair = async (req, res) => {
+    try {
+        const { description, cost } = req.body;
+        if (cost != null && (isNaN(cost) || cost < 0)) return res.status(400).json({ message: 'Cost must be a non-negative number' });
+        const [result] = await db.query("UPDATE Equipment SET condition_status = 'Needs Repair' WHERE equipment_id = ?", [req.params.id]);
+        if (!result.affectedRows) return res.status(404).json({ message: 'Equipment not found' });
+        await db.query(
+            'INSERT INTO Maintenance (equipment_id, maintenance_date, description, cost) VALUES (?, CURDATE(), ?, ?)',
+            [req.params.id, description || null, cost ?? null]
+        );
+        res.json({ message: 'Equipment sent to repair' });
+    } catch (error) { res.status(500).json({ error: error.message }); }
+};
+
+exports.markRepaired = async (req, res) => {
+    try {
+        const [result] = await db.query("UPDATE Equipment SET condition_status = 'Good' WHERE equipment_id = ?", [req.params.id]);
+        if (!result.affectedRows) return res.status(404).json({ message: 'Equipment not found' });
+        res.json({ message: 'Equipment marked as repaired' });
+    } catch (error) { res.status(500).json({ error: error.message }); }
+};
+
 exports.getMaintenance = async (req, res) => {
     try {
+        // Maintenance rows log past service; next service is due 180 days after the latest one (same threshold as vw_equipment_health).
         const [rows] = await db.query(
-            `SELECT m.*, e.equipment_name, e.condition_status
+            `SELECT m.*, e.equipment_name, e.condition_status,
+                    DATE_ADD(m.maintenance_date, INTERVAL 180 DAY) AS next_due,
+                    DATEDIFF(DATE_ADD(m.maintenance_date, INTERVAL 180 DAY), CURDATE()) AS days_diff
              FROM Maintenance m
              JOIN Equipment e ON m.equipment_id = e.equipment_id
-             ORDER BY m.maintenance_date ASC`
+             WHERE m.maintenance_id = (SELECT m2.maintenance_id FROM Maintenance m2
+                                       WHERE m2.equipment_id = m.equipment_id
+                                       ORDER BY m2.maintenance_date DESC, m2.maintenance_id DESC LIMIT 1)
+             ORDER BY next_due ASC`
         );
-        const today = new Date();
         const enriched = rows.map(r => {
-            const mDate = new Date(r.maintenance_date);
-            const diffDays = Math.round((mDate - today) / (1000 * 60 * 60 * 24));
+            const diffDays = r.days_diff;
             let label = '';
-            if (diffDays < 0) label = `Past Due (${Math.abs(diffDays)} day${Math.abs(diffDays) !== 1 ? 's' : ''})`;
+            if (r.condition_status === 'Needs Repair' || r.condition_status === 'Out of Order') label = 'In Repair';
+            else if (diffDays < 0) label = `Past Due (${Math.abs(diffDays)} day${Math.abs(diffDays) !== 1 ? 's' : ''})`;
             else if (diffDays === 0) label = 'Today';
             else if (diffDays === 1) label = 'Tomorrow';
-            else label = mDate.toLocaleDateString('en-US', { weekday: 'short', day: '2-digit', month: 'short' });
-            return { ...r, days_diff: diffDays, date_label: label };
+            else label = new Date(r.next_due).toLocaleDateString('en-US', { weekday: 'short', day: '2-digit', month: 'short' });
+            return { ...r, date_label: label };
         });
         res.json(enriched);
     } catch (error) { res.status(500).json({ error: error.message }); }

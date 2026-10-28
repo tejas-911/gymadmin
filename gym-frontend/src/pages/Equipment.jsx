@@ -657,7 +657,7 @@ export default function Equipment() {
                     </div>
                     <div className="mt-3 flex items-center justify-between text-xs">
                       <span className="text-iron-text-secondary">Condition: <span className="text-fg">{item.condition_status}</span></span>
-                      <span className="text-iron-text-secondary">Date: <span className="text-fg">{formatDate(item.maintenance_date)}</span></span>
+                      <span className="text-iron-text-secondary">Last serviced: <span className="text-fg">{formatDate(item.maintenance_date)}</span></span>
                     </div>
                   </div>
                 ))
