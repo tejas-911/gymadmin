@@ -6,6 +6,7 @@ import {
   Dumbbell, Bike, Heart, LayoutGrid, Wrench,
   ChevronRight, Clock, ShieldAlert
 } from 'lucide-react';
+import useDialog from '../hooks/useDialog';
 
 const API = 'http://localhost:5000/api/equipment';
 
@@ -36,7 +37,7 @@ function CategoryBadge({ category }) {
   const cfg = CATEGORY_CFG[category] || CATEGORY_CFG.General;
   const Icon = cfg.Icon;
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-black uppercase tracking-widest border ${cfg.cls}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-black tracking-widest border ${cfg.cls}`}>
       <Icon size={10} /> {category}
     </span>
   );
@@ -84,7 +85,7 @@ function MaintenanceItem({ item }) {
 
   return (
     <div className={`pl-4 border-l-2 ${borderCls} py-1 space-y-1`}>
-      <p className={`text-xs font-black uppercase tracking-widest ${labelCls}`}>
+      <p className={`text-xs font-black tracking-widest ${labelCls}`}>
         {item.date_label}
         {isPast && <span className="ml-1 text-red-400">(Overdue)</span>}
       </p>
@@ -109,6 +110,7 @@ export default function Equipment() {
 
   // Modal
   const [showModal, setShowModal] = useState(false);
+  const modalDialogRef = useDialog(showModal, () => setShowModal(false));
   const [formData, setFormData]   = useState(initialForm);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
@@ -116,11 +118,13 @@ export default function Equipment() {
 
   // Repair/Maintenance Modal State
   const [repairModalOpen, setRepairModalOpen] = useState(false);
+  const repairModalDialogRef = useDialog(repairModalOpen, () => setRepairModalOpen(false));
   const [repairItemId, setRepairItemId]       = useState(null);
   const [repairDesc, setRepairDesc]           = useState('');
   const [repairCost, setRepairCost]           = useState(0);
   const [repairSubmitting, setRepairSubmitting] = useState(false);
   const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
+  const maintenanceModalDialogRef = useDialog(showMaintenanceModal, () => setShowMaintenanceModal(false));
 
   const fetchStats = useCallback(async () => {
     try {
@@ -222,7 +226,7 @@ export default function Equipment() {
         {/* Total Equipment */}
         <div className="stat-card group">
           <div className="flex items-start justify-between mb-4">
-            <p className="text-[10px] font-space font-black uppercase tracking-[0.2em] text-iron-text-secondary">Total Equipment</p>
+            <p className="text-[10px] font-space font-black tracking-[0.2em] text-iron-text-secondary">Total Equipment</p>
             <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-iron-text-secondary group-hover:bg-iron-lime/10 group-hover:text-iron-lime transition-colors">
               <Package size={14} />
             </div>
@@ -232,7 +236,7 @@ export default function Equipment() {
               {stats?.total ?? '00'}
             </p>
             <div className="text-right">
-              <p className="text-[10px] font-black uppercase tracking-widest text-iron-lime">Reliability</p>
+              <p className="text-[10px] font-black tracking-widest text-iron-lime">Reliability</p>
               <p className="text-sm font-space font-black text-white tracking-tight">{stats?.reliability_score ?? '000'}</p>
             </div>
           </div>
@@ -241,7 +245,7 @@ export default function Equipment() {
         {/* Active Equipment */}
         <div className="stat-card group">
           <div className="flex items-start justify-between mb-4">
-            <p className="text-[10px] font-space font-black uppercase tracking-[0.2em] text-iron-text-secondary">Active Assets</p>
+            <p className="text-[10px] font-space font-black tracking-[0.2em] text-iron-text-secondary">Active Assets</p>
             <div className="w-8 h-8 rounded-lg bg-iron-lime/10 flex items-center justify-center text-iron-lime">
               <Zap size={14} />
             </div>
@@ -257,7 +261,7 @@ export default function Equipment() {
         {/* Utilization % */}
         <div className="stat-card group">
           <div className="flex items-start justify-between mb-4">
-            <p className="text-[10px] font-space font-black uppercase tracking-[0.2em] text-iron-text-secondary">Utilization %</p>
+            <p className="text-[10px] font-space font-black tracking-[0.2em] text-iron-text-secondary">Utilization %</p>
             <div className="w-8 h-8 rounded-lg bg-iron-blue/10 flex items-center justify-center text-iron-blue">
               <LayoutGrid size={14} />
             </div>
@@ -266,14 +270,14 @@ export default function Equipment() {
             <p className="text-4xl font-space font-black text-white tracking-tighter">
               {stats?.utilization ?? '0.0'}%
             </p>
-            <span className="text-emerald-400 text-[10px] font-black mb-1.5 uppercase">Optimal</span>
+            <span className="text-emerald-400 text-[10px] font-black mb-1.5">Optimal</span>
           </div>
         </div>
 
         {/* Maintenance Due */}
         <div className="stat-card group border-red-500/20">
           <div className="flex items-start justify-between mb-4">
-            <p className="text-[10px] font-space font-black uppercase tracking-[0.2em] text-iron-text-secondary">Maintenance Due</p>
+            <p className="text-[10px] font-space font-black tracking-[0.2em] text-iron-text-secondary">Maintenance Due</p>
             <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center text-red-400">
               <AlertTriangle size={14} />
             </div>
@@ -282,9 +286,9 @@ export default function Equipment() {
             <p className="text-4xl font-space font-black text-red-500 tracking-tighter">
               {stats?.maintenance_due !== undefined ? String(stats.maintenance_due).padStart(2, '0') : '00'}
             </p>
-            <div className="animate-pulse flex items-center gap-1">
+            <div className="flex items-center gap-1">
               <ShieldAlert size={12} className="text-red-500" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-red-500">Urgent</span>
+              <span className="text-[10px] font-black tracking-widest text-red-500">Urgent</span>
             </div>
           </div>
         </div>
@@ -299,7 +303,7 @@ export default function Equipment() {
           <div className="px-6 py-5 border-b border-border">
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div>
-                <h2 className="text-white font-space font-black text-lg italic uppercase tracking-tight">Gym Inventory</h2>
+                <h2 className="text-white font-space font-black text-lg italic tracking-tight">Gym Inventory</h2>
                 <p className="text-iron-text-secondary text-xs italic mt-0.5">Real-time equipment performance and status</p>
               </div>
               <div className="flex items-center gap-3">
@@ -309,12 +313,13 @@ export default function Equipment() {
                   <input
                     type="text"
                     placeholder="Search machine or ID..."
+                    aria-label="Search equipment"
                     value={searchInput}
                     onChange={e => setSearchInput(e.target.value)}
                     className="bg-[#18181A] border border-border rounded-lg pl-8 pr-8 py-2 text-xs text-white placeholder:text-iron-text-secondary/60 outline-none focus:border-iron-lime/40 transition-colors w-48"
                   />
                   {searchInput && (
-                    <button type="button" onClick={clearSearch} className="absolute right-2 text-iron-text-secondary hover:text-white">
+                    <button type="button" onClick={clearSearch} aria-label="Clear search" className="absolute right-2 text-iron-text-secondary hover:text-white">
                       <X size={12} />
                     </button>
                   )}
@@ -345,7 +350,7 @@ export default function Equipment() {
                 {loadingEq ? (
                   <tr>
                     <td colSpan={7} className="py-16 text-center">
-                      <div className="flex justify-center items-center gap-3 text-iron-text-secondary text-xs font-space uppercase tracking-widest">
+                      <div className="flex justify-center items-center gap-3 text-iron-text-secondary text-xs font-space tracking-widest">
                         <Loader2 size={15} className="animate-spin text-iron-lime" /> Loading inventory...
                       </div>
                     </td>
@@ -360,7 +365,7 @@ export default function Equipment() {
                   equipment.map(item => (
                     <tr key={item.equipment_id} className="group">
                       <td>
-                        <span className="text-iron-text-secondary text-xs font-black uppercase tracking-widest font-space">
+                        <span className="text-iron-text-secondary text-xs font-black tracking-widest font-space">
                           #{item.equipment_id.toString().padStart(3, '0')}
                         </span>
                       </td>
@@ -386,11 +391,11 @@ export default function Equipment() {
                       <td><StatusDot status={item.display_status} /></td>
                       <td className="text-right">
                         {(item.condition_status === 'Needs Repair' || item.condition_status === 'Out of Order') ? (
-                          <button onClick={() => handleRepair(item.equipment_id)} className="px-3 py-1 bg-iron-lime/10 text-iron-lime text-[10px] font-black uppercase tracking-widest rounded hover:bg-iron-lime/20 transition-colors whitespace-nowrap">
+                          <button onClick={() => handleRepair(item.equipment_id)} className="px-3 py-1 bg-iron-lime/10 text-iron-lime text-[10px] font-black tracking-widest rounded hover:bg-iron-lime/20 transition-colors whitespace-nowrap">
                             Mark Repaired
                           </button>
                         ) : (
-                          <button onClick={() => handleSendToRepair(item.equipment_id)} className="px-3 py-1 bg-red-500/10 text-red-500 text-[10px] font-black uppercase tracking-widest rounded hover:bg-red-500/20 transition-colors whitespace-nowrap">
+                          <button onClick={() => handleSendToRepair(item.equipment_id)} className="px-3 py-1 bg-red-500/10 text-red-500 text-[10px] font-black tracking-widest rounded hover:bg-red-500/20 transition-colors whitespace-nowrap">
                             Send Repair
                           </button>
                         )}
@@ -420,10 +425,10 @@ export default function Equipment() {
             <div className="px-5 py-4 border-b border-border flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <CalendarClock size={15} className="text-iron-text-secondary" />
-                <h3 className="text-white font-space font-black uppercase tracking-widest text-sm italic">Maintenance</h3>
+                <h3 className="text-white font-space font-black tracking-widest text-sm italic">Maintenance</h3>
               </div>
               {urgentCount > 0 && (
-                <span className="px-2.5 py-1 bg-red-500 text-white text-[11px] font-black uppercase tracking-widest rounded">
+                <span className="px-2.5 py-1 bg-red-500 text-white text-[11px] font-black tracking-widest rounded">
                   Urgent
                 </span>
               )}
@@ -444,7 +449,7 @@ export default function Equipment() {
             {/* View full schedule */}
             <button
               onClick={() => setShowMaintenanceModal(true)}
-              className="mx-5 mb-5 mt-auto flex items-center justify-center gap-2 py-3 bg-white/[0.03] border border-white/5 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] text-iron-text-secondary hover:text-white hover:border-white/20 transition-all"
+              className="mx-5 mb-5 mt-auto flex items-center justify-center gap-2 py-3 bg-white/[0.03] border border-white/5 rounded-xl text-[11px] font-black tracking-[0.2em] text-iron-text-secondary hover:text-white hover:border-white/20 transition-all"
             >
               <Clock size={12} /> Full Log
             </button>
@@ -452,7 +457,7 @@ export default function Equipment() {
 
           {/* Quick stats card */}
           <div className="card space-y-3">
-            <p className="text-xs font-space font-black uppercase tracking-widest text-iron-text-secondary mb-3">Condition Breakdown</p>
+            <p className="text-xs font-space font-black tracking-widest text-iron-text-secondary mb-3">Condition Breakdown</p>
             {[
               { label: 'New',          color: 'bg-iron-lime',    key: 'New'           },
               { label: 'Good',         color: 'bg-emerald-400',  key: 'Good'          },
@@ -480,14 +485,14 @@ export default function Equipment() {
       {/* ── Add Equipment Modal ────────────────────────────────── */}
       {showModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-surface border border-border rounded-2xl w-full max-w-md shadow-2xl">
+          <div ref={modalDialogRef} role="dialog" aria-modal="true" aria-labelledby="equipment-showModal-title" tabIndex={-1} className="bg-surface border border-border rounded-2xl w-full max-w-md shadow-2xl">
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-border">
               <div>
-                <h2 className="text-white font-space font-bold text-base tracking-wide">Add Equipment</h2>
+                <h2 id="equipment-showModal-title" className="text-white font-space font-bold text-base tracking-wide">Add Equipment</h2>
                 <p className="text-iron-text-secondary text-xs italic mt-0.5">Register a new asset to the inventory</p>
               </div>
-              <button onClick={() => setShowModal(false)}
+              <button aria-label="Close dialog" onClick={() => setShowModal(false)}
                 className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center text-iron-text-secondary hover:text-white transition-colors">
                 <X size={15} />
               </button>
@@ -495,8 +500,9 @@ export default function Equipment() {
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+              <p className="text-xs text-iron-text-secondary">Fields marked <span aria-hidden="true" className="text-red-400">*</span><span className="sr-only">with an asterisk</span> are required.</p>
               {formError && (
-                <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-red-400 text-xs">
+                <div role="alert" className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-red-400 text-xs">
                   <AlertCircle size={14} className="flex-shrink-0" />{formError}
                 </div>
               )}
@@ -507,10 +513,10 @@ export default function Equipment() {
               )}
 
               <div className="space-y-1">
-                <label className="text-iron-text-secondary text-xs uppercase tracking-widest font-space font-semibold">
-                  Equipment Name <span className="text-red-400">*</span>
+                <label htmlFor="equipment-equipment-name" className="text-iron-text-secondary text-xs tracking-widest font-space font-semibold">
+                  Equipment Name <span aria-hidden="true" className="text-red-400">*</span>
                 </label>
-                <input required type="text" placeholder="e.g. SteelForce Power Rack"
+                <input id="equipment-equipment-name" required type="text" placeholder="e.g. SteelForce Power Rack"
                   value={formData.equipment_name}
                   onChange={e => setFormData({ ...formData, equipment_name: e.target.value })}
                   className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors placeholder:text-iron-text-secondary/50" />
@@ -518,19 +524,19 @@ export default function Equipment() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-iron-text-secondary text-xs uppercase tracking-widest font-space font-semibold">
+                  <label htmlFor="equipment-purchase-date" className="text-iron-text-secondary text-xs tracking-widest font-space font-semibold">
                     Purchase Date
                   </label>
-                  <input type="date"
+                  <input id="equipment-purchase-date" type="date"
                     value={formData.purchase_date}
                     onChange={e => setFormData({ ...formData, purchase_date: e.target.value })}
                     className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors" />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-iron-text-secondary text-xs uppercase tracking-widest font-space font-semibold">
-                    Condition <span className="text-red-400">*</span>
+                  <label htmlFor="equipment-condition-status" className="text-iron-text-secondary text-xs tracking-widest font-space font-semibold">
+                    Condition <span aria-hidden="true" className="text-red-400">*</span>
                   </label>
-                  <select value={formData.condition_status}
+                  <select id="equipment-condition-status" required value={formData.condition_status}
                     onChange={e => setFormData({ ...formData, condition_status: e.target.value })}
                     className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors">
                     {CONDITION_OPTIONS.map(c => <option key={c}>{c}</option>)}
@@ -539,10 +545,10 @@ export default function Equipment() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-iron-text-secondary text-xs uppercase tracking-widest font-space font-semibold">
+                <label htmlFor="equipment-location" className="text-iron-text-secondary text-xs tracking-widest font-space font-semibold">
                   Location / Zone
                 </label>
-                <input type="text" placeholder="e.g. Main Floor, Zone A"
+                <input id="equipment-location" type="text" placeholder="e.g. Main Floor, Zone A"
                   value={formData.location}
                   onChange={e => setFormData({ ...formData, location: e.target.value })}
                   className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors placeholder:text-iron-text-secondary/50" />
@@ -554,7 +560,7 @@ export default function Equipment() {
                   {submitting ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Plus size={13} /> Add Equipment</>}
                 </button>
                 <button type="button" onClick={() => setShowModal(false)}
-                  className="flex-1 py-3 px-6 bg-white/[0.03] border border-white/10 rounded text-white text-xs font-space font-semibold uppercase tracking-wider hover:bg-white/5 transition-colors">
+                  className="flex-1 py-3 px-6 bg-white/[0.03] border border-white/10 rounded text-white text-xs font-space font-semibold tracking-wider hover:bg-white/5 transition-colors">
                   Cancel
                 </button>
               </div>
@@ -566,22 +572,23 @@ export default function Equipment() {
       {repairModalOpen && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
              onClick={() => setRepairModalOpen(false)}>
-          <div className="bg-surface border border-border rounded-2xl w-full max-w-md shadow-2xl"
+          <div ref={repairModalDialogRef} role="dialog" aria-modal="true" aria-labelledby="equipment-repairModalOpen-title" tabIndex={-1} className="bg-surface border border-border rounded-2xl w-full max-w-md shadow-2xl"
                onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-6 py-5 border-b border-border">
               <div>
-                <h2 className="text-white font-space font-bold text-base tracking-wide">Send to Repair</h2>
+                <h2 id="equipment-repairModalOpen-title" className="text-white font-space font-bold text-base tracking-wide">Send to Repair</h2>
                 <p className="text-iron-text-secondary text-xs italic mt-0.5">Log maintenance details</p>
               </div>
-              <button onClick={() => setRepairModalOpen(false)} className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center text-iron-text-secondary hover:text-white transition-colors">
+              <button aria-label="Close dialog" onClick={() => setRepairModalOpen(false)} className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center text-iron-text-secondary hover:text-white transition-colors">
                 <X size={15} />
               </button>
             </div>
             
             <form onSubmit={submitRepair} className="px-6 py-5 space-y-4">
+              <p className="text-xs text-iron-text-secondary">Fields marked <span aria-hidden="true" className="text-red-400">*</span><span className="sr-only">with an asterisk</span> are required.</p>
               <div className="space-y-1">
-                <label className="text-iron-text-secondary text-xs uppercase tracking-widest font-space font-semibold">Maintenance Description</label>
-                <textarea 
+                <label htmlFor="equipment-repairDesc" className="text-iron-text-secondary text-xs tracking-widest font-space font-semibold">Maintenance Description <span aria-hidden="true" className="text-red-400">*</span></label>
+                <textarea id="equipment-repairDesc" 
                   required
                   value={repairDesc}
                   onChange={e => setRepairDesc(e.target.value)}
@@ -589,8 +596,8 @@ export default function Equipment() {
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-iron-text-secondary text-xs uppercase tracking-widest font-space font-semibold">Estimated Cost (₹)</label>
-                <input 
+                <label htmlFor="equipment-repairCost" className="text-iron-text-secondary text-xs tracking-widest font-space font-semibold">Estimated Cost (₹)</label>
+                <input id="equipment-repairCost" 
                   type="number" 
                   step="0.01"
                   value={repairCost}
@@ -602,7 +609,7 @@ export default function Equipment() {
                 <button type="submit" disabled={repairSubmitting} className="flex-1 btn flex items-center justify-center gap-2">
                   {repairSubmitting ? <><Loader2 size={14} className="animate-spin" /> Sending...</> : 'Send to Repair'}
                 </button>
-                <button type="button" onClick={() => setRepairModalOpen(false)} className="flex-1 py-3 px-6 bg-white/[0.03] border border-white/10 rounded text-white text-xs font-space font-semibold uppercase tracking-wider hover:bg-white/5 transition-colors">
+                <button type="button" onClick={() => setRepairModalOpen(false)} className="flex-1 py-3 px-6 bg-white/[0.03] border border-white/10 rounded text-white text-xs font-space font-semibold tracking-wider hover:bg-white/5 transition-colors">
                   Cancel
                 </button>
               </div>
@@ -613,14 +620,14 @@ export default function Equipment() {
       {showMaintenanceModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
              onClick={() => setShowMaintenanceModal(false)}>
-          <div className="bg-surface border border-border rounded-2xl w-full max-w-2xl shadow-2xl max-h-[80vh] overflow-hidden"
+          <div ref={maintenanceModalDialogRef} role="dialog" aria-modal="true" aria-labelledby="equipment-showMaintenanceModal-title" tabIndex={-1} className="bg-surface border border-border rounded-2xl w-full max-w-2xl shadow-2xl max-h-[80vh] overflow-hidden"
                onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-6 py-5 border-b border-border">
               <div>
-                <h2 className="text-white font-space font-bold text-base tracking-wide">Maintenance Schedule</h2>
+                <h2 id="equipment-showMaintenanceModal-title" className="text-white font-space font-bold text-base tracking-wide">Maintenance Schedule</h2>
                 <p className="text-iron-text-secondary text-xs italic mt-0.5">Latest maintenance item per equipment</p>
               </div>
-              <button onClick={() => setShowMaintenanceModal(false)} className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center text-iron-text-secondary hover:text-white transition-colors">
+              <button aria-label="Close dialog" onClick={() => setShowMaintenanceModal(false)} className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center text-iron-text-secondary hover:text-white transition-colors">
                 <X size={15} />
               </button>
             </div>
@@ -635,7 +642,7 @@ export default function Equipment() {
                         <p className="text-white font-bold text-sm">{item.equipment_name}</p>
                         <p className="text-iron-text-secondary text-xs italic mt-1">{item.description || 'No description provided'}</p>
                       </div>
-                      <span className={`text-[11px] font-black uppercase tracking-widest ${
+                      <span className={`text-[11px] font-black tracking-widest ${
                         item.condition_status === 'Needs Repair' || item.condition_status === 'Out of Order' ? 'text-red-400' : 'text-iron-lime'
                       }`}>
                         {item.date_label}

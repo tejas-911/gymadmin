@@ -7,6 +7,7 @@ import {
   Building2, CheckCircle, AlertCircle, BadgeCheck, CalendarDays
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import useDialog from '../hooks/useDialog';
 
 const API = 'http://localhost:5000/api/members';
 const PLANS_API = 'http://localhost:5000/api/plans';
@@ -40,6 +41,7 @@ export default function Members() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const modalDialogRef = useDialog(showModal, () => setShowModal(false));
   const [formData, setFormData] = useState(initialFormState);
   const [editingId, setEditingId] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,6 +52,7 @@ export default function Members() {
 
   // ── Subscription Modal ────────────────────────────────────────
   const [showSubModal, setShowSubModal] = useState(false);
+  const subModalDialogRef = useDialog(showSubModal, () => setShowSubModal(false));
   const [subTarget, setSubTarget] = useState(null); // { member_id, name }
   const [plans, setPlans] = useState([]);
   const [plansLoading, setPlansLoading] = useState(false);
@@ -212,10 +215,10 @@ export default function Members() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-space font-bold tracking-tighter mb-2" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Members</h1>
+          <h2 className="text-4xl font-space font-bold tracking-tighter mb-2" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Members</h2>
           <p className="text-iron-text-secondary font-medium italic text-sm">
             {data.length} total · {activeCount} active
-            {hasEnrichedData && <span className="ml-2 px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-[11px] font-black uppercase tracking-widest">View + Functions Active</span>}
+            {hasEnrichedData && <span className="ml-2 px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-[11px] font-black tracking-widest">View + Functions Active</span>}
           </p>
         </div>
         <button className="btn flex items-center gap-2 group" onClick={openCreateModal}>
@@ -230,12 +233,12 @@ export default function Members() {
           <div className="absolute left-4 top-1/2 -translate-y-1/2 text-iron-text-secondary group-focus-within:text-iron-lime transition-colors">
             <Search size={18} />
           </div>
-          <input type="text" placeholder="Search by name or email..."
+          <input type="text" placeholder="Search by name or email..." aria-label="Search members"
             className="w-full bg-surface border border-border rounded-xl py-3 pl-12 pr-4 text-sm focus:outline-none focus:border-iron-lime transition-all"
             value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
         </div>
         <div className="flex gap-4">
-          <select className="bg-surface border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-iron-lime appearance-none min-w-[140px] cursor-pointer"
+          <select aria-label="Filter by status" className="bg-surface border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-iron-lime appearance-none min-w-[140px] cursor-pointer"
             value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
             <option value="all">All Status</option>
             <option value="active">Active</option>
@@ -250,21 +253,21 @@ export default function Members() {
           <table className="iron-table">
             <thead>
               <tr className="bg-white/[0.01]">
-                <th>MEMBER</th>
-                <th>CONTACT</th>
-                {hasEnrichedData && <th>AGE</th>}
-                {hasEnrichedData && <th>PLAN & STATUS</th>}
-                {hasEnrichedData && <th>REVENUE</th>}
-                {hasEnrichedData && <th>VISITS</th>}
-                {!hasEnrichedData && <th>JOIN DATE</th>}
-                <th>STATUS</th>
-                <th>ACTIONS</th>
+                <th>Member</th>
+                <th>Contact</th>
+                {hasEnrichedData && <th>Age</th>}
+                {hasEnrichedData && <th>Plan & Status</th>}
+                {hasEnrichedData && <th>Revenue</th>}
+                {hasEnrichedData && <th>Visits</th>}
+                {!hasEnrichedData && <th>Join Date</th>}
+                <th>Status</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.03]">
               {loading ? (
                 <tr>
-                  <td colSpan={hasEnrichedData ? 8 : 6} className="py-20 text-center text-iron-text-secondary font-space uppercase tracking-widest text-xs animate-pulse italic">
+                  <td colSpan={hasEnrichedData ? 8 : 6} className="py-20 text-center text-iron-text-secondary font-space tracking-widest text-xs italic">
                     Retrieving member directory...
                   </td>
                 </tr>
@@ -289,7 +292,7 @@ export default function Members() {
                           </div>
                           <div className="flex flex-col">
                             <span className="font-bold group-hover:text-iron-lime transition-colors" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>{name}</span>
-                            <span className="text-xs font-bold text-iron-text-secondary uppercase tracking-tighter">ID: IC-{member.member_id}</span>
+                            <span className="text-xs font-bold text-iron-text-secondary tracking-tighter">ID: IC-{member.member_id}</span>
                           </div>
                         </div>
                       </td>
@@ -315,7 +318,7 @@ export default function Members() {
                           <td>
                             <div className="flex flex-col gap-1.5">
                               {member.plan_name ? (
-                                <span className="px-2.5 py-0.5 bg-iron-blue/10 text-iron-blue border border-iron-blue/20 rounded text-[11px] font-black uppercase tracking-widest w-fit">
+                                <span className="px-2.5 py-0.5 bg-iron-blue/10 text-iron-blue border border-iron-blue/20 rounded text-[11px] font-black tracking-widest w-fit">
                                   {member.plan_name}
                                 </span>
                               ) : (
@@ -330,7 +333,7 @@ export default function Members() {
                                 {member.subscription_status_label || '—'}
                               </span>
                               {member.days_remaining != null && member.days_remaining > 0 && member.days_remaining <= 7 && (
-                                <span className="flex items-center gap-1 text-amber-400 text-[11px] font-black uppercase tracking-widest">
+                                <span className="flex items-center gap-1 text-amber-400 text-[11px] font-black tracking-widest">
                                   <Clock size={10} /> Renew Soon
                                 </span>
                               )}
@@ -367,7 +370,7 @@ export default function Members() {
                       <td>
                         <div className="flex items-center gap-2">
                           <div className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-iron-lime shadow-[0_0_8px_rgba(223,255,0,0.5)]' : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]'}`} />
-                          <span className={`text-xs font-black uppercase tracking-widest ${isActive ? 'text-iron-lime' : 'text-red-400'}`}>
+                          <span className={`text-xs font-black tracking-widest ${isActive ? 'text-iron-lime' : 'text-red-400'}`}>
                             {isActive ? 'Active' : 'Inactive'}
                           </span>
                         </div>
@@ -376,14 +379,14 @@ export default function Members() {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => openEditModal(member)}
-                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/10 text-xs font-black uppercase tracking-widest text-iron-text-secondary hover:text-white hover:border-iron-lime/30 transition-all"
+                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/10 text-xs font-black tracking-widest text-iron-text-secondary hover:text-white hover:border-iron-lime/30 transition-all"
                           >
                             <Pencil size={12} />
                             Edit
                           </button>
                           <button
                             onClick={() => openSubModal(member)}
-                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-iron-lime/10 border border-iron-lime/20 text-xs font-black uppercase tracking-widest text-iron-lime hover:bg-iron-lime/20 hover:border-iron-lime/40 transition-all"
+                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-iron-lime/10 border border-iron-lime/20 text-xs font-black tracking-widest text-iron-lime hover:bg-iron-lime/20 hover:border-iron-lime/40 transition-all"
                           >
                             <BadgeCheck size={12} />
                             Subscribe
@@ -399,7 +402,7 @@ export default function Members() {
         </div>
 
         <div className="p-6 bg-white/[0.01] border-t border-white/[0.03] flex items-center justify-between">
-          <p className="text-xs font-bold text-iron-text-secondary uppercase tracking-widest italic">
+          <p className="text-xs font-bold text-iron-text-secondary tracking-widest italic">
             Showing {filtered.length} of {data.length} members
           </p>
         </div>
@@ -409,24 +412,25 @@ export default function Members() {
       {showModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-dark/80 backdrop-blur-md" onClick={() => setShowModal(false)} />
-          <div className="bg-surface border border-border rounded-xl w-full max-w-[640px] relative z-[210] shadow-[0_30px_100px_rgba(0,0,0,0.5)] overflow-hidden">
+          <div ref={modalDialogRef} role="dialog" aria-modal="true" aria-labelledby="members-showModal-title" tabIndex={-1} className="bg-surface border border-border rounded-xl w-full max-w-[640px] relative z-[210] shadow-[0_30px_100px_rgba(0,0,0,0.5)] overflow-hidden">
             <div className="p-6 pb-4 flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>{editingId ? 'Edit Member' : 'Register Member'}</h2>
+                <h2 id="members-showModal-title" className="text-xl font-bold" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>{editingId ? 'Edit Member' : 'Register Member'}</h2>
                 <p className="text-iron-text-secondary text-xs italic mt-1">
                   {editingId ? 'Update profile details and membership status' : 'Uses sp_register_member stored procedure'}
                 </p>
               </div>
-              <button onClick={() => setShowModal(false)} className="text-iron-text-secondary hover:text-white transition-colors">
+              <button aria-label="Close dialog" onClick={() => setShowModal(false)} className="text-iron-text-secondary hover:text-white transition-colors">
                 <X size={20} />
               </button>
             </div>
             <div className="w-full h-px bg-white/5" />
 
             <form onSubmit={handleSave} className="p-6 space-y-6">
+              <p className="text-xs text-iron-text-secondary">Fields marked <span aria-hidden="true" className="text-red-400">*</span><span className="sr-only">with an asterisk</span> are required.</p>
               {modalError && (
-                <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-xl flex items-center gap-3 italic">
-                  <div className="w-1 h-1 bg-red-400 rounded-full animate-pulse" />
+                <div role="alert" className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-xl flex items-center gap-3 italic">
+                  <div className="w-1 h-1 bg-red-400 rounded-full" />
                   {modalError}
                 </div>
               )}
@@ -439,33 +443,33 @@ export default function Members() {
 
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-iron-text-secondary uppercase tracking-[0.2em] block">Full Name <span className="text-red-400">*</span></label>
-                  <input required type="text" placeholder="e.g. Arjun Sharma"
+                  <label htmlFor="members-name" className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] block">Full Name <span aria-hidden="true" className="text-red-400">*</span></label>
+                  <input id="members-name" required type="text" placeholder="e.g. Arjun Sharma"
                     className="w-full bg-surface border border-border rounded py-3 px-4 text-sm focus:outline-none focus:border-iron-lime transition-all placeholder:text-iron-text-secondary"
                     value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-iron-text-secondary uppercase tracking-[0.2em] block">Email Address <span className="text-red-400">*</span></label>
-                  <input required type="email" placeholder="email@example.com"
+                  <label htmlFor="members-email" className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] block">Email Address <span aria-hidden="true" className="text-red-400">*</span></label>
+                  <input id="members-email" required type="email" placeholder="email@example.com"
                     className="w-full bg-surface border border-border rounded py-3 px-4 text-sm focus:outline-none focus:border-iron-lime transition-all placeholder:text-iron-text-secondary"
                     value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-iron-text-secondary uppercase tracking-[0.2em] block">Phone Number</label>
-                  <input type="text" placeholder="+91 00000 00000"
+                  <label htmlFor="members-phone" className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] block">Phone Number</label>
+                  <input id="members-phone" type="text" placeholder="+91 00000 00000"
                     className="w-full bg-surface border border-border rounded py-3 px-4 text-sm focus:outline-none focus:border-iron-lime transition-all placeholder:text-iron-text-secondary"
                     value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-iron-text-secondary uppercase tracking-[0.2em] block">DOB</label>
-                    <input type="date"
+                    <label htmlFor="members-date-of-birth" className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] block">Date of Birth</label>
+                    <input id="members-date-of-birth" type="date"
                       className="w-full bg-surface border border-border rounded py-3 px-4 text-sm focus:outline-none focus:border-iron-lime transition-all [color-scheme:light]"
                       value={formData.date_of_birth} onChange={e => setFormData({ ...formData, date_of_birth: e.target.value })} />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-iron-text-secondary uppercase tracking-[0.2em] block">Gender</label>
-                    <select className="w-full bg-surface border border-border rounded py-3 px-4 text-sm focus:outline-none focus:border-iron-lime cursor-pointer"
+                    <label htmlFor="members-gender" className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] block">Gender</label>
+                    <select id="members-gender" className="w-full bg-surface border border-border rounded py-3 px-4 text-sm focus:outline-none focus:border-iron-lime cursor-pointer"
                       value={formData.gender} onChange={e => setFormData({ ...formData, gender: e.target.value })}>
                       <option value="Male">Male</option>
                       <option value="Female">Female</option>
@@ -476,14 +480,14 @@ export default function Members() {
                 {editingId && (
                   <>
                     <div className="space-y-2">
-                      <label className="text-xs font-bold text-iron-text-secondary uppercase tracking-[0.2em] block">Join Date</label>
-                      <input type="date"
+                      <label htmlFor="members-join-date" className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] block">Join Date</label>
+                      <input id="members-join-date" type="date"
                         className="w-full bg-surface border border-border rounded py-3 px-4 text-sm focus:outline-none focus:border-iron-lime transition-all [color-scheme:light]"
                         value={formData.join_date || ''} onChange={e => setFormData({ ...formData, join_date: e.target.value })} />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-xs font-bold text-iron-text-secondary uppercase tracking-[0.2em] block">Status</label>
-                      <select className="w-full bg-surface border border-border rounded py-3 px-4 text-sm focus:outline-none focus:border-iron-lime cursor-pointer"
+                      <label htmlFor="members-status" className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] block">Status</label>
+                      <select id="members-status" className="w-full bg-surface border border-border rounded py-3 px-4 text-sm focus:outline-none focus:border-iron-lime cursor-pointer"
                         value={formData.status || 'Active'} onChange={e => setFormData({ ...formData, status: e.target.value })}>
                         <option value="Active">Active</option>
                         <option value="Inactive">Inactive</option>
@@ -495,11 +499,11 @@ export default function Members() {
 
               <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
                 <button type="button" onClick={() => setShowModal(false)}
-                  className="px-6 py-3 rounded-lg border border-border text-xs font-bold tracking-widest uppercase hover:bg-black/5 transition-all" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>
+                  className="px-6 py-3 rounded-lg border border-border text-xs font-bold tracking-widest hover:bg-black/5 transition-all" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>
                   Cancel
                 </button>
                 <button type="submit" disabled={isSubmitting}
-                  className="px-6 py-3 rounded-lg bg-iron-lime text-dark text-xs font-black tracking-widest uppercase hover:shadow-[0_0_20px_rgba(223,255,0,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                  className="px-6 py-3 rounded-lg bg-iron-lime text-dark text-xs font-black tracking-widest hover:shadow-[0_0_20px_rgba(223,255,0,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2">
                   {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <span>{editingId ? 'Save Changes' : 'Register Member'}</span>}
                 </button>
               </div>
@@ -512,7 +516,7 @@ export default function Members() {
       {showSubModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-dark/80 backdrop-blur-md" onClick={() => setShowSubModal(false)} />
-          <div className="bg-surface border border-border rounded-xl w-full max-w-[560px] relative z-[210] shadow-[0_30px_100px_rgba(0,0,0,0.5)] overflow-hidden">
+          <div ref={subModalDialogRef} role="dialog" aria-modal="true" aria-labelledby="members-showSubModal-title" tabIndex={-1} className="bg-surface border border-border rounded-xl w-full max-w-[560px] relative z-[210] shadow-[0_30px_100px_rgba(0,0,0,0.5)] overflow-hidden">
 
             {/* Header */}
             <div className="p-6 pb-4 border-b border-white/5">
@@ -522,22 +526,23 @@ export default function Members() {
                     <BadgeCheck size={20} className="text-iron-lime" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-white">Assign Membership</h2>
+                    <h2 id="members-showSubModal-title" className="text-xl font-bold text-white">Assign Membership</h2>
                     <p className="text-iron-text-secondary text-xs italic mt-0.5">
                       Subscribing: <span className="text-white font-bold">{subTarget?.member_name || subTarget?.name}</span>
                     </p>
                   </div>
                 </div>
-                <button onClick={() => setShowSubModal(false)} className="text-iron-text-secondary hover:text-white transition-colors">
+                <button aria-label="Close dialog" onClick={() => setShowSubModal(false)} className="text-iron-text-secondary hover:text-white transition-colors">
                   <X size={20} />
                 </button>
               </div>
             </div>
 
             <form onSubmit={handleSubscribe} className="p-6 space-y-5">
+              <p className="text-xs text-iron-text-secondary">Fields marked <span aria-hidden="true" className="text-red-400">*</span><span className="sr-only">with an asterisk</span> are required.</p>
               {/* Alerts */}
               {subError && (
-                <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-xl flex items-center gap-3">
+                <div role="alert" className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-xl flex items-center gap-3">
                   <AlertCircle size={14} className="shrink-0" />
                   <span>{subError}</span>
                 </div>
@@ -551,22 +556,23 @@ export default function Members() {
 
               {/* Plan selection */}
               <div className="space-y-2">
-                <label className="text-xs font-bold text-iron-text-secondary uppercase tracking-[0.2em] block">
-                  Membership Plan <span className="text-red-400">*</span>
-                </label>
+                <p id="members-plan-label" className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] block">
+                  Membership Plan <span aria-hidden="true" className="text-red-400">*</span>
+                </p>
                 {plansLoading ? (
                   <div className="flex items-center gap-3 py-4 text-iron-text-secondary text-xs">
                     <Loader2 size={14} className="animate-spin text-iron-lime" />
                     Loading plans...
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 gap-2">
+                  <div role="group" aria-labelledby="members-plan-label" className="grid grid-cols-1 gap-2">
                     {plans.map(p => {
                       const isSelected = parseInt(subForm.plan_id) === p.plan_id;
                       return (
                         <button
                           key={p.plan_id}
                           type="button"
+                          aria-pressed={isSelected}
                           onClick={() => setSubForm(f => ({ ...f, plan_id: String(p.plan_id) }))}
                           className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all text-left ${
                             isSelected
@@ -586,7 +592,7 @@ export default function Members() {
                             <p className={`text-lg font-space font-black ${isSelected ? 'text-iron-lime' : 'text-white'}`}>
                               ₹{parseFloat(p.price).toLocaleString('en-IN')}
                             </p>
-                            <p className="text-iron-text-secondary text-[11px] font-bold uppercase tracking-widest">
+                            <p className="text-iron-text-secondary text-[11px] font-bold tracking-widest">
                               {p.duration_months} month{p.duration_months !== 1 ? 's' : ''}
                             </p>
                           </div>
@@ -623,16 +629,17 @@ export default function Members() {
 
               {/* Payment method */}
               <div className="space-y-2">
-                <label className="text-xs font-bold text-iron-text-secondary uppercase tracking-[0.2em] block">
-                  Payment Method <span className="text-red-400">*</span>
-                </label>
-                <div className="grid grid-cols-4 gap-2">
+                <p id="members-method-label" className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] block">
+                  Payment Method <span aria-hidden="true" className="text-red-400">*</span>
+                </p>
+                <div role="group" aria-labelledby="members-method-label" className="grid grid-cols-4 gap-2">
                   {['Card','Cash','UPI','Bank Transfer'].map(method => {
                     const isActive = subForm.payment_method === method;
                     return (
                       <button
                         key={method}
                         type="button"
+                        aria-pressed={isActive}
                         onClick={() => setSubForm(f => ({ ...f, payment_method: method }))}
                         className={`flex flex-col items-center gap-2 py-3 px-2 rounded-xl border text-xs font-bold transition-all ${
                           isActive
@@ -653,14 +660,14 @@ export default function Members() {
                 <button
                   type="button"
                   onClick={() => setShowSubModal(false)}
-                  className="px-6 py-3 rounded-lg border border-white/10 text-xs font-bold tracking-widest uppercase text-white hover:bg-white/5 transition-all"
+                  className="px-6 py-3 rounded-lg border border-white/10 text-xs font-bold tracking-widest text-white hover:bg-white/5 transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={subSubmitting || !subForm.plan_id}
-                  className="px-8 py-3 rounded-lg bg-iron-lime text-dark text-xs font-black tracking-widest uppercase hover:shadow-[0_0_20px_rgba(223,255,0,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100"
+                  className="px-8 py-3 rounded-lg bg-iron-lime text-dark text-xs font-black tracking-widest hover:shadow-[0_0_20px_rgba(223,255,0,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100"
                 >
                   {subSubmitting ? <Loader2 size={15} className="animate-spin" /> : <BadgeCheck size={15} />}
                   {subSubmitting ? 'Assigning...' : 'Confirm Subscription'}

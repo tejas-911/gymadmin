@@ -4,6 +4,7 @@ import {
   ShoppingBag, Plus, X, Loader2, Search,
   Package, AlertTriangle, CheckCircle
 } from 'lucide-react';
+import useDialog from '../hooks/useDialog';
 
 const API_SUPP = 'http://localhost:5000/api/supplements';
 const API_MEM = 'http://localhost:5000/api/members';
@@ -41,12 +42,14 @@ export default function Supplements() {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const modalDialogRef = useDialog(showModal, () => setShowModal(false));
   const [formData, setFormData] = useState(initialFormState);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [modalError, setModalError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [showRestockModal, setShowRestockModal] = useState(false);
+  const restockModalDialogRef = useDialog(showRestockModal, () => setShowRestockModal(false));
   const [restockData, setRestockData] = useState(initialRestockState);
   const [restockSubmitting, setRestockSubmitting] = useState(false);
   const [restockError, setRestockError] = useState('');
@@ -136,20 +139,20 @@ export default function Supplements() {
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-4xl font-space font-bold tracking-tighter text-white mb-2">Supplements</h1>
+          <h2 className="text-4xl font-space font-bold tracking-tighter text-white mb-2">Supplements</h2>
           <p className="text-iron-text-secondary font-medium italic text-sm">{data.length} products · {totalStock} units in stock</p>
         </div>
         <button onClick={() => { setShowModal(true); setModalError(''); fetchMembers(); }} className="btn flex items-center gap-2">
           <Plus size={14} /> Record Sale
         </button>
-        <button onClick={() => openRestockModal()} className="px-4 py-3 rounded-lg bg-white/[0.03] border border-white/10 text-xs font-black uppercase tracking-widest text-white hover:bg-white/5 transition-all">
+        <button onClick={() => openRestockModal()} className="px-4 py-3 rounded-lg bg-white/[0.03] border border-white/10 text-xs font-black tracking-widest text-white hover:bg-white/5 transition-all">
           Restock
         </button>
       </div>
 
       {/* Success banner */}
       {successMsg && (
-        <div className="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 text-xs font-medium">
+        <div role="status" className="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 text-xs font-medium">
           <CheckCircle size={14} /> {successMsg}
         </div>
       )}
@@ -157,22 +160,22 @@ export default function Supplements() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="stat-card">
-          <p className="text-xs font-space font-bold uppercase tracking-[0.2em] text-iron-text-secondary mb-3">Total Products</p>
+          <p className="text-xs font-space font-bold tracking-[0.2em] text-iron-text-secondary mb-3">Total Products</p>
           <p className="text-4xl font-space font-black text-white">{data.length}</p>
         </div>
         <div className="stat-card">
-          <p className="text-xs font-space font-bold uppercase tracking-[0.2em] text-iron-text-secondary mb-3">Total Stock</p>
+          <p className="text-xs font-space font-bold tracking-[0.2em] text-iron-text-secondary mb-3">Total Stock</p>
           <div className="flex items-end gap-2">
             <p className="text-4xl font-space font-black text-white">{totalStock}</p>
             <span className="text-iron-text-secondary text-xs mb-1">units</span>
           </div>
         </div>
         <div className="stat-card">
-          <p className="text-xs font-space font-bold uppercase tracking-[0.2em] text-iron-text-secondary mb-3">Low Stock Alerts</p>
+          <p className="text-xs font-space font-bold tracking-[0.2em] text-iron-text-secondary mb-3">Low Stock Alerts</p>
           <p className={`text-4xl font-space font-black ${lowStockCount > 0 ? 'text-red-400' : 'text-emerald-400'}`}>{lowStockCount}</p>
         </div>
         <div className="stat-card">
-          <p className="text-xs font-space font-bold uppercase tracking-[0.2em] text-iron-text-secondary mb-3">Avg Price</p>
+          <p className="text-xs font-space font-bold tracking-[0.2em] text-iron-text-secondary mb-3">Avg Price</p>
           <div className="flex items-end gap-1">
             <p className="text-4xl font-space font-black text-white">
               {data.length > 0 ? formatINR(data.reduce((s, d) => s + parseFloat(d.price), 0) / data.length) : formatINR(0)}
@@ -185,7 +188,7 @@ export default function Supplements() {
       <div className="card p-4">
         <div className="relative group">
           <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-iron-text-secondary group-focus-within:text-iron-lime transition-colors" />
-          <input type="text" placeholder="Search supplements by name or brand..."
+          <input type="text" placeholder="Search supplements by name or brand..." aria-label="Search supplements"
             className="w-full bg-white/[0.03] border border-white/5 rounded-xl py-3 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-iron-lime/20 focus:bg-white/[0.05] transition-all"
             value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
         </div>
@@ -196,7 +199,7 @@ export default function Supplements() {
         {loading ? (
           <div className="col-span-full py-20 text-center">
             <Loader2 size={20} className="animate-spin text-iron-lime mx-auto mb-3" />
-            <p className="text-iron-text-secondary text-xs font-space uppercase tracking-widest">Loading inventory...</p>
+            <p className="text-iron-text-secondary text-xs font-space tracking-widest">Loading inventory...</p>
           </div>
         ) : filtered.length === 0 ? (
           <div className="col-span-full py-20 text-center text-iron-text-secondary italic">No supplements found.</div>
@@ -210,7 +213,7 @@ export default function Supplements() {
                   <div className="w-12 h-12 rounded-xl bg-iron-lime/10 flex items-center justify-center text-iron-lime group-hover:scale-110 transition-transform">
                     <Package size={20} />
                   </div>
-                  <span className="text-iron-text-secondary text-xs font-black uppercase tracking-widest font-space">#{item.supplement_id}</span>
+                  <span className="text-iron-text-secondary text-xs font-black tracking-widest font-space">#{item.supplement_id}</span>
                 </div>
                 <h3 className="text-white font-bold text-sm mb-1 group-hover:text-iron-lime transition-colors">{item.name}</h3>
                 <p className="text-iron-text-secondary text-xs italic mb-4">{item.brand || 'Unknown Brand'}</p>
@@ -235,7 +238,7 @@ export default function Supplements() {
                 </div>
                 <button
                   onClick={() => openRestockModal(item.supplement_id)}
-                  className="mt-4 w-full py-2 bg-white/[0.03] border border-white/10 rounded-lg text-xs font-black uppercase tracking-widest text-iron-text-secondary hover:text-white hover:border-iron-lime/30 transition-all"
+                  className="mt-4 w-full py-2 bg-white/[0.03] border border-white/10 rounded-lg text-xs font-black tracking-widest text-iron-text-secondary hover:text-white hover:border-iron-lime/30 transition-all"
                 >
                   Restock
                 </button>
@@ -249,28 +252,29 @@ export default function Supplements() {
       {showModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-dark/80 backdrop-blur-md" onClick={() => setShowModal(false)} />
-          <div className="bg-surface border border-border rounded-xl w-full max-w-md relative z-[210] shadow-[0_30px_100px_rgba(0,0,0,0.5)] overflow-hidden">
+          <div ref={modalDialogRef} role="dialog" aria-modal="true" aria-labelledby="supplements-showModal-title" tabIndex={-1} className="bg-surface border border-border rounded-xl w-full max-w-md relative z-[210] shadow-[0_30px_100px_rgba(0,0,0,0.5)] overflow-hidden">
             <div className="p-6 pb-4 flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold text-white">Record Sale</h2>
+                <h2 id="supplements-showModal-title" className="text-xl font-bold text-white">Record Sale</h2>
                 <p className="text-iron-text-secondary text-xs italic mt-1">Stock auto-updated via trg_supplement_stock_update trigger</p>
               </div>
-              <button onClick={() => setShowModal(false)} className="text-iron-text-secondary hover:text-white transition-colors">
+              <button aria-label="Close dialog" onClick={() => setShowModal(false)} className="text-iron-text-secondary hover:text-white transition-colors">
                 <X size={20} />
               </button>
             </div>
             <div className="w-full h-px bg-white/5" />
 
             <form onSubmit={handleSale} className="p-6 space-y-4">
+              <p className="text-xs text-iron-text-secondary">Fields marked <span aria-hidden="true" className="text-red-400">*</span><span className="sr-only">with an asterisk</span> are required.</p>
               {modalError && (
-                <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-xl flex items-center gap-3">
+                <div role="alert" className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-xl flex items-center gap-3">
                   <AlertTriangle size={14} className="shrink-0" /> {modalError}
                 </div>
               )}
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-iron-text-secondary uppercase tracking-[0.2em] block">Member <span className="text-red-400">*</span></label>
-                <select required value={formData.member_id} onChange={e => setFormData({ ...formData, member_id: e.target.value })}
+                <label htmlFor="supplements-member-id" className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] block">Member <span aria-hidden="true" className="text-red-400">*</span></label>
+                <select id="supplements-member-id" required value={formData.member_id} onChange={e => setFormData({ ...formData, member_id: e.target.value })}
                   className="w-full bg-[#18181A] border border-white/5 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-iron-lime/30">
                   <option value="">Select member...</option>
                   {members.map(m => (
@@ -280,8 +284,8 @@ export default function Supplements() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-iron-text-secondary uppercase tracking-[0.2em] block">Supplement <span className="text-red-400">*</span></label>
-                <select required value={formData.supplement_id} onChange={e => setFormData({ ...formData, supplement_id: e.target.value })}
+                <label htmlFor="supplements-supplement-id" className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] block">Supplement <span aria-hidden="true" className="text-red-400">*</span></label>
+                <select id="supplements-supplement-id" required value={formData.supplement_id} onChange={e => setFormData({ ...formData, supplement_id: e.target.value })}
                   className="w-full bg-[#18181A] border border-white/5 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-iron-lime/30">
                   <option value="">Select supplement...</option>
                   {data.map(s => (
@@ -294,14 +298,14 @@ export default function Supplements() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-iron-text-secondary uppercase tracking-[0.2em] block">Quantity <span className="text-red-400">*</span></label>
-                  <input required type="number" min="1" max={previewSupplement ? previewSupplement.stock_quantity : 99}
+                  <label htmlFor="supplements-quantity" className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] block">Quantity <span aria-hidden="true" className="text-red-400">*</span></label>
+                  <input id="supplements-quantity" required type="number" min="1" max={previewSupplement ? previewSupplement.stock_quantity : 99}
                     value={formData.quantity} onChange={e => setFormData({ ...formData, quantity: parseInt(e.target.value) || 1 })}
                     className="w-full bg-[#18181A] border border-white/5 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-iron-lime/30" />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-iron-text-secondary uppercase tracking-[0.2em] block">Payment</label>
-                  <select value={formData.payment_method} onChange={e => setFormData({ ...formData, payment_method: e.target.value })}
+                  <label htmlFor="supplements-payment-method" className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] block">Payment</label>
+                  <select id="supplements-payment-method" value={formData.payment_method} onChange={e => setFormData({ ...formData, payment_method: e.target.value })}
                     className="w-full bg-[#18181A] border border-white/5 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-iron-lime/30">
                     <option>Card</option><option>Cash</option><option>UPI</option><option>Bank Transfer</option>
                   </select>
@@ -309,15 +313,15 @@ export default function Supplements() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-iron-text-secondary uppercase tracking-[0.2em] block">Sale Date</label>
-                <input required type="date" value={formData.sale_date} onChange={e => setFormData({ ...formData, sale_date: e.target.value })}
+                <label htmlFor="supplements-sale-date" className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] block">Sale Date <span aria-hidden="true" className="text-red-400">*</span></label>
+                <input id="supplements-sale-date" required type="date" value={formData.sale_date} onChange={e => setFormData({ ...formData, sale_date: e.target.value })}
                   className="w-full bg-[#18181A] border border-white/5 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-iron-lime/30 [color-scheme:dark]" />
               </div>
 
               {/* Total preview */}
               {previewSupplement && (
                 <div className="flex items-center justify-between p-4 bg-iron-lime/5 border border-iron-lime/20 rounded-xl">
-                  <span className="text-iron-text-secondary text-xs font-bold uppercase tracking-widest">Total</span>
+                  <span className="text-iron-text-secondary text-xs font-bold tracking-widest">Total</span>
                   <span className="text-iron-lime font-space font-black text-xl">{formatINR(previewTotal)}</span>
                 </div>
               )}
@@ -329,7 +333,7 @@ export default function Supplements() {
                   {isSubmitting ? 'Processing...' : 'Record Sale'}
                 </button>
                 <button type="button" onClick={() => setShowModal(false)}
-                  className="flex-1 py-3 px-6 bg-white/[0.03] border border-white/10 rounded text-white text-xs font-space font-semibold uppercase tracking-wider hover:bg-white/5 transition-colors">
+                  className="flex-1 py-3 px-6 bg-white/[0.03] border border-white/10 rounded text-white text-xs font-space font-semibold tracking-wider hover:bg-white/5 transition-colors">
                   Cancel
                 </button>
               </div>
@@ -341,28 +345,29 @@ export default function Supplements() {
       {showRestockModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-dark/80 backdrop-blur-md" onClick={() => setShowRestockModal(false)} />
-          <div className="bg-surface border border-border rounded-xl w-full max-w-md relative z-[210] shadow-[0_30px_100px_rgba(0,0,0,0.5)] overflow-hidden">
+          <div ref={restockModalDialogRef} role="dialog" aria-modal="true" aria-labelledby="supplements-showRestockModal-title" tabIndex={-1} className="bg-surface border border-border rounded-xl w-full max-w-md relative z-[210] shadow-[0_30px_100px_rgba(0,0,0,0.5)] overflow-hidden">
             <div className="p-6 pb-4 flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold text-white">Restock Supplement</h2>
+                <h2 id="supplements-showRestockModal-title" className="text-xl font-bold text-white">Restock Supplement</h2>
                 <p className="text-iron-text-secondary text-xs italic mt-1">Increase available inventory</p>
               </div>
-              <button onClick={() => setShowRestockModal(false)} className="text-iron-text-secondary hover:text-white transition-colors">
+              <button aria-label="Close dialog" onClick={() => setShowRestockModal(false)} className="text-iron-text-secondary hover:text-white transition-colors">
                 <X size={20} />
               </button>
             </div>
             <div className="w-full h-px bg-white/5" />
 
             <form onSubmit={handleRestock} className="p-6 space-y-4">
+              <p className="text-xs text-iron-text-secondary">Fields marked <span aria-hidden="true" className="text-red-400">*</span><span className="sr-only">with an asterisk</span> are required.</p>
               {restockError && (
-                <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-xl flex items-center gap-3">
+                <div role="alert" className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-xl flex items-center gap-3">
                   <AlertTriangle size={14} className="shrink-0" /> {restockError}
                 </div>
               )}
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-iron-text-secondary uppercase tracking-[0.2em] block">Supplement</label>
-                <select
+                <label htmlFor="supplements-supplement-id-2" className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] block">Supplement <span aria-hidden="true" className="text-red-400">*</span></label>
+                <select id="supplements-supplement-id-2"
                   required
                   value={restockData.supplement_id}
                   onChange={e => setRestockData({ ...restockData, supplement_id: e.target.value })}
@@ -378,8 +383,8 @@ export default function Supplements() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-iron-text-secondary uppercase tracking-[0.2em] block">Quantity to Add</label>
-                <input
+                <label htmlFor="supplements-quantity-2" className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] block">Quantity to Add <span aria-hidden="true" className="text-red-400">*</span></label>
+                <input id="supplements-quantity-2"
                   required
                   min="1"
                   type="number"
@@ -395,7 +400,7 @@ export default function Supplements() {
                   {restockSubmitting ? 'Updating...' : 'Restock'}
                 </button>
                 <button type="button" onClick={() => setShowRestockModal(false)}
-                  className="flex-1 py-3 px-6 bg-white/[0.03] border border-white/10 rounded text-white text-xs font-space font-semibold uppercase tracking-wider hover:bg-white/5 transition-colors">
+                  className="flex-1 py-3 px-6 bg-white/[0.03] border border-white/10 rounded text-white text-xs font-space font-semibold tracking-wider hover:bg-white/5 transition-colors">
                   Cancel
                 </button>
               </div>

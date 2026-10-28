@@ -43,12 +43,13 @@ const ProtectedRoute = ({ children }) => {
 
   return (
     <div className="app-container">
+      <a href="#main-content" className="skip-link">Skip to main content</a>
       <Sidebar />
       <div className="main-wrapper">
         <TopBar title={getTitle()} />
-        <div className="main-content">
+        <main id="main-content" className="main-content" tabIndex={-1}>
           {children}
-        </div>
+        </main>
       </div>
     </div>
   );

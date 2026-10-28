@@ -30,9 +30,9 @@ function Section({ icon: Icon, title, badge, badgeColor = 'iron-lime', descripti
           </div>
           <div className="text-left">
             <div className="flex items-center gap-3">
-              <h3 className="text-white font-space font-bold text-sm uppercase tracking-widest">{title}</h3>
+              <h3 className="text-white font-space font-bold text-sm tracking-widest">{title}</h3>
               {badge && (
-                <span className={`px-2 py-0.5 bg-${badgeColor}/10 text-${badgeColor} border border-${badgeColor}/20 rounded text-[11px] font-black uppercase tracking-widest`}>
+                <span className={`px-2 py-0.5 bg-${badgeColor}/10 text-${badgeColor} border border-${badgeColor}/20 rounded text-[11px] font-black tracking-widest`}>
                   {badge}
                 </span>
               )}
@@ -53,7 +53,7 @@ function RunButton({ onClick, loading, label = 'Execute', icon: Icon = Play }) {
     <button
       onClick={onClick}
       disabled={loading}
-      className="flex items-center gap-2 px-5 py-2.5 bg-iron-lime text-dark rounded-lg font-space font-bold text-xs uppercase tracking-widest hover:shadow-[0_0_20px_rgba(223,255,0,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+      className="flex items-center gap-2 px-5 py-2.5 bg-iron-lime text-dark rounded-lg font-space font-bold text-xs tracking-widest hover:shadow-[0_0_20px_rgba(223,255,0,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
     >
       {loading ? <Loader2 size={14} className="animate-spin" /> : <Icon size={14} />}
       {label}
@@ -71,7 +71,7 @@ function ResultTable({ data, maxHeight = '400px' }) {
         <thead className="sticky top-0 bg-surface z-10">
           <tr>
             {keys.map(k => (
-              <th key={k} className="px-4 py-3 text-xs font-space font-bold uppercase tracking-widest text-iron-text-secondary border-b border-border whitespace-nowrap">
+              <th key={k} className="px-4 py-3 text-xs font-space font-bold tracking-widest text-iron-text-secondary border-b border-border whitespace-nowrap">
                 {k.replace(/_/g, ' ')}
               </th>
             ))}
@@ -107,7 +107,7 @@ function StatusMsg({ msg }) {
   if (!msg) return null;
   const isError = msg.type === 'error';
   return (
-    <div className={`flex items-start gap-3 p-4 rounded-xl text-xs border mt-4 ${
+    <div role={isError ? 'alert' : 'status'} className={`flex items-start gap-3 p-4 rounded-xl text-xs border mt-4 ${
       isError ? 'bg-red-500/10 border-red-500/20 text-red-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
     }`}>
       {isError ? <AlertCircle size={16} className="shrink-0 mt-0.5" /> : <CheckCircle size={16} className="shrink-0 mt-0.5" />}
@@ -207,14 +207,14 @@ export default function DBFeatures() {
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-4xl font-space font-bold tracking-tighter text-white mb-2">Advanced DB Features</h1>
+          <h2 className="text-4xl font-space font-bold tracking-tighter text-white mb-2">Advanced DB Features</h2>
           <p className="text-iron-text-secondary font-medium italic text-sm">
             Views, Stored Procedures, Functions & Triggers — CSS 2212 DBS Lab
           </p>
         </div>
         <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
           <Database size={14} className="text-emerald-400" />
-          <span className="text-emerald-400 text-xs font-bold uppercase tracking-widest">MySQL 8.x Connected</span>
+          <span className="text-emerald-400 text-xs font-bold tracking-widest">MySQL 8.x Connected</span>
         </div>
       </div>
 
@@ -232,7 +232,7 @@ export default function DBFeatures() {
             </div>
             <div>
               <p className="text-3xl font-space font-black text-white">{String(count).padStart(2, '0')}</p>
-              <p className="text-xs font-bold text-iron-text-secondary uppercase tracking-widest">{label}</p>
+              <p className="text-xs font-bold text-iron-text-secondary tracking-widest">{label}</p>
             </div>
           </div>
         ))}
@@ -333,24 +333,40 @@ export default function DBFeatures() {
             </div>
             <SQLBlock sql={`CALL sp_register_member(\n  'Rahul Sharma', 'Male', '9876543210',\n  'rahul@gym.com', '1998-03-15',\n  @new_id, @msg\n);\nSELECT @new_id AS member_id, @msg AS result;`} />
 
+              <p className="text-xs text-iron-text-secondary">Fields marked <span aria-hidden="true" className="text-red-400">*</span><span className="sr-only">with an asterisk</span> are required.</p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              <input placeholder="Name *" value={procForm.reg.name}
-                onChange={e => setProcForm(p => ({ ...p, reg: { ...p.reg, name: e.target.value } }))}
-                className="bg-[#18181A] border border-border rounded-lg px-4 py-3 text-xs text-white outline-none focus:border-iron-lime/40" />
-              <input placeholder="Email *" value={procForm.reg.email}
-                onChange={e => setProcForm(p => ({ ...p, reg: { ...p.reg, email: e.target.value } }))}
-                className="bg-[#18181A] border border-border rounded-lg px-4 py-3 text-xs text-white outline-none focus:border-iron-lime/40" />
-              <input placeholder="Phone" value={procForm.reg.phone}
-                onChange={e => setProcForm(p => ({ ...p, reg: { ...p.reg, phone: e.target.value } }))}
-                className="bg-[#18181A] border border-border rounded-lg px-4 py-3 text-xs text-white outline-none focus:border-iron-lime/40" />
-              <select value={procForm.reg.gender}
-                onChange={e => setProcForm(p => ({ ...p, reg: { ...p.reg, gender: e.target.value } }))}
-                className="bg-[#18181A] border border-border rounded-lg px-4 py-3 text-xs text-white outline-none focus:border-iron-lime/40">
-                <option>Male</option><option>Female</option><option>Other</option>
-              </select>
-              <input type="date" value={procForm.reg.date_of_birth}
-                onChange={e => setProcForm(p => ({ ...p, reg: { ...p.reg, date_of_birth: e.target.value } }))}
-                className="bg-[#18181A] border border-border rounded-lg px-4 py-3 text-xs text-white outline-none focus:border-iron-lime/40" />
+              <label className="flex flex-col gap-1 text-xs font-bold text-iron-text-secondary">
+                <span>Name <span aria-hidden="true" className="text-red-400">*</span></span>
+                <input aria-required="true" placeholder="e.g. Rahul Sharma" value={procForm.reg.name}
+                  onChange={e => setProcForm(p => ({ ...p, reg: { ...p.reg, name: e.target.value } }))}
+                  className="bg-[#18181A] border border-border rounded-lg px-4 py-3 text-xs text-white outline-none focus:border-iron-lime/40" />
+              </label>
+              <label className="flex flex-col gap-1 text-xs font-bold text-iron-text-secondary">
+                <span>Email <span aria-hidden="true" className="text-red-400">*</span></span>
+                <input aria-required="true" placeholder="rahul@gym.com" value={procForm.reg.email}
+                  onChange={e => setProcForm(p => ({ ...p, reg: { ...p.reg, email: e.target.value } }))}
+                  className="bg-[#18181A] border border-border rounded-lg px-4 py-3 text-xs text-white outline-none focus:border-iron-lime/40" />
+              </label>
+              <label className="flex flex-col gap-1 text-xs font-bold text-iron-text-secondary">
+                <span>Phone</span>
+                <input placeholder="9876543210" value={procForm.reg.phone}
+                  onChange={e => setProcForm(p => ({ ...p, reg: { ...p.reg, phone: e.target.value } }))}
+                  className="bg-[#18181A] border border-border rounded-lg px-4 py-3 text-xs text-white outline-none focus:border-iron-lime/40" />
+              </label>
+              <label className="flex flex-col gap-1 text-xs font-bold text-iron-text-secondary">
+                <span>Gender</span>
+                <select value={procForm.reg.gender}
+                  onChange={e => setProcForm(p => ({ ...p, reg: { ...p.reg, gender: e.target.value } }))}
+                  className="bg-[#18181A] border border-border rounded-lg px-4 py-3 text-xs text-white outline-none focus:border-iron-lime/40">
+                  <option>Male</option><option>Female</option><option>Other</option>
+                </select>
+              </label>
+              <label className="flex flex-col gap-1 text-xs font-bold text-iron-text-secondary">
+                <span>Date of Birth</span>
+                <input type="date" value={procForm.reg.date_of_birth}
+                  onChange={e => setProcForm(p => ({ ...p, reg: { ...p.reg, date_of_birth: e.target.value } }))}
+                  className="bg-[#18181A] border border-border rounded-lg px-4 py-3 text-xs text-white outline-none focus:border-iron-lime/40" />
+              </label>
               <RunButton
                 onClick={() => runProcedure('reg', 'POST', '/procedures/register-member', procForm.reg)}
                 loading={procLoading.reg} label="Execute" />
@@ -380,17 +396,26 @@ export default function DBFeatures() {
             <SQLBlock sql={`CALL sp_renew_subscription(\n  2, 3, 'UPI',\n  @sub_id, @msg\n);\nSELECT @sub_id AS subscription_id, @msg AS result;`} />
 
             <div className="flex gap-3 flex-wrap items-end">
-              <input type="number" placeholder="Member ID *" value={procForm.renew.member_id}
-                onChange={e => setProcForm(p => ({ ...p, renew: { ...p.renew, member_id: e.target.value } }))}
-                className="bg-[#18181A] border border-border rounded-lg px-4 py-3 text-xs text-white outline-none focus:border-iron-lime/40 w-32" />
-              <input type="number" placeholder="Plan ID *" value={procForm.renew.plan_id}
-                onChange={e => setProcForm(p => ({ ...p, renew: { ...p.renew, plan_id: e.target.value } }))}
-                className="bg-[#18181A] border border-border rounded-lg px-4 py-3 text-xs text-white outline-none focus:border-iron-lime/40 w-32" />
-              <select value={procForm.renew.payment_method}
-                onChange={e => setProcForm(p => ({ ...p, renew: { ...p.renew, payment_method: e.target.value } }))}
-                className="bg-[#18181A] border border-border rounded-lg px-4 py-3 text-xs text-white outline-none focus:border-iron-lime/40">
-                <option>Cash</option><option>Card</option><option>UPI</option><option>Bank Transfer</option>
-              </select>
+              <label className="flex flex-col gap-1 text-xs font-bold text-iron-text-secondary">
+                <span>Member ID <span aria-hidden="true" className="text-red-400">*</span></span>
+                <input aria-required="true" type="number" placeholder="e.g. 2" value={procForm.renew.member_id}
+                  onChange={e => setProcForm(p => ({ ...p, renew: { ...p.renew, member_id: e.target.value } }))}
+                  className="bg-[#18181A] border border-border rounded-lg px-4 py-3 text-xs text-white outline-none focus:border-iron-lime/40 w-32" />
+              </label>
+              <label className="flex flex-col gap-1 text-xs font-bold text-iron-text-secondary">
+                <span>Plan ID <span aria-hidden="true" className="text-red-400">*</span></span>
+                <input aria-required="true" type="number" placeholder="e.g. 3" value={procForm.renew.plan_id}
+                  onChange={e => setProcForm(p => ({ ...p, renew: { ...p.renew, plan_id: e.target.value } }))}
+                  className="bg-[#18181A] border border-border rounded-lg px-4 py-3 text-xs text-white outline-none focus:border-iron-lime/40 w-32" />
+              </label>
+              <label className="flex flex-col gap-1 text-xs font-bold text-iron-text-secondary">
+                <span>Payment Method</span>
+                <select value={procForm.renew.payment_method}
+                  onChange={e => setProcForm(p => ({ ...p, renew: { ...p.renew, payment_method: e.target.value } }))}
+                  className="bg-[#18181A] border border-border rounded-lg px-4 py-3 text-xs text-white outline-none focus:border-iron-lime/40">
+                  <option>Cash</option><option>Card</option><option>UPI</option><option>Bank Transfer</option>
+                </select>
+              </label>
               <RunButton
                 onClick={() => runProcedure('renew', 'POST', '/procedures/renew-subscription', procForm.renew)}
                 loading={procLoading.renew} label="Execute" />
@@ -420,8 +445,8 @@ export default function DBFeatures() {
 
             <div className="flex gap-3 items-end flex-wrap">
               <div>
-                <label className="text-iron-text-secondary text-xs uppercase tracking-widest font-bold block mb-1">Month</label>
-                <select value={procForm.report.month}
+                <label htmlFor="dbfeatures-month" className="text-iron-text-secondary text-xs tracking-widest font-bold block mb-1">Month</label>
+                <select id="dbfeatures-month" value={procForm.report.month}
                   onChange={e => setProcForm(p => ({ ...p, report: { ...p.report, month: e.target.value } }))}
                   className="bg-[#18181A] border border-border rounded-lg px-4 py-3 text-xs text-white outline-none focus:border-iron-lime/40">
                   {Array.from({ length: 12 }, (_, i) => (
@@ -432,8 +457,8 @@ export default function DBFeatures() {
                 </select>
               </div>
               <div>
-                <label className="text-iron-text-secondary text-xs uppercase tracking-widest font-bold block mb-1">Year</label>
-                <input type="number" value={procForm.report.year}
+                <label htmlFor="dbfeatures-year" className="text-iron-text-secondary text-xs tracking-widest font-bold block mb-1">Year</label>
+                <input id="dbfeatures-year" type="number" value={procForm.report.year}
                   onChange={e => setProcForm(p => ({ ...p, report: { ...p.report, year: e.target.value } }))}
                   className="bg-[#18181A] border border-border rounded-lg px-4 py-3 text-xs text-white outline-none focus:border-iron-lime/40 w-24" />
               </div>
@@ -444,7 +469,7 @@ export default function DBFeatures() {
             {procResult.report && procResult.report.type === 'error' && <StatusMsg msg={procResult.report} />}
             {procResult.report && procResult.report.type === 'success' && procResult.report.data && (
               <div className="space-y-4 mt-4">
-                <h5 className="text-white font-space font-bold text-xs uppercase tracking-widest flex items-center gap-2">
+                <h5 className="text-white font-space font-bold text-xs tracking-widest flex items-center gap-2">
                   <BarChart3 size={12} className="text-iron-lime" />
                   Report for {new Date(2000, procResult.report.data.month - 1).toLocaleString('en', { month: 'long' })} {procResult.report.data.year}
                 </h5>
@@ -453,7 +478,7 @@ export default function DBFeatures() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {Object.entries(procResult.report.data.membership).map(([k, v]) => (
                       <div key={k} className="bg-white/[0.02] border border-white/5 rounded-xl px-4 py-3">
-                        <p className="text-[11px] text-iron-text-secondary uppercase tracking-widest font-bold">{k.replace(/_/g, ' ')}</p>
+                        <p className="text-[11px] text-iron-text-secondary tracking-widest font-bold">{k.replace(/_/g, ' ')}</p>
                         <p className="text-white font-space font-bold text-lg">{v ?? '—'}</p>
                       </div>
                     ))}
@@ -462,7 +487,7 @@ export default function DBFeatures() {
 
                 {procResult.report.data.revenue && procResult.report.data.revenue.length > 0 && (
                   <div>
-                    <p className="text-iron-text-secondary text-xs uppercase tracking-widest font-bold mb-2">Revenue by Method</p>
+                    <p className="text-iron-text-secondary text-xs tracking-widest font-bold mb-2">Revenue by Method</p>
                     <ResultTable data={procResult.report.data.revenue} maxHeight="200px" />
                   </div>
                 )}
@@ -471,7 +496,7 @@ export default function DBFeatures() {
                   <div className="grid grid-cols-3 gap-3">
                     {Object.entries(procResult.report.data.attendance).map(([k, v]) => (
                       <div key={k} className="bg-white/[0.02] border border-white/5 rounded-xl px-4 py-3">
-                        <p className="text-[11px] text-iron-text-secondary uppercase tracking-widest font-bold">{k.replace(/_/g, ' ')}</p>
+                        <p className="text-[11px] text-iron-text-secondary tracking-widest font-bold">{k.replace(/_/g, ' ')}</p>
                         <p className="text-white font-space font-bold text-lg">{v ?? '—'}</p>
                       </div>
                     ))}
@@ -480,14 +505,14 @@ export default function DBFeatures() {
 
                 {procResult.report.data.top_members && procResult.report.data.top_members.length > 0 && (
                   <div>
-                    <p className="text-iron-text-secondary text-xs uppercase tracking-widest font-bold mb-2">Top Active Members</p>
+                    <p className="text-iron-text-secondary text-xs tracking-widest font-bold mb-2">Top Active Members</p>
                     <ResultTable data={procResult.report.data.top_members} maxHeight="200px" />
                   </div>
                 )}
 
                 {procResult.report.data.equipment_alerts && procResult.report.data.equipment_alerts.length > 0 && (
                   <div>
-                    <p className="text-iron-text-secondary text-xs uppercase tracking-widest font-bold mb-2">Equipment Alerts</p>
+                    <p className="text-iron-text-secondary text-xs tracking-widest font-bold mb-2">Equipment Alerts</p>
                     <ResultTable data={procResult.report.data.equipment_alerts} maxHeight="200px" />
                   </div>
                 )}
@@ -534,8 +559,8 @@ export default function DBFeatures() {
                   <span className="text-white text-xs font-bold font-space">{t.name}</span>
                 </div>
                 <div className="flex gap-2">
-                  <span className="px-2 py-0.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded text-[11px] font-black uppercase tracking-widest">{t.event}</span>
-                  <span className="px-2 py-0.5 bg-white/5 text-iron-text-secondary border border-white/10 rounded text-[11px] font-black uppercase tracking-widest">{t.table}</span>
+                  <span className="px-2 py-0.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded text-[11px] font-black tracking-widest">{t.event}</span>
+                  <span className="px-2 py-0.5 bg-white/5 text-iron-text-secondary border border-white/10 rounded text-[11px] font-black tracking-widest">{t.table}</span>
                 </div>
                 <p className="text-iron-text-secondary text-xs italic">{t.desc}</p>
               </div>

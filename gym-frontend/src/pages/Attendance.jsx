@@ -144,7 +144,7 @@ export default function Attendance() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-space font-bold tracking-tighter mb-2" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Attendance</h1>
+          <h2 className="text-4xl font-space font-bold tracking-tighter mb-2" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Attendance</h2>
           <p className="text-iron-text-secondary font-medium italic text-sm">Monitor facility access and member activity</p>
         </div>
       </div>
@@ -161,7 +161,7 @@ export default function Attendance() {
               <QrCode size={16} />
             </div>
             <div>
-              <h2 className="font-space font-bold tracking-widest uppercase" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Quick Scan</h2>
+              <h3 className="font-space font-bold tracking-widest" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Quick Scan</h3>
               <p className="text-xs text-iron-text-secondary font-medium italic">Enter ID to grant entry or exit</p>
             </div>
           </div>
@@ -171,6 +171,7 @@ export default function Attendance() {
               <input
                 type="text"
                 placeholder="Member ID (e.g. 104)"
+                aria-label="Member ID"
                 value={memberIdInput}
                 onChange={e => setMemberIdInput(e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -184,7 +185,7 @@ export default function Attendance() {
               <button
                 onClick={() => handleAction('checkin')}
                 disabled={actionLoading || !memberIdInput.trim()}
-                className="flex-1 flex justify-center items-center gap-2 bg-iron-lime text-dark py-3 rounded-xl font-space font-bold text-xs uppercase tracking-widest transition-all hover:shadow-[0_0_20px_rgba(223,255,0,0.3)] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none"
+                className="flex-1 flex justify-center items-center gap-2 bg-iron-lime text-dark py-3 rounded-xl font-space font-bold text-xs tracking-widest transition-all hover:shadow-[0_0_20px_rgba(223,255,0,0.3)] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none"
               >
                 {actionLoading && actionMode === 'checkin' ? <Loader2 size={14} className="animate-spin" /> : <LogIn size={14} />}
                 Check In
@@ -192,7 +193,7 @@ export default function Attendance() {
               <button
                 onClick={() => handleAction('checkout')}
                 disabled={actionLoading || !memberIdInput.trim()}
-                className="flex-1 flex justify-center items-center gap-2 bg-white/[0.03] text-white border border-white/10 py-3 rounded-xl font-space font-bold text-xs uppercase tracking-widest transition-all hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 flex justify-center items-center gap-2 bg-white/[0.03] text-white border border-white/10 py-3 rounded-xl font-space font-bold text-xs tracking-widest transition-all hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {actionLoading && actionMode === 'checkout' ? <Loader2 size={14} className="animate-spin" /> : <LogOut size={14} />}
                 Check Out
@@ -201,7 +202,7 @@ export default function Attendance() {
 
             {/* Feedback Alert */}
             {actionFeedback && (
-              <div className={`mt-4 p-4 rounded-xl text-xs flex items-start gap-3 border ${
+              <div role="status" className={`mt-4 p-4 rounded-xl text-xs flex items-start gap-3 border ${
                 actionFeedback.type === 'success' ? 'bg-iron-lime/10 border-iron-lime/20 text-iron-lime' : 'bg-red-500/10 border-red-500/20 text-red-400'
               } animate-in fade-in slide-in-from-top-2 duration-300`}>
                 {actionFeedback.type === 'success' ? <CheckCircle size={16} className="mt-0.5 shrink-0" /> : <AlertCircle size={16} className="mt-0.5 shrink-0" />}
@@ -212,7 +213,7 @@ export default function Attendance() {
                       <span className="opacity-80 italic">Successfully checked {actionFeedback.mode === 'checkin' ? 'in' : 'out'} at {actionFeedback.time}.</span>
                       {actionFeedback.member_status && (
                         <div className="mt-2">
-                          <span className="px-2 py-0.5 bg-iron-lime/20 text-iron-lime text-[11px] rounded font-black uppercase tracking-widest">
+                          <span className="px-2 py-0.5 bg-iron-lime/20 text-iron-lime text-[11px] rounded font-black tracking-widest">
                             {actionFeedback.member_status}
                           </span>
                         </div>
@@ -234,13 +235,13 @@ export default function Attendance() {
               <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform">
                 <Users size={18} />
               </div>
-              <span className="px-2 py-1 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full text-[11px] font-black uppercase tracking-widest italic flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span className="px-2 py-1 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full text-[11px] font-black tracking-widest italic flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                 Live
               </span>
             </div>
             <div>
-              <p className="text-xs font-bold text-iron-text-secondary uppercase tracking-[0.2em] mb-1">Currently Inside</p>
+              <p className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] mb-1">Currently Inside</p>
               <p className="text-4xl font-space font-bold tracking-tighter" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>{stats.currently_inside}</p>
             </div>
           </div>
@@ -252,7 +253,7 @@ export default function Attendance() {
               </div>
             </div>
             <div>
-              <p className="text-xs font-bold text-iron-text-secondary uppercase tracking-[0.2em] mb-1">Checked In Today</p>
+              <p className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] mb-1">Checked In Today</p>
               <p className="text-4xl font-space font-bold tracking-tighter" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>{stats.checked_in_today}</p>
             </div>
           </div>
@@ -264,7 +265,7 @@ export default function Attendance() {
               </div>
             </div>
             <div>
-              <p className="text-xs font-bold text-iron-text-secondary uppercase tracking-[0.2em] mb-1">Avg Session</p>
+              <p className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] mb-1">Avg Session</p>
               <div className="flex items-baseline gap-1">
                 <p className="text-4xl font-space font-bold tracking-tighter" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>{stats.avg_session || 0}</p>
                 <span className="text-sm font-bold text-iron-text-secondary italic">min</span>
@@ -279,7 +280,7 @@ export default function Attendance() {
               </div>
             </div>
             <div>
-              <p className="text-xs font-bold text-iron-text-secondary uppercase tracking-[0.2em] mb-1">Peak Hour</p>
+              <p className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] mb-1">Peak Hour</p>
               <p className="text-2xl mt-2 font-space font-bold tracking-tighter" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>{stats.peak_hour || '—'}</p>
             </div>
           </div>
@@ -293,13 +294,13 @@ export default function Attendance() {
             <div className="w-8 h-8 rounded bg-white/[0.03] flex items-center justify-center text-iron-text-secondary">
               <BarChart2 size={16} />
             </div>
-            <h3 className="text-white font-space font-bold uppercase tracking-widest text-sm">Today's Activity Log</h3>
+            <h3 className="text-white font-space font-bold tracking-widest text-sm">Today's Activity Log</h3>
           </div>
           
           <div className="flex items-center gap-3">
             <button
               onClick={() => downloadCSV(records)}
-              className="flex items-center gap-2 px-4 py-2 bg-white/[0.03] hover:bg-white/[0.05] border border-white/5 rounded-lg text-xs font-bold text-iron-text-secondary hover:text-white uppercase tracking-widest transition-all"
+              className="flex items-center gap-2 px-4 py-2 bg-white/[0.03] hover:bg-white/[0.05] border border-white/5 rounded-lg text-xs font-bold text-iron-text-secondary hover:text-white tracking-widest transition-all"
             >
               <Download size={14} />
               Export
@@ -307,7 +308,7 @@ export default function Attendance() {
             
             <div className="relative group/filter hover:z-50">
               <button
-                className="flex items-center gap-2 px-4 py-2 bg-white/[0.03] hover:bg-white/[0.05] border border-white/5 rounded-lg text-xs font-bold text-iron-text-secondary hover:text-white uppercase tracking-widest transition-all"
+                className="flex items-center gap-2 px-4 py-2 bg-white/[0.03] hover:bg-white/[0.05] border border-white/5 rounded-lg text-xs font-bold text-iron-text-secondary hover:text-white tracking-widest transition-all"
               >
                 <Filter size={14} />
                 {filterStatus === 'all' ? 'Filter' : filterStatus}
@@ -318,7 +319,7 @@ export default function Attendance() {
                   <button
                     key={val}
                     onClick={() => { setFilterStatus(val); }}
-                    className={`w-full text-left px-4 py-3 rounded-lg text-xs font-bold tracking-widest uppercase transition-colors flex items-center justify-between ${
+                    className={`w-full text-left px-4 py-3 rounded-lg text-xs font-bold tracking-widest transition-colors flex items-center justify-between ${
                       filterStatus === val ? 'bg-iron-lime/10 text-iron-lime' : 'text-iron-text-secondary hover:bg-black/5 hover:text-white'
                     }`}
                   >
@@ -335,18 +336,18 @@ export default function Attendance() {
           <table className="iron-table relative">
             <thead>
               <tr className="bg-white/[0.01]">
-                <th>MEMBER DETAILS</th>
-                <th>IN TIME</th>
-                <th>OUT TIME</th>
-                <th>DURATION</th>
-                <th>STATUS</th>
+                <th>Member Details</th>
+                <th>In Time</th>
+                <th>Out Time</th>
+                <th>Duration</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.03]">
               {loadingRecords ? (
                 <tr>
                   <td colSpan="5" className="py-20">
-                    <div className="flex justify-center items-center gap-3 text-iron-text-secondary font-space uppercase tracking-widest text-xs">
+                    <div className="flex justify-center items-center gap-3 text-iron-text-secondary font-space tracking-widest text-xs">
                       <Loader2 size={16} className="animate-spin text-iron-lime" />
                       Syncing Records...
                     </div>
@@ -356,7 +357,7 @@ export default function Attendance() {
                 <tr>
                   <td colSpan="5" className="py-20 text-center text-iron-text-secondary italic font-medium">
                     <div className="flex flex-col items-center gap-3">
-                      <Info size={24} className="text-white/20" />
+                      <Info size={24} className="text-iron-text-secondary" />
                       No records found matching the current view.
                     </div>
                   </td>
@@ -373,7 +374,7 @@ export default function Attendance() {
                           </div>
                           <div className="flex flex-col">
                             <span className="font-bold text-white group-hover:text-iron-lime transition-colors">{record.name}</span>
-                            <span className="text-xs font-bold text-iron-text-secondary uppercase tracking-tighter">ID: IC-{record.member_id}</span>
+                            <span className="text-xs font-bold text-iron-text-secondary tracking-tighter">ID: IC-{record.member_id}</span>
                           </div>
                         </div>
                       </td>
@@ -394,7 +395,7 @@ export default function Attendance() {
                         )}
                       </td>
                       <td>
-                        <span className="px-3 py-1 bg-white/[0.03] text-iron-text-secondary border border-white/5 rounded-lg text-xs font-black uppercase tracking-widest italic flex w-fit items-center justify-center">
+                        <span className="px-3 py-1 bg-white/[0.03] text-iron-text-secondary border border-white/5 rounded-lg text-xs font-black tracking-widest italic flex w-fit items-center justify-center">
                           {formatDuration(record.duration_minutes)}
                         </span>
                       </td>
@@ -402,13 +403,13 @@ export default function Attendance() {
                         <div className="flex items-center gap-2">
                            {isInside ? (
                              <>
-                               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse"></div>
-                               <span className="text-xs font-black uppercase tracking-widest text-emerald-400">Inside Now</span>
+                               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                               <span className="text-xs font-black tracking-widest text-emerald-400">Inside Now</span>
                              </>
                            ) : (
                              <>
                                <div className="w-1.5 h-1.5 rounded-full bg-iron-text-secondary"></div>
-                               <span className="text-xs font-black uppercase tracking-widest text-iron-text-secondary">Completed</span>
+                               <span className="text-xs font-black tracking-widest text-iron-text-secondary">Completed</span>
                              </>
                            )}
                         </div>
@@ -427,7 +428,7 @@ export default function Attendance() {
             <button
                onClick={() => fetchToday(false)}
                disabled={loadingMore}
-               className="flex items-center gap-2 px-6 py-2 bg-white/[0.03] hover:bg-white/[0.05] border border-white/5 rounded-full text-xs font-bold text-white uppercase tracking-widest transition-all disabled:opacity-50"
+               className="flex items-center gap-2 px-6 py-2 bg-white/[0.03] hover:bg-white/[0.05] border border-white/5 rounded-full text-xs font-bold text-white tracking-widest transition-all disabled:opacity-50"
              >
                {loadingMore ? <Loader2 size={14} className="animate-spin" /> : <ChevronDown size={14} />}
                {loadingMore ? 'Loading More...' : 'Load Older Records'}

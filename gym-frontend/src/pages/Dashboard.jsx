@@ -20,7 +20,6 @@ import {
   Calendar,
   IndianRupee,
   ArrowUpRight,
-  MoreHorizontal,
   Plus
 } from 'lucide-react';
 
@@ -86,7 +85,7 @@ export default function Dashboard() {
   }, []);
 
   if (loading) return (
-    <div className="flex items-center justify-center h-full text-iron-text-secondary font-space uppercase tracking-widest animate-pulse">
+    <div className="flex items-center justify-center h-full text-iron-text-secondary font-space tracking-widest">
       Loading IronCore Metrics...
     </div>
   );
@@ -147,7 +146,7 @@ export default function Dashboard() {
         <div className="stat-card group">
           <div className="flex justify-between items-start">
             <div>
-              <h3 className="stat-label">ACTIVE MEMBERS</h3>
+              <h2 className="stat-label">Active Members</h2>
               <p className="stat-value">{activeMembers}</p>
             </div>
             <div className="p-2 bg-iron-lime/10 rounded-lg group-hover:bg-iron-lime/20 transition-colors">
@@ -173,7 +172,7 @@ export default function Dashboard() {
         <div className="stat-card group">
           <div className="flex justify-between items-start">
             <div>
-              <h3 className="stat-label">TODAY'S CHECK-INS</h3>
+              <h2 className="stat-label">Today's Check-Ins</h2>
               <p className="stat-value">{checkinsTodayVal}</p>
             </div>
             <div className="p-2 bg-iron-blue/10 rounded-lg group-hover:bg-iron-blue/20 transition-colors">
@@ -196,7 +195,7 @@ export default function Dashboard() {
         <div className="stat-card group">
           <div className="flex justify-between items-start">
             <div>
-              <h3 className="stat-label">MONTHLY REVENUE</h3>
+              <h2 className="stat-label">Monthly Revenue</h2>
               <p className="stat-value">{formatRevenue(monthlyRevenue)}</p>
             </div>
             <div className="p-2 bg-emerald-500/10 rounded-lg group-hover:bg-emerald-500/20 transition-colors">
@@ -216,7 +215,7 @@ export default function Dashboard() {
         <div className="stat-card group">
           <div className="flex justify-between items-start">
             <div>
-              <h3 className="stat-label">CLASSES TODAY</h3>
+              <h2 className="stat-label">Classes Today</h2>
               <p className="stat-value">{classesToday}</p>
             </div>
             <div className="p-2 bg-amber-500/10 rounded-lg group-hover:bg-amber-500/20 transition-colors">
@@ -239,14 +238,11 @@ export default function Dashboard() {
         {/* Revenue Chart */}
         <div className="card lg:col-span-2">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-sm font-bold tracking-widest uppercase">REVENUE LAST 6 MONTHS</h2>
-            <button className="text-iron-text-secondary hover:text-white transition-colors">
-              <MoreHorizontal size={20} />
-            </button>
+            <h2 className="text-sm font-bold tracking-widest">Revenue Last 6 Months</h2>
           </div>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={revenueChartData}>
+              <AreaChart data={revenueChartData} title="Revenue, last 6 months" desc={revenueChartData.map(d => `${d.month}: ${d.total}`).join(", ")}>
                 <defs>
                   <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor={isLight ? '#2563EB' : '#DFFF00'} stopOpacity={isLight ? 0.2 : 0.1} />
@@ -258,7 +254,7 @@ export default function Dashboard() {
                   dataKey="month"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: '#71717A', fontSize: 12, fontWeight: 600 }}
+                  tick={{ fill: 'var(--color-iron-text-secondary)', fontSize: 13, fontWeight: 600 }}
                   dy={10}
                 />
                 <YAxis hide />
@@ -283,11 +279,11 @@ export default function Dashboard() {
         {/* Membership Split */}
         <div className="card">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-sm font-bold tracking-widest uppercase">MEMBERSHIP SPLIT</h2>
+            <h2 className="text-sm font-bold tracking-widest">Membership Split</h2>
           </div>
           <div className="relative h-[220px]">
             <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
+              <PieChart title="Membership split by plan" desc={membershipData.map(d => `${d.name}: ${d.value}`).join(", ")}>
                 <Pie
                   data={membershipData.length > 0 ? membershipData : [{ name: 'No Data', value: 1, fill: '#1F1F26' }]}
                   cx="50%"
@@ -306,14 +302,14 @@ export default function Dashboard() {
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
               <span className="text-3xl font-bold font-space">{totalMembers}</span>
-              <span className="text-xs text-iron-text-secondary font-bold tracking-widest uppercase mt-1">TOTAL</span>
+              <span className="text-xs text-iron-text-secondary font-bold tracking-widest mt-1">Total</span>
             </div>
           </div>
           <div className="mt-8 grid grid-cols-2 gap-4">
             {membershipData.map((item) => (
               <div key={item.name} className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: item.fill }} />
-                <span className="text-xs text-iron-text-secondary font-bold uppercase truncate">{item.name}</span>
+                <span className="text-xs text-iron-text-secondary font-bold truncate">{item.name}</span>
               </div>
             ))}
           </div>
@@ -324,22 +320,22 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="card lg:col-span-2">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-sm font-bold tracking-widest uppercase">RECENT MEMBERS</h2>
+            <h2 className="text-sm font-bold tracking-widest">Recent Members</h2>
             <button 
-              className="text-xs text-iron-lime font-bold tracking-widest uppercase hover:underline"
+              className="text-xs text-iron-lime font-bold tracking-widest hover:underline"
               onClick={() => navigate('/members')}
             >
-              VIEW ALL
+              View All
             </button>
           </div>
           <div className="overflow-x-auto">
             <table className="iron-table">
               <thead>
                 <tr>
-                  <th>NAME</th>
-                  <th>PLAN</th>
-                  <th>JOIN DATE</th>
-                  <th>STATUS</th>
+                  <th>Name</th>
+                  <th>Plan</th>
+                  <th>Join Date</th>
+                  <th>Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -357,7 +353,7 @@ export default function Dashboard() {
                     <td className="text-iron-text-secondary text-xs">{formatDate(member.join_date)}</td>
                     <td>
                       <span className={`badge ${member.status === 'Active' ? 'badge-active' : 'badge-expired'}`}>
-                        {member.status || 'ACTIVE'}
+                        {member.status || 'Active'}
                       </span>
                     </td>
                   </tr>
@@ -373,7 +369,7 @@ export default function Dashboard() {
 
         {/* Attendance Log */}
         <div className="card flex flex-col">
-          <h2 className="text-sm font-bold tracking-widest uppercase mb-6">TODAY'S ATTENDANCE LOG</h2>
+          <h2 className="text-sm font-bold tracking-widest mb-6">Today's Attendance Log</h2>
           <div className="space-y-5 flex-1">
             {attendanceLog.length > 0 ? attendanceLog.map((entry, i) => {
               const isActive = !entry.check_out_time;
@@ -386,12 +382,12 @@ export default function Dashboard() {
                   <div className="w-10 h-10 rounded-full border-2 border-border/50 overflow-hidden relative z-10 shrink-0">
                     <img
                       src={`https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${isLight ? 'E4E4EB' : '1F1F26'}&color=${isLight ? '52525B' : 'FFFFFF'}`}
-                      alt={name}
+                      alt=""
                     />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start gap-2">
-                      <h4 className="text-sm font-bold truncate">{name}</h4>
+                      <h3 className="text-sm font-bold truncate">{name}</h3>
                       <span className={`text-xs font-bold shrink-0 ${isActive ? 'text-iron-lime' : 'text-iron-text-secondary'}`}>
                         {formatTime(entry.check_in_time)}
                       </span>
@@ -411,7 +407,7 @@ export default function Dashboard() {
             onClick={() => navigate('/members', { state: { openModal: true } })}
           >
             <Plus size={16} strokeWidth={3} />
-            <span>NEW MEMBER</span>
+            <span>New Member</span>
           </button>
         </div>
       </div>

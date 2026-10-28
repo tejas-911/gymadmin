@@ -36,7 +36,7 @@ const RevenueTooltip = ({ active, payload, label, isLight }) => {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-surface border border-border rounded-xl px-4 py-3 shadow-2xl">
-      <p className="text-iron-text-secondary text-xs uppercase tracking-widest font-bold mb-1">{label}</p>
+      <p className="text-iron-text-secondary text-xs tracking-widest font-bold mb-1">{label}</p>
       <p className="font-space font-bold text-base" style={{ color: isLight ? '#2563EB' : '#DFFF00' }}>
         {fmt(payload[0].value)}
       </p>
@@ -67,7 +67,7 @@ const MethodPieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent })
   const y = cy + r * Math.sin(-midAngle * RADIAN);
   return (
     <text x={x} y={y} fill="#fff" textAnchor="middle" dominantBaseline="central"
-      style={{ fontSize: 11, fontWeight: 700 }}>
+      style={{ fontSize: 13, fontWeight: 700 }}>
       {`${(percent * 100).toFixed(0)}%`}
     </text>
   );
@@ -89,7 +89,7 @@ function KpiCard({ label, value, sub, icon: Icon, color = 'lime', border }) {
   return (
     <div className={`stat-card ${border || ''}`}>
       <div className="flex items-start justify-between mb-3">
-        <p className="text-[11px] font-space font-bold uppercase tracking-[0.18em] text-iron-text-secondary">{label}</p>
+        <p className="text-[11px] font-space font-bold tracking-[0.18em] text-iron-text-secondary">{label}</p>
         <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${colors[color]}`}>
           <Icon size={14} />
         </div>
@@ -110,7 +110,7 @@ function DbBadge({ label, icon: Icon, color }) {
     emerald: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
   };
   return (
-    <span className={`flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-[11px] font-black uppercase tracking-widest ${styles[color]}`}>
+    <span className={`flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-[11px] font-black tracking-widest ${styles[color]}`}>
       <Icon size={10} /> {label}
     </span>
   );
@@ -139,7 +139,7 @@ export default function Reports() {
   if (loading) return (
     <div className="flex items-center justify-center h-96 gap-3 text-iron-text-secondary">
       <Loader2 size={20} className="animate-spin text-iron-lime" />
-      <span className="font-space uppercase tracking-widest text-xs">Generating Report...</span>
+      <span className="font-space tracking-widest text-xs">Generating Report...</span>
     </div>
   );
   if (!data) return <div className="text-iron-text-secondary text-center py-20">Error loading reports.</div>;
@@ -180,20 +180,20 @@ export default function Reports() {
       {/* ── HEADER ─────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-4xl font-space font-bold tracking-tighter mb-1" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Analytics & Reports</h1>
+          <h2 className="text-4xl font-space font-bold tracking-tighter mb-1" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Analytics & Reports</h2>
           <p className="text-iron-text-secondary font-medium italic text-sm">
             Powered by stored procedures, views, functions &amp; triggers
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <select value={month} onChange={e => setMonth(parseInt(e.target.value))}
+          <select aria-label="Report month" value={month} onChange={e => setMonth(parseInt(e.target.value))}
             className="bg-surface border border-border rounded-xl px-3 py-2.5 text-xs font-space outline-none focus:border-iron-lime/40 cursor-pointer" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>
             {MONTHS.map((m, i) => <option key={i} value={i+1}>{m}</option>)}
           </select>
-          <input type="number" value={year} onChange={e => setYear(parseInt(e.target.value))}
+          <input type="number" aria-label="Report year" value={year} onChange={e => setYear(parseInt(e.target.value))}
             className="bg-surface border border-border rounded-xl px-3 py-2.5 text-xs font-space outline-none focus:border-iron-lime/40 w-20" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }} />
           <button onClick={fetchReports}
-            className="flex items-center gap-2 px-4 py-2.5 bg-iron-lime text-dark rounded-xl font-space font-bold text-xs uppercase tracking-widest hover:shadow-[0_0_20px_rgba(223,255,0,0.3)] transition-all">
+            className="flex items-center gap-2 px-4 py-2.5 bg-iron-lime text-dark rounded-xl font-space font-bold text-xs tracking-widest hover:shadow-[0_0_20px_rgba(223,255,0,0.3)] transition-all">
             <RefreshCw size={12} /> Generate
           </button>
         </div>
@@ -234,7 +234,7 @@ export default function Reports() {
 
         {/* Subscription Status Breakdown */}
         <div className="card flex flex-col justify-between gap-3">
-          <p className="text-[11px] font-space font-bold uppercase tracking-[0.18em] text-iron-text-secondary">Subscription Status</p>
+          <p className="text-[11px] font-space font-bold tracking-[0.18em] text-iron-text-secondary">Subscription Status</p>
           <div className="space-y-2.5">
             {[
               { label: 'Active', val: subStats.active_subs, color: 'text-emerald-400', bg: 'bg-emerald-500/10', icon: CheckCircle2 },
@@ -276,14 +276,14 @@ export default function Reports() {
         <div className="card">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h3 className="font-space font-bold text-sm uppercase tracking-widest" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Monthly Revenue</h3>
+              <h3 className="font-space font-bold text-sm tracking-widest" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Monthly Revenue</h3>
               <p className="text-iron-text-secondary text-xs italic mt-0.5">Source: vw_monthly_revenue · 12-month rolling</p>
             </div>
-            <span className="px-2 py-1 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded text-[11px] font-black uppercase tracking-widest">View</span>
+            <span className="px-2 py-1 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded text-[11px] font-black tracking-widest">View</span>
           </div>
           {chartRevenue.some(r => r.total_revenue > 0) ? (
             <ResponsiveContainer width="100%" height={240}>
-              <AreaChart data={chartRevenue} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+              <AreaChart data={chartRevenue} title="Monthly revenue" desc={chartRevenue.map(d => `${d.label}: ${d.total_revenue}`).join(", ")} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor={lineColor} stopOpacity={0.25} />
@@ -292,9 +292,9 @@ export default function Reports() {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke={isLight ? '#E4E4EB' : '#1F1F26'} vertical={false} />
                 <XAxis dataKey="label" axisLine={false} tickLine={false}
-                  tick={{ fill: '#71717A', fontSize: 10 }} interval="preserveStartEnd" />
+                  tick={{ fill: 'var(--color-iron-text-secondary)', fontSize: 13 }} interval="preserveStartEnd" />
                 <YAxis axisLine={false} tickLine={false}
-                  tick={{ fill: '#71717A', fontSize: 10 }} tickFormatter={v => fmt(v)} width={54} />
+                  tick={{ fill: 'var(--color-iron-text-secondary)', fontSize: 13 }} tickFormatter={v => fmt(v)} width={54} />
                 <Tooltip content={<RevenueTooltip isLight={isLight} />} />
                 <Area type="monotone" dataKey="total_revenue" stroke={lineColor} strokeWidth={2}
                   fill="url(#revGrad)" dot={false} activeDot={{ r: 4, fill: lineColor }} />
@@ -309,15 +309,15 @@ export default function Reports() {
         <div className="card">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="font-space font-bold text-sm uppercase tracking-widest" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>By Method</h3>
+              <h3 className="font-space font-bold text-sm tracking-widest" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>By Method</h3>
               <p className="text-iron-text-secondary text-xs italic mt-0.5">{year} revenue split</p>
             </div>
-            <span className="px-2 py-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded text-[11px] font-black uppercase tracking-widest">Proc</span>
+            <span className="px-2 py-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded text-[11px] font-black tracking-widest">Proc</span>
           </div>
           {pieData.length > 0 ? (
             <div className="flex flex-col items-center gap-3">
               <ResponsiveContainer width="100%" height={170}>
-                <PieChart>
+                <PieChart title="Revenue by payment method" desc={pieData.map(d => `${d.name}: ${d.value}`).join(", ")}>
                   <Pie data={pieData} cx="50%" cy="50%" innerRadius={44} outerRadius={72}
                     dataKey="value" labelLine={false} label={MethodPieLabel}>
                     {pieData.map((entry) => (
@@ -355,19 +355,19 @@ export default function Reports() {
         <div className="card">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h3 className="font-space font-bold text-sm uppercase tracking-widest" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Revenue by Plan</h3>
+              <h3 className="font-space font-bold text-sm tracking-widest" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Revenue by Plan</h3>
               <p className="text-iron-text-secondary text-xs italic mt-0.5">{year} · Paid transactions only</p>
             </div>
-            <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-[11px] font-black uppercase tracking-widest">Query</span>
+            <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-[11px] font-black tracking-widest">Query</span>
           </div>
           {data.revenueByPlan?.length > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={data.revenueByPlan} layout="vertical" margin={{ left: 0, right: 10 }}>
+              <BarChart data={data.revenueByPlan} title="Revenue by plan" desc={data.revenueByPlan.map(d => `${d.plan_name}: ${d.total_revenue}`).join(", ")} layout="vertical" margin={{ left: 0, right: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={isLight ? '#E4E4EB' : '#1F1F26'} horizontal={false} />
                 <XAxis type="number" axisLine={false} tickLine={false}
-                  tick={{ fill: '#71717A', fontSize: 10 }} tickFormatter={v => fmt(v)} />
+                  tick={{ fill: 'var(--color-iron-text-secondary)', fontSize: 13 }} tickFormatter={v => fmt(v)} />
                 <YAxis type="category" dataKey="plan_name" axisLine={false} tickLine={false}
-                  tick={{ fill: '#A1A1AA', fontSize: 10 }} width={100} />
+                  tick={{ fill: 'var(--color-iron-text-secondary)', fontSize: 13 }} width={100} />
                 <Tooltip content={<PlanTooltip isLight={isLight} />} />
                 <Bar dataKey="total_revenue" radius={[0, 6, 6, 0]}>
                   {(data.revenueByPlan || []).map((_, i) => (
@@ -385,19 +385,19 @@ export default function Reports() {
         <div className="card">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h3 className="font-space font-bold text-sm uppercase tracking-widest" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Member Growth</h3>
+              <h3 className="font-space font-bold text-sm tracking-widest" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Member Growth</h3>
               <p className="text-iron-text-secondary text-xs italic mt-0.5">New sign-ups over time</p>
             </div>
-            <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-[11px] font-black uppercase tracking-widest">Query</span>
+            <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-[11px] font-black tracking-widest">Query</span>
           </div>
           {data.memberGrowth?.length > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={data.memberGrowth} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+              <BarChart data={data.memberGrowth} title="Member growth" desc={data.memberGrowth.map(d => `${d.month}: ${d.count}`).join(", ")} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={isLight ? '#E4E4EB' : '#1F1F26'} vertical={false} />
                 <XAxis dataKey="month" axisLine={false} tickLine={false}
-                  tick={{ fill: '#71717A', fontSize: 10 }} />
+                  tick={{ fill: 'var(--color-iron-text-secondary)', fontSize: 13 }} />
                 <YAxis axisLine={false} tickLine={false}
-                  tick={{ fill: '#71717A', fontSize: 10 }} allowDecimals={false} width={28} />
+                  tick={{ fill: 'var(--color-iron-text-secondary)', fontSize: 13 }} allowDecimals={false} width={28} />
                 <Tooltip formatter={(v) => [v, 'New Members']} contentStyle={{
                   background: isLight ? '#fff' : '#18181A',
                   border: `1px solid ${isLight ? '#E4E4EB' : '#2A2A35'}`,
@@ -419,25 +419,25 @@ export default function Reports() {
         <div className="card">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h3 className="text-white font-space font-bold text-sm uppercase tracking-widest">
+              <h3 className="text-white font-space font-bold text-sm tracking-widest">
                 Attendance — {MONTHS[month - 1]} {year}
               </h3>
               <p className="text-iron-text-secondary text-xs italic mt-0.5">Source: sp_gym_performance_report</p>
             </div>
-            <span className="px-2 py-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded text-[11px] font-black uppercase tracking-widest">Procedure</span>
+            <span className="px-2 py-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded text-[11px] font-black tracking-widest">Procedure</span>
           </div>
           {attendance && (attendance.unique_visitors || attendance.total_check_ins) ? (
             <div className="grid grid-cols-3 gap-4">
               <div className="p-4 bg-border/20 rounded-xl border border-border/40">
-                <p className="text-[11px] font-space font-bold uppercase tracking-widest text-iron-text-secondary mb-2">Unique Visitors</p>
+                <p className="text-[11px] font-space font-bold tracking-widest text-iron-text-secondary mb-2">Unique Visitors</p>
                 <p className="text-3xl font-space font-black" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>{attendance.unique_visitors ?? '—'}</p>
               </div>
               <div className="p-4 bg-border/20 rounded-xl border border-border/40">
-                <p className="text-[11px] font-space font-bold uppercase tracking-widest text-iron-text-secondary mb-2">Total Check-Ins</p>
+                <p className="text-[11px] font-space font-bold tracking-widest text-iron-text-secondary mb-2">Total Check-Ins</p>
                 <p className="text-3xl font-space font-black" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>{attendance.total_check_ins ?? '—'}</p>
               </div>
               <div className="p-4 bg-border/20 rounded-xl border border-border/40">
-                <p className="text-[11px] font-space font-bold uppercase tracking-widest text-iron-text-secondary mb-2">Avg Session</p>
+                <p className="text-[11px] font-space font-bold tracking-widest text-iron-text-secondary mb-2">Avg Session</p>
                 <div className="flex items-baseline gap-1">
                   <p className="text-3xl font-space font-black" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>{attendance.avg_session_minutes ?? '—'}</p>
                   <span className="text-iron-text-secondary text-sm font-bold">min</span>
@@ -458,10 +458,10 @@ export default function Reports() {
             <div className="card">
               <div className="flex items-center gap-2 mb-4">
                 <Award size={13} className="text-iron-lime" />
-                <h4 className="font-space font-bold text-xs uppercase tracking-widest flex-1" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>
+                <h4 className="font-space font-bold text-xs tracking-widest flex-1" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>
                   Top Members — {MONTHS[month-1]}
                 </h4>
-                <span className="px-2 py-0.5 bg-blue-500/10 text-blue-500 border border-blue-500/20 rounded text-[10px] font-black uppercase">Procedure</span>
+                <span className="px-2 py-0.5 bg-blue-500/10 text-blue-500 border border-blue-500/20 rounded text-[10px] font-black">Procedure</span>
               </div>
               <div className="space-y-2.5">
                 {data.topMembers.map((m, i) => (
@@ -479,7 +479,7 @@ export default function Reports() {
 
           {/* Top Assets */}
           <div className="card space-y-3">
-            <h4 className="text-white font-space font-bold text-xs uppercase tracking-widest flex items-center gap-2">
+            <h4 className="text-white font-space font-bold text-xs tracking-widest flex items-center gap-2">
               <TrendingUp size={12} className="text-iron-lime" /> Top Assets
             </h4>
             {[
@@ -490,7 +490,7 @@ export default function Reports() {
               <div key={label} className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2 shrink-0">
                   <Icon size={11} className="text-iron-text-secondary" />
-                  <span className="text-[11px] text-iron-text-secondary uppercase tracking-widest font-bold">{label}</span>
+                  <span className="text-[11px] text-iron-text-secondary tracking-widest font-bold">{label}</span>
                 </div>
                 <span className="text-xs font-bold text-right truncate" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>{value}</span>
               </div>
@@ -506,18 +506,18 @@ export default function Reports() {
             <div className="flex items-center gap-3">
               <Shield size={14} className="text-amber-500" />
               <div>
-                <h3 className="font-space font-bold text-sm uppercase tracking-widest" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Equipment Health</h3>
+                <h3 className="font-space font-bold text-sm tracking-widest" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Equipment Health</h3>
                 <p className="text-iron-text-secondary text-xs italic">Source: vw_equipment_health</p>
               </div>
             </div>
-            <span className="px-2 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded text-[11px] font-black uppercase tracking-widest">View</span>
+            <span className="px-2 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded text-[11px] font-black tracking-widest">View</span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-border">
                   {['Equipment', 'Condition', 'Location', 'Last Service', 'Days Since', 'Flag'].map(h => (
-                    <th key={h} className="px-6 py-3 text-xs font-space font-bold uppercase tracking-widest text-iron-text-secondary">{h}</th>
+                    <th key={h} className="px-6 py-3 text-xs font-space font-bold tracking-widest text-iron-text-secondary">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -539,7 +539,7 @@ export default function Reports() {
                     </td>
                     <td className="px-6 py-3 text-xs font-space font-bold" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>{eq.days_since_service ?? '—'}</td>
                     <td className="px-6 py-3">
-                      <span className={`px-2.5 py-1 rounded text-[11px] font-black uppercase tracking-widest ${eq.maintenance_flag === 'Overdue' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                      <span className={`px-2.5 py-1 rounded text-[11px] font-black tracking-widest ${eq.maintenance_flag === 'Overdue' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
                           eq.maintenance_flag === 'Due Soon' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
                             'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}`}>
                         {eq.maintenance_flag || '—'}
@@ -558,14 +558,14 @@ export default function Reports() {
         <div className="card">
           <div className="flex items-center gap-2 mb-4">
             <AlertTriangle size={13} className="text-red-500" />
-            <h3 className="font-space font-bold text-xs uppercase tracking-widest flex-1" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Equipment Alerts</h3>
-            <span className="px-2 py-0.5 bg-blue-500/10 text-blue-500 border border-blue-500/20 rounded text-[10px] font-black uppercase">Procedure</span>
+            <h3 className="font-space font-bold text-xs tracking-widest flex-1" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Equipment Alerts</h3>
+            <span className="px-2 py-0.5 bg-blue-500/10 text-blue-500 border border-blue-500/20 rounded text-[10px] font-black">Procedure</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {data.equipmentAlerts.map((eq, i) => (
               <div key={i} className="flex items-center justify-between p-3 bg-red-500/5 border border-red-500/10 rounded-xl">
                 <span className="text-sm font-medium" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>{eq.equipment_name}</span>
-                <span className="text-red-500 text-xs font-black uppercase tracking-widest">{eq.condition_status}</span>
+                <span className="text-red-500 text-xs font-black tracking-widest">{eq.condition_status}</span>
               </div>
             ))}
           </div>
@@ -578,11 +578,11 @@ export default function Reports() {
             <div className="flex items-center gap-3">
               <ScrollText size={14} className="text-red-500" />
               <div>
-                <h3 className="font-space font-bold text-sm uppercase tracking-widest" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Audit Log</h3>
+                <h3 className="font-space font-bold text-sm tracking-widest" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Audit Log</h3>
                 <p className="text-iron-text-secondary text-xs italic">Auto-populated by AFTER INSERT / AFTER UPDATE triggers</p>
               </div>
             </div>
-          <span className="px-2 py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded text-[11px] font-black uppercase tracking-widest">Triggers</span>
+          <span className="px-2 py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded text-[11px] font-black tracking-widest">Triggers</span>
         </div>
 
         {hasAudit ? (
@@ -591,7 +591,7 @@ export default function Reports() {
               <thead className="sticky top-0 bg-surface z-10">
                 <tr className="border-b border-border">
                   {['ID', 'Table', 'Action', 'Record ID', 'Values', 'Timestamp'].map(h => (
-                    <th key={h} className="px-6 py-3 text-xs font-space font-bold uppercase tracking-widest text-iron-text-secondary">{h}</th>
+                    <th key={h} className="px-6 py-3 text-xs font-space font-bold tracking-widest text-iron-text-secondary">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -600,12 +600,12 @@ export default function Reports() {
                   <tr key={log.log_id} className={`transition-colors ${isLight ? 'hover:bg-black/5' : 'hover:bg-white/[0.02]'}`}>
                     <td className="px-6 py-3 text-iron-text-secondary text-xs font-space">#{log.log_id}</td>
                     <td className="px-6 py-3">
-                      <span className="px-2 py-0.5 bg-border/20 border border-border/40 rounded text-[11px] font-black uppercase tracking-widest" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>
+                      <span className="px-2 py-0.5 bg-border/20 border border-border/40 rounded text-[11px] font-black tracking-widest" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>
                         {log.table_name}
                       </span>
                     </td>
                     <td className="px-6 py-3">
-                      <span className={`text-xs font-black uppercase tracking-widest ${log.action_type === 'INSERT' ? 'text-emerald-400' :
+                      <span className={`text-xs font-black tracking-widest ${log.action_type === 'INSERT' ? 'text-emerald-400' :
                           log.action_type === 'UPDATE' ? 'text-amber-400' : 'text-red-400'}`}>
                         {log.action_type}
                       </span>

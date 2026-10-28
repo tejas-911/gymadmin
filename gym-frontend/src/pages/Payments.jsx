@@ -6,7 +6,7 @@ import {
 import { useTheme } from '../context/ThemeContext';
 import {
   TrendingUp, TrendingDown, ShieldCheck, Download,
-  Search, ChevronLeft, ChevronRight, MoreHorizontal,
+  Search, ChevronLeft, ChevronRight,
   CreditCard, Banknote, Smartphone, Building2,
   Loader2, AlertCircle, X
 } from 'lucide-react';
@@ -63,7 +63,7 @@ function ChartTooltip({ active, payload, label, isLight }) {
   if (!active || !payload?.length) return null;
   return (
     <div className="border rounded-xl px-4 py-3 shadow-2xl" style={{ backgroundColor: isLight ? '#FFFFFF' : '#18181A', borderColor: isLight ? '#E4E4EB' : 'var(--color-border)' }}>
-      <p className="text-iron-text-secondary text-xs uppercase tracking-widest font-space mb-1">{label}</p>
+      <p className="text-iron-text-secondary text-xs tracking-widest font-space mb-1">{label}</p>
       <p className="font-space font-bold text-base" style={{ color: isLight ? '#2563EB' : 'var(--color-iron-lime)' }}>{formatINR(payload[0].value)}</p>
     </div>
   );
@@ -177,10 +177,10 @@ export default function Payments() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-space font-bold tracking-tighter mb-1" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Revenue Overview</h1>
+          <h2 className="text-4xl font-space font-bold tracking-tighter mb-1" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Revenue Overview</h2>
           <p className="text-iron-text-secondary text-sm italic">Real-time financial performance &amp; transaction history</p>
         </div>
-        <button onClick={downloadCSV} className="flex items-center gap-2 px-4 py-3 rounded-lg bg-white/[0.03] border border-white/10 text-xs font-black uppercase tracking-widest text-white hover:bg-white/5 transition-all">
+        <button onClick={downloadCSV} className="flex items-center gap-2 px-4 py-3 rounded-lg bg-white/[0.03] border border-white/10 text-xs font-black tracking-widest text-white hover:bg-white/5 transition-all">
           <Download size={14} /> Export CSV
         </button>
       </div>
@@ -192,9 +192,9 @@ export default function Payments() {
         {/* This Month Revenue */}
         <div className="card relative overflow-hidden">
           <div className="absolute inset-0 flex items-center justify-end pr-4 pointer-events-none select-none">
-            <span className="text-[5rem] font-space font-black leading-none tracking-tighter" style={{ color: isLight ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.03)' }}>REV</span>
+            <span className="text-[5rem] font-space font-black leading-none tracking-tighter" style={{ color: isLight ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.03)' }}>Rev</span>
           </div>
-          <p className="text-xs font-space font-bold uppercase tracking-[0.2em] text-iron-text-secondary mb-4">
+          <p className="text-xs font-space font-bold tracking-[0.2em] text-iron-text-secondary mb-4">
             This Month Revenue
           </p>
           <p className="text-4xl font-space font-black text-iron-lime tracking-tighter mb-3">
@@ -218,7 +218,7 @@ export default function Payments() {
           <div className="absolute inset-0 flex items-center justify-end pr-4 pointer-events-none select-none">
             <span className="text-[5rem] font-space font-black text-iron-blue/5 leading-none">OK</span>
           </div>
-          <p className="text-xs font-space font-bold uppercase tracking-[0.2em] text-iron-text-secondary mb-4">
+          <p className="text-xs font-space font-bold tracking-[0.2em] text-iron-text-secondary mb-4">
             Successful
           </p>
           <p className="text-iron-text-secondary text-xs italic mb-3">
@@ -226,7 +226,7 @@ export default function Payments() {
           </p>
           <div className="flex items-center gap-1.5 px-3 py-1.5 bg-iron-blue/10 border border-iron-blue/20 rounded-full w-fit">
             <ShieldCheck size={11} className="text-iron-blue" />
-            <span className="text-iron-blue text-xs font-black uppercase tracking-widest">Verified Secure</span>
+            <span className="text-iron-blue text-xs font-black tracking-widest">Verified Secure</span>
           </div>
         </div>
 
@@ -236,7 +236,7 @@ export default function Payments() {
       <div className="card !p-0 overflow-hidden">
         <div className="px-6 py-4 border-b border-border flex items-center justify-between">
           <div>
-            <h3 className="font-space font-bold uppercase tracking-widest text-sm" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Revenue Trend</h3>
+            <h3 className="font-space font-bold tracking-widest text-sm" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Revenue Trend</h3>
             <p className="text-iron-text-secondary text-xs italic mt-0.5">
               {trendMode === 'monthly' ? 'Monthly collection performance' : 'Daily collection — last 30 days'}
             </p>
@@ -246,7 +246,7 @@ export default function Payments() {
               <button
                 key={mode}
                 onClick={() => handleTrendToggle(mode)}
-                className={`px-4 py-2 text-xs font-space font-black uppercase tracking-widest transition-all ${trendMode === mode
+                className={`px-4 py-2 text-xs font-space font-black tracking-widest transition-all ${trendMode === mode
                     ? 'bg-iron-lime text-dark'
                     : 'text-iron-text-secondary hover:text-white'
                   }`}
@@ -258,7 +258,7 @@ export default function Payments() {
         </div>
         <div className="px-2 py-4" style={{ height: 260 }}>
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={trendData} margin={{ top: 10, right: 30, left: 10, bottom: 0 }}>
+            <AreaChart data={trendData} title="Revenue trend" desc={trendData.map(d => `${d.name}: ${d.revenue}`).join(", ")} margin={{ top: 10, right: 30, left: 10, bottom: 0 }}>
               <defs>
                 <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor={isLight ? '#2563EB' : '#DFFF00'} stopOpacity={0.25} />
@@ -266,9 +266,9 @@ export default function Payments() {
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke={isLight ? '#E4E4EB' : '#1F1F26'} vertical={false} />
-              <XAxis dataKey="name" tick={{ fill: '#71717A', fontSize: 11, fontFamily: 'Space Grotesk' }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="name" tick={{ fill: 'var(--color-iron-text-secondary)', fontSize: 13, fontFamily: 'Space Grotesk' }} axisLine={false} tickLine={false} />
               <YAxis
-                tick={{ fill: '#71717A', fontSize: 10, fontFamily: 'Space Grotesk' }}
+                tick={{ fill: 'var(--color-iron-text-secondary)', fontSize: 13, fontFamily: 'Space Grotesk' }}
                 axisLine={false} tickLine={false}
                 tickFormatter={v => v >= 1000 ? `₹${(v / 1000).toFixed(0)}k` : `₹${v}`}
               />
@@ -289,7 +289,7 @@ export default function Payments() {
         {/* Table Header */}
         <div className="px-6 py-4 border-b border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
-            <h3 className="font-space font-bold uppercase tracking-widest text-sm" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Payments Log</h3>
+            <h3 className="font-space font-bold tracking-widest text-sm" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Payments Log</h3>
             <p className="text-iron-text-secondary text-xs italic mt-0.5">Real-time transaction history and status</p>
           </div>
           <div className="flex items-center gap-3 flex-wrap">
@@ -301,19 +301,20 @@ export default function Payments() {
                   ref={searchRef}
                   type="text"
                   placeholder="Search transactions..."
+                  aria-label="Search transactions"
                   value={searchInput}
                   onChange={e => setSearchInput(e.target.value)}
                   className="bg-surface border border-border rounded-lg pl-8 pr-8 py-2 text-xs placeholder:text-iron-text-secondary/60 outline-none focus:border-iron-lime transition-colors w-44"
                   style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}
                 />
                 {searchInput && (
-                  <button type="button" onClick={clearSearch} className="absolute right-2 text-iron-text-secondary hover:text-white">
+                  <button type="button" onClick={clearSearch} aria-label="Clear search" className="absolute right-2 text-iron-text-secondary hover:text-white">
                     <X size={12} />
                   </button>
                 )}
               </div>
             </form>
-            <button onClick={downloadCSV} className="flex items-center gap-2 px-4 py-2 bg-white/[0.03] hover:bg-white/[0.05] border border-white/5 rounded-lg text-xs font-bold text-iron-text-secondary hover:text-white uppercase tracking-widest transition-all">
+            <button onClick={downloadCSV} className="flex items-center gap-2 px-4 py-2 bg-white/[0.03] hover:bg-white/[0.05] border border-white/5 rounded-lg text-xs font-bold text-iron-text-secondary hover:text-white tracking-widest transition-all">
               <Download size={13} /> Download CSV
             </button>
           </div>
@@ -330,14 +331,13 @@ export default function Payments() {
                 <th>Method</th>
                 <th>Date</th>
                 <th>Status</th>
-                <th className="text-right pr-6">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loadingTable ? (
                 <tr>
-                  <td colSpan={7} className="py-16 text-center">
-                    <div className="flex justify-center items-center gap-3 text-iron-text-secondary font-space text-xs uppercase tracking-widest">
+                  <td colSpan={6} className="py-16 text-center">
+                    <div className="flex justify-center items-center gap-3 text-iron-text-secondary font-space text-xs tracking-widest">
                       <Loader2 size={16} className="animate-spin text-iron-lime" />
                       Loading transactions...
                     </div>
@@ -345,7 +345,7 @@ export default function Payments() {
                 </tr>
               ) : records.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-16 text-center text-iron-text-secondary italic text-sm">
+                  <td colSpan={6} className="py-16 text-center text-iron-text-secondary italic text-sm">
                     No transactions found.
                   </td>
                 </tr>
@@ -359,7 +359,7 @@ export default function Payments() {
                           <p className="font-semibold group-hover:text-iron-lime transition-colors text-sm" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>
                             {r.member_name || <span className="text-iron-text-secondary italic">Supplement Sale</span>}
                           </p>
-                          <p className="text-xs text-iron-text-secondary uppercase tracking-tight">
+                          <p className="text-xs text-iron-text-secondary tracking-tight">
                             #{r.member_id ? `M-${r.member_id}` : `P-${r.payment_id}`}
                           </p>
                         </div>
@@ -383,14 +383,9 @@ export default function Payments() {
                       <span className="text-iron-text-secondary text-xs">{formatDate(r.payment_date)}</span>
                     </td>
                     <td>
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded text-xs font-black uppercase tracking-widest border ${STATUS_STYLES[r.status] || STATUS_STYLES.Paid}`}>
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded text-xs font-black tracking-widest border ${STATUS_STYLES[r.status] || STATUS_STYLES.Paid}`}>
                         {r.status}
                       </span>
-                    </td>
-                    <td className="text-right pr-6">
-                      <button className="w-7 h-7 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center text-iron-text-secondary hover:text-white hover:border-white/20 transition-all ml-auto">
-                        <MoreHorizontal size={13} />
-                      </button>
                     </td>
                   </tr>
                 ))
@@ -408,14 +403,14 @@ export default function Payments() {
             <button
               onClick={() => setPage(p => Math.max(0, p - 1))}
               disabled={page === 0}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.03] border border-white/5 rounded-lg text-xs font-bold text-iron-text-secondary hover:text-white hover:border-white/20 transition-all disabled:opacity-30 disabled:cursor-not-allowed uppercase tracking-widest font-space"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.03] border border-white/5 rounded-lg text-xs font-bold text-iron-text-secondary hover:text-white hover:border-white/20 transition-all disabled:opacity-30 disabled:cursor-not-allowed tracking-widest font-space"
             >
               <ChevronLeft size={13} /> Previous
             </button>
             <button
               onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
               disabled={page >= totalPages - 1}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-iron-lime text-dark border border-iron-lime rounded-lg text-xs font-bold transition-all disabled:opacity-30 disabled:cursor-not-allowed uppercase tracking-widest font-space hover:shadow-[0_0_15px_rgba(223,255,0,0.3)]"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-iron-lime text-dark border border-iron-lime rounded-lg text-xs font-bold transition-all disabled:opacity-30 disabled:cursor-not-allowed tracking-widest font-space hover:shadow-[0_0_15px_rgba(223,255,0,0.3)]"
             >
               Next <ChevronRight size={13} />
             </button>

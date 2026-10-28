@@ -44,26 +44,27 @@ export default function Sidebar() {
   ];
 
   return (
-    <div className="sidebar shadow-2xl">
+    <aside className="sidebar shadow-2xl">
       {/* Logo */}
       <div className="px-6 mb-12 flex items-center gap-3">
         <div className="p-2 bg-iron-lime rounded-lg flex items-center justify-center text-dark">
           <Activity size={24} strokeWidth={3} />
         </div>
         <div className="flex flex-col">
-          <span className="font-space font-bold text-lg tracking-tighter leading-none" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>IRONCORE</span>
-          <span className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] mt-1 uppercase">PRECISION GMS</span>
+          <span className="font-space font-bold text-lg tracking-tighter leading-none" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>IronCore</span>
+          <span className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] mt-1">Precision GMS</span>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 overflow-y-auto">
+      <nav aria-label="Main" className="flex-1 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
             <Link
               key={item.path}
               to={item.path}
+              aria-current={isActive ? 'page' : undefined}
               className={`
                 flex items-center gap-4 px-6 py-3 transition-all duration-200 group relative
                 ${isActive
@@ -77,7 +78,7 @@ export default function Sidebar() {
               <div className={`transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}>
                 {item.icon}
               </div>
-              <span className="font-space font-bold text-xs uppercase tracking-widest">{item.label}</span>
+              <span className="font-space font-bold text-xs tracking-widest">{item.label}</span>
               {isActive && (
                 <div
                   className="absolute right-0 top-0 bottom-0 w-1 bg-iron-lime"
@@ -90,15 +91,15 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="pt-8 mt-auto border-t border-border">
+      <footer className="pt-8 mt-auto border-t border-border">
         <button
           onClick={handleLogout}
           className="w-full flex items-center gap-4 px-6 py-4 text-iron-text-secondary hover:text-red-400 transition-colors group"
         >
           <LogOut size={18} className="group-hover:translate-x-1 transition-transform" />
-          <span className="font-space font-bold text-xs uppercase tracking-widest">Logout</span>
+          <span className="font-space font-bold text-xs tracking-widest">Logout</span>
         </button>
-      </div>
-    </div>
+      </footer>
+    </aside>
   );
 }

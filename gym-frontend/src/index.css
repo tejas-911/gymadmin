@@ -8,8 +8,8 @@
   --color-iron-lime: #DFFF00;
   --color-iron-blue: #1A3AFF;
   --color-iron-text-primary: #FFFFFF;
-  --color-iron-text-secondary: #71717A;
-  
+  --color-iron-text-secondary: #A1A1AA; /* 7.6:1 on dark bg (was #71717A, 4.1:1) */
+
   --font-space: "Space Grotesk", sans-serif;
   --font-manrope: "Manrope", sans-serif;
 
@@ -51,7 +51,8 @@
   .text-5xl { font-size: 4rem !important; }
 
   /* Ensure specific utility styles aren't too tiny */
-  [class*="text-[10px]"], 
+  [class*="text-[9px]"],
+  [class*="text-[10px]"],
   [class*="text-[11px]"],
   [class*="text-[12px]"] {
     font-size: 0.8rem !important;
@@ -88,7 +89,7 @@
 }
 
 .stat-label {
-  @apply text-xs font-space font-bold uppercase tracking-[0.2em] text-iron-text-secondary mb-1 block;
+  @apply text-xs font-space font-bold tracking-[0.2em] text-iron-text-secondary mb-1 block;
 }
 
 .stat-value {
@@ -96,7 +97,7 @@
 }
 
 .stat-change {
-  @apply flex items-center gap-1.5 mt-3 text-sm font-bold uppercase tracking-wider;
+  @apply flex items-center gap-1.5 mt-3 text-sm font-bold tracking-wider;
 }
 
 .card {
@@ -104,12 +105,12 @@
 }
 
 .btn {
-  @apply bg-iron-lime text-dark border border-iron-lime px-6 py-3 rounded font-space font-semibold text-base uppercase tracking-wider transition-all duration-200 hover:shadow-[0_0_20px_rgba(223,255,0,0.3)] hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply bg-iron-lime text-dark border border-iron-lime px-6 py-3 rounded font-space font-semibold text-base tracking-wider transition-all duration-200 hover:shadow-[0_0_20px_rgba(223,255,0,0.3)] hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
 }
 
 /* Badges */
 .badge {
-  @apply inline-block px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wider border;
+  @apply inline-block px-3 py-1 rounded-full text-sm font-bold tracking-wider border;
 }
 
 .badge-active {
@@ -130,7 +131,7 @@
 }
 
 .iron-table th {
-  @apply text-left px-5 py-4 border-b border-border text-iron-text-secondary font-space font-bold text-xl uppercase tracking-widest;
+  @apply text-left px-5 py-4 border-b border-border text-iron-text-secondary font-space font-bold text-xl tracking-widest;
 }
 
 .iron-table td {
@@ -157,6 +158,49 @@
 /* Transition for smooth theme switch */
 *, *::before, *::after {
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+}
+
+/* ===================== ACCESSIBILITY ===================== */
+/* Unlayered, so these beat Tailwind's outline-none / placeholder utilities */
+:focus-visible {
+  outline: 2px solid var(--color-iron-lime);
+  outline-offset: 2px;
+}
+
+/* Dialog panels and <main> only take focus programmatically; no ring needed */
+[role="dialog"]:focus-visible,
+main:focus-visible {
+  outline: none;
+}
+
+::placeholder {
+  color: #8A8A93;
+  opacity: 1;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  z-index: 100;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--color-iron-lime);
+  color: var(--color-dark);
+  font-weight: 700;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* ===================== LIGHT THEME ===================== */
@@ -263,9 +307,19 @@ html.light [class*="bg-[#111116]"] {
   border-color: #D4D4DC !important;
 }
 
-html.light input::placeholder {
-  color: #A1A1AA !important;
+html.light ::placeholder {
+  color: #71717A !important;
 }
+
+/* Tailwind's -400 text colors are too light on white; darken them for AA */
+html.light .text-red-400, html.light .text-red-500 { color: #B91C1C !important; }
+html.light .text-emerald-400, html.light .text-emerald-500 { color: #047857 !important; }
+html.light .text-amber-400, html.light .text-amber-500 { color: #B45309 !important; }
+html.light .text-blue-400, html.light .text-blue-500 { color: #1D4ED8 !important; }
+html.light .text-purple-400 { color: #7E22CE !important; }
+html.light .text-orange-400 { color: #C2410C !important; }
+html.light .text-cyan-400 { color: #0E7490 !important; }
+html.light .text-pink-400 { color: #BE185D !important; }
 
 /* Modals */
 html.light .bg-dark\/80 {

@@ -6,6 +6,7 @@ import {
   LayoutGrid, List, Users, CalendarCheck, TrendingUp,
   Star, ChevronRight, Trash2, Phone, Briefcase, UserPlus
 } from 'lucide-react';
+import useDialog from '../hooks/useDialog';
 
 const API    = 'http://localhost:5000/api/trainers';
 const PAGE   = 6;
@@ -107,20 +108,20 @@ function TrainerCard({ trainer, onDelete, onManage, isLight }) {
         </div>
         {/* Status badge */}
         <div className="absolute top-3 left-3">
-          <span className={`px-2.5 py-1 rounded text-[11px] font-black uppercase tracking-widest ${spec.bgCls} ${spec.textCls}`}>
+          <span className={`px-2.5 py-1 rounded text-[11px] font-black tracking-widest ${spec.bgCls} ${spec.textCls}`}>
             {spec.label}
           </span>
         </div>
         {/* Action menu */}
         <div className="absolute top-3 right-3" onClick={e => { e.stopPropagation(); setMenuOpen(v => !v); }}>
-          <button className="w-7 h-7 rounded-lg bg-black/40 backdrop-blur border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-black/60 transition-colors">
+          <button aria-label="Trainer actions" aria-expanded={menuOpen} className="w-7 h-7 rounded-lg bg-black/40 backdrop-blur border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-black/60 transition-colors">
             <span className="text-base leading-none">⋯</span>
           </button>
           {menuOpen && (
             <div className="absolute right-0 top-full mt-1 w-32 bg-[#18181A] border border-border rounded-xl shadow-xl z-20 overflow-hidden py-1"
               onMouseLeave={() => setMenuOpen(false)}>
               <button onClick={() => { onDelete(trainer.trainer_id); setMenuOpen(false); }}
-                className="w-full text-left px-4 py-2.5 text-xs font-bold uppercase tracking-widest text-red-400 hover:bg-red-500/10 transition-colors flex items-center gap-2">
+                className="w-full text-left px-4 py-2.5 text-xs font-bold tracking-widest text-red-400 hover:bg-red-500/10 transition-colors flex items-center gap-2">
                 <Trash2 size={11} /> Delete
               </button>
             </div>
@@ -136,11 +137,11 @@ function TrainerCard({ trainer, onDelete, onManage, isLight }) {
 
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="text-iron-text-secondary text-[11px] uppercase tracking-widest font-bold mb-0.5">Active Clients</p>
+            <p className="text-iron-text-secondary text-[11px] tracking-widest font-bold mb-0.5">Active Clients</p>
             <p className="text-white text-xl font-space font-black">{clients}</p>
           </div>
           <div className="text-right">
-            <p className="text-iron-text-secondary text-[11px] uppercase tracking-widest font-bold mb-0.5">Performance</p>
+            <p className="text-iron-text-secondary text-[11px] tracking-widest font-bold mb-0.5">Performance</p>
             <div className="flex items-center justify-end gap-1">
               <Star size={11} className="text-iron-lime fill-iron-lime" />
               <p className="text-iron-lime text-xl font-space font-black">+{rating}</p>
@@ -150,7 +151,7 @@ function TrainerCard({ trainer, onDelete, onManage, isLight }) {
 
         <button
           onClick={() => onManage(trainer)}
-          className="w-full py-2 bg-white/[0.03] border border-white/5 rounded-lg text-xs font-black uppercase tracking-widest text-iron-text-secondary hover:text-white hover:border-white/20 hover:bg-white/5 transition-all flex items-center justify-center gap-2 group/btn"
+          className="w-full py-2 bg-white/[0.03] border border-white/5 rounded-lg text-xs font-black tracking-widest text-iron-text-secondary hover:text-white hover:border-white/20 hover:bg-white/5 transition-all flex items-center justify-center gap-2 group/btn"
         >
           Manage Profile
           <ChevronRight size={11} className="group-hover/btn:translate-x-0.5 transition-transform" />
@@ -180,7 +181,7 @@ function TrainerRow({ trainer, onDelete, onManage, isLight }) {
         </div>
       </div>
       <div>
-        <span className={`px-2 py-0.5 rounded text-[11px] font-black uppercase tracking-widest ${spec.bgCls} ${spec.textCls}`}>
+        <span className={`px-2 py-0.5 rounded text-[11px] font-black tracking-widest ${spec.bgCls} ${spec.textCls}`}>
           {spec.label}
         </span>
       </div>
@@ -195,10 +196,10 @@ function TrainerRow({ trainer, onDelete, onManage, isLight }) {
       <div className="flex justify-end">
         <div className="flex items-center gap-2">
           <button onClick={() => onManage(trainer)}
-            className="px-3 h-8 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center text-iron-text-secondary hover:text-white hover:border-white/20 transition-colors text-[10px] font-black uppercase tracking-widest">
+            className="px-3 h-8 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center text-iron-text-secondary hover:text-white hover:border-white/20 transition-colors text-[10px] font-black tracking-widest">
             Edit
           </button>
-          <button onClick={() => onDelete(trainer.trainer_id)}
+          <button aria-label="Delete trainer" onClick={() => onDelete(trainer.trainer_id)}
             className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center text-iron-text-secondary hover:text-red-400 hover:border-red-500/20 hover:bg-red-500/5 transition-colors">
             <Trash2 size={13} />
           </button>
@@ -225,6 +226,7 @@ export default function Trainers() {
 
   // Modal
   const [showModal, setShowModal] = useState(false);
+  const modalDialogRef = useDialog(showModal, () => setShowModal(false));
   const [formData, setFormData]   = useState(initForm);
   const [editingId, setEditingId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -313,10 +315,10 @@ export default function Trainers() {
       {/* ── Page Header ───────────────────────────────────────── */}
       <div className="flex items-end justify-between">
         <div>
-          <h1 className="text-5xl font-space font-black uppercase tracking-tighter text-white leading-none">
+          <h2 className="text-5xl font-space font-black tracking-tighter text-white leading-none">
             Trainers
-          </h1>
-          <p className="text-iron-text-secondary text-xs font-bold uppercase tracking-widest mt-2">
+          </h2>
+          <p className="text-iron-text-secondary text-xs font-bold tracking-widest mt-2">
             {stats.total_trainers} Total Trainers Active
           </p>
         </div>
@@ -331,7 +333,7 @@ export default function Trainers() {
 
         {/* Team Performance */}
         <div className="stat-card space-y-3">
-          <p className="text-xs font-space font-bold uppercase tracking-[0.2em] text-iron-text-secondary">Team Performance</p>
+          <p className="text-xs font-space font-bold tracking-[0.2em] text-iron-text-secondary">Team Performance</p>
           <div className="flex items-baseline gap-2">
             <p className="text-5xl font-space font-black text-white tracking-tighter">{stats.performance}</p>
             <span className="text-iron-lime font-black text-xl">%</span>
@@ -345,7 +347,7 @@ export default function Trainers() {
         {/* Sessions Today */}
         <div className="stat-card">
           <div className="flex items-start justify-between mb-4">
-            <p className="text-xs font-space font-bold uppercase tracking-[0.2em] text-iron-text-secondary">Sessions Today</p>
+            <p className="text-xs font-space font-bold tracking-[0.2em] text-iron-text-secondary">Sessions Today</p>
             <div className="w-9 h-9 rounded-lg bg-iron-lime/10 flex items-center justify-center text-iron-lime">
               <CalendarCheck size={16} />
             </div>
@@ -360,7 +362,7 @@ export default function Trainers() {
         {/* Active Clients */}
         <div className="stat-card">
           <div className="flex items-start justify-between mb-4">
-            <p className="text-xs font-space font-bold uppercase tracking-[0.2em] text-iron-text-secondary">Active Clients</p>
+            <p className="text-xs font-space font-bold tracking-[0.2em] text-iron-text-secondary">Active Clients</p>
             <div className="w-9 h-9 rounded-lg bg-iron-blue/10 flex items-center justify-center text-blue-400">
               <Users size={16} />
             </div>
@@ -374,7 +376,7 @@ export default function Trainers() {
       <div className="card !p-0 overflow-hidden">
         {/* Roster header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <h3 className="text-white font-space font-black uppercase tracking-widest text-sm">Active Roster</h3>
+          <h3 className="text-white font-space font-black tracking-widest text-sm">Active Roster</h3>
           <div className="flex items-center gap-1 bg-white/[0.03] border border-white/5 rounded-lg p-1">
             <button onClick={() => setViewMode('grid')}
               className={`w-8 h-8 rounded flex items-center justify-center transition-all ${viewMode === 'grid' ? 'bg-iron-lime text-dark' : 'text-iron-text-secondary hover:text-white'}`}>
@@ -391,14 +393,14 @@ export default function Trainers() {
         {viewMode === 'list' && (
           <div className="grid grid-cols-[2fr_1fr_1fr_1fr_100px] px-6 py-2 border-b border-border bg-white/[0.01]">
             {['Trainer', 'Specialty', 'Clients', 'Rating', 'Actions'].map(h => (
-              <span key={h} className="text-xs font-black uppercase tracking-widest text-iron-text-secondary font-space">{h}</span>
+              <span key={h} className="text-xs font-black tracking-widest text-iron-text-secondary font-space">{h}</span>
             ))}
           </div>
         )}
 
         {/* Content */}
         {loading ? (
-          <div className="py-24 flex justify-center items-center gap-3 text-iron-text-secondary text-xs font-space uppercase tracking-widest">
+          <div className="py-24 flex justify-center items-center gap-3 text-iron-text-secondary text-xs font-space tracking-widest">
             <Loader2 size={16} className="animate-spin text-iron-lime" /> Loading roster...
           </div>
         ) : trainers.length === 0 ? (
@@ -424,11 +426,11 @@ export default function Trainers() {
           <div className="px-6 py-5 border-t border-border flex flex-col items-center gap-3">
             {hasMore && (
               <button onClick={() => fetchTrainers(false)} disabled={loadingMore}
-                className="flex items-center gap-2 px-10 py-3 border border-white/10 rounded-full text-xs font-black uppercase tracking-widest text-iron-text-secondary hover:text-white hover:border-white/30 hover:bg-white/[0.02] transition-all disabled:opacity-50">
+                className="flex items-center gap-2 px-10 py-3 border border-white/10 rounded-full text-xs font-black tracking-widest text-iron-text-secondary hover:text-white hover:border-white/30 hover:bg-white/[0.02] transition-all disabled:opacity-50">
                 {loadingMore ? <><Loader2 size={13} className="animate-spin" /> Loading...</> : 'Load More Trainers'}
               </button>
             )}
-            <p className="text-iron-text-secondary text-xs uppercase tracking-widest font-bold">
+            <p className="text-iron-text-secondary text-xs tracking-widest font-bold">
               Page {curPage} of {totalPages}&nbsp;
               <span className="mx-2 opacity-30">|</span>
               <button onClick={() => fetchTrainers(true)} className="hover:text-white transition-colors">Show All</button>
@@ -441,21 +443,22 @@ export default function Trainers() {
       {showModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
           onClick={() => setShowModal(false)}>
-          <div className="bg-surface border border-border rounded-2xl w-full max-w-md shadow-2xl"
+          <div ref={modalDialogRef} role="dialog" aria-modal="true" aria-labelledby="trainers-showModal-title" tabIndex={-1} className="bg-surface border border-border rounded-2xl w-full max-w-md shadow-2xl"
             onClick={e => e.stopPropagation()}>
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-border">
               <div>
-                <h2 className="text-white font-space font-bold text-base tracking-wide">{editingId ? 'Manage Trainer Profile' : 'Hire New Trainer'}</h2>
+                <h2 id="trainers-showModal-title" className="text-white font-space font-bold text-base tracking-wide">{editingId ? 'Manage Trainer Profile' : 'Hire New Trainer'}</h2>
                 <p className="text-iron-text-secondary text-xs italic mt-0.5">{editingId ? 'Update trainer profile and login details' : 'Add a trainer to the active roster'}</p>
               </div>
-              <button onClick={() => setShowModal(false)}
+              <button aria-label="Close dialog" onClick={() => setShowModal(false)}
                 className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center text-iron-text-secondary hover:text-white transition-colors">
                 <X size={15} />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+              <p className="text-xs text-iron-text-secondary">Fields marked <span aria-hidden="true" className="text-red-400">*</span><span className="sr-only">with an asterisk</span> are required.</p>
               {formErr && (
                 <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-red-400 text-xs">
                   <AlertCircle size={14} className="flex-shrink-0" />{formErr}
@@ -469,10 +472,10 @@ export default function Trainers() {
 
               {/* Name */}
               <div className="space-y-1">
-                <label className="text-iron-text-secondary text-xs uppercase tracking-widest font-space font-bold">
-                  Full Name <span className="text-red-400">*</span>
+                <label htmlFor="trainers-name" className="text-iron-text-secondary text-xs tracking-widest font-space font-bold">
+                  Full Name <span aria-hidden="true" className="text-red-400">*</span>
                 </label>
-                <input required type="text" placeholder="e.g. Arjun Kumar"
+                <input id="trainers-name" required type="text" placeholder="e.g. Arjun Kumar"
                   value={formData.name}
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
                   className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors placeholder:text-iron-text-secondary/50" />
@@ -481,15 +484,15 @@ export default function Trainers() {
               {/* Specialization + Phone */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-iron-text-secondary text-xs uppercase tracking-widest font-space font-bold">Specialization</label>
-                  <input type="text" placeholder="e.g. Strength Training"
+                  <label htmlFor="trainers-specialization" className="text-iron-text-secondary text-xs tracking-widest font-space font-bold">Specialization</label>
+                  <input id="trainers-specialization" type="text" placeholder="e.g. Strength Training"
                     value={formData.specialization}
                     onChange={e => setFormData({ ...formData, specialization: e.target.value })}
                     className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors placeholder:text-iron-text-secondary/50" />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-iron-text-secondary text-xs uppercase tracking-widest font-space font-bold">Phone</label>
-                  <input type="text" placeholder="e.g. 9876543210"
+                  <label htmlFor="trainers-phone" className="text-iron-text-secondary text-xs tracking-widest font-space font-bold">Phone</label>
+                  <input id="trainers-phone" type="text" placeholder="e.g. 9876543210"
                     value={formData.phone}
                     onChange={e => setFormData({ ...formData, phone: e.target.value })}
                     className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors placeholder:text-iron-text-secondary/50" />
@@ -499,15 +502,15 @@ export default function Trainers() {
               {/* Salary + Hire Date */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-iron-text-secondary text-xs uppercase tracking-widest font-space font-bold">Monthly Salary (₹)</label>
-                  <input type="number" min="0" placeholder="e.g. 35000"
+                  <label htmlFor="trainers-salary" className="text-iron-text-secondary text-xs tracking-widest font-space font-bold">Monthly Salary (₹)</label>
+                  <input id="trainers-salary" type="number" min="0" placeholder="e.g. 35000"
                     value={formData.salary}
                     onChange={e => setFormData({ ...formData, salary: e.target.value })}
                     className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors" />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-iron-text-secondary text-xs uppercase tracking-widest font-space font-bold">Hire Date</label>
-                  <input type="date"
+                  <label htmlFor="trainers-hire-date" className="text-iron-text-secondary text-xs tracking-widest font-space font-bold">Hire Date</label>
+                  <input id="trainers-hire-date" type="date"
                     value={formData.hire_date}
                     onChange={e => setFormData({ ...formData, hire_date: e.target.value })}
                     className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors" />
@@ -516,17 +519,17 @@ export default function Trainers() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-iron-text-secondary text-xs uppercase tracking-widest font-space font-bold">Email</label>
-                  <input type="email" placeholder="trainer@example.com"
+                  <label htmlFor="trainers-email" className="text-iron-text-secondary text-xs tracking-widest font-space font-bold">Email</label>
+                  <input id="trainers-email" type="email" placeholder="trainer@example.com"
                     value={formData.email}
                     onChange={e => setFormData({ ...formData, email: e.target.value })}
                     className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors placeholder:text-iron-text-secondary/50" />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-iron-text-secondary text-xs uppercase tracking-widest font-space font-bold">
+                  <label htmlFor="trainers-password" className="text-iron-text-secondary text-xs tracking-widest font-space font-bold">
                     {editingId ? 'New Password' : 'Password'}
                   </label>
-                  <input type="password" placeholder={editingId ? 'Leave blank to keep current' : 'Optional'}
+                  <input id="trainers-password" type="password" placeholder={editingId ? 'Leave blank to keep current' : 'Optional'}
                     value={formData.password}
                     onChange={e => setFormData({ ...formData, password: e.target.value })}
                     className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors placeholder:text-iron-text-secondary/50" />
@@ -539,7 +542,7 @@ export default function Trainers() {
                   {submitting ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><UserPlus size={13} /> {editingId ? 'Save Profile' : 'Add Trainer'}</>}
                 </button>
                 <button type="button" onClick={() => setShowModal(false)}
-                  className="flex-1 py-3 px-6 bg-white/[0.03] border border-white/10 rounded text-white text-xs font-space font-semibold uppercase tracking-wider hover:bg-white/5 transition-colors">
+                  className="flex-1 py-3 px-6 bg-white/[0.03] border border-white/10 rounded text-white text-xs font-space font-semibold tracking-wider hover:bg-white/5 transition-colors">
                   Cancel
                 </button>
               </div>
