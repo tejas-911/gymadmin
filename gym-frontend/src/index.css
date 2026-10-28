@@ -1,0 +1,289 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-dark: #0A0A0E;
+  --color-surface: #111116;
+  --color-border: #1F1F26;
+  --color-iron-lime: #DFFF00;
+  --color-iron-blue: #1A3AFF;
+  --color-iron-text-primary: #FFFFFF;
+  --color-iron-text-secondary: #71717A;
+  
+  --font-space: "Space Grotesk", sans-serif;
+  --font-manrope: "Manrope", sans-serif;
+
+  --sidebar-width: 280px;
+}
+
+@layer base {
+  * {
+    @apply box-border m-0 p-0;
+  }
+
+  html {
+    font-size: 20px; /* Base for all rem units */
+    @apply bg-dark;
+  }
+
+  body {
+    @apply bg-dark text-white font-manrope h-full text-base antialiased;
+    overflow: hidden;
+  }
+
+  #root {
+    @apply h-full;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-space font-bold text-white;
+  }
+
+  /* Robust scaling for Tailwind utility classes */
+  .text-xs { font-size: 0.85rem !important; }
+  .text-sm { font-size: 1rem !important; }
+  .text-base { font-size: 1.15rem !important; }
+  .text-lg { font-size: 1.35rem !important; }
+  .text-xl { font-size: 1.6rem !important; }
+  .text-2xl { font-size: 2rem !important; }
+  .text-3xl { font-size: 2.5rem !important; }
+  .text-4xl { font-size: 3rem !important; }
+  .text-5xl { font-size: 4rem !important; }
+
+  /* Ensure specific utility styles aren't too tiny */
+  [class*="text-[10px]"], 
+  [class*="text-[11px]"],
+  [class*="text-[12px]"] {
+    font-size: 0.8rem !important;
+  }
+}
+
+/* Layout components */
+.app-container {
+  @apply flex min-h-screen w-full bg-dark;
+}
+
+.sidebar {
+  @apply fixed left-0 top-0 w-(--sidebar-width) h-screen bg-dark border-r border-border flex flex-col py-8 z-50;
+}
+
+.top-bar {
+  @apply fixed top-0 left-(--sidebar-width) right-0 h-[72px] bg-dark border-b border-border flex items-center justify-between px-8 z-40;
+}
+
+.main-wrapper {
+  @apply flex-1 flex flex-col pl-(--sidebar-width);
+}
+
+.main-content {
+  @apply ml-0 mt-[72px] p-8 bg-[#0D0D12];
+  height: calc(100vh - 72px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Dashboard components */
+.stat-card {
+  @apply bg-surface border border-border rounded-lg p-6 relative transition-all duration-300 hover:border-iron-lime/30 hover:-translate-y-1;
+}
+
+.stat-label {
+  @apply text-xs font-space font-bold uppercase tracking-[0.2em] text-iron-text-secondary mb-1 block;
+}
+
+.stat-value {
+  @apply text-5xl font-space font-black text-iron-text-primary tracking-tighter block;
+}
+
+.stat-change {
+  @apply flex items-center gap-1.5 mt-3 text-sm font-bold uppercase tracking-wider;
+}
+
+.card {
+  @apply bg-surface border border-border rounded-lg p-6 transition-all duration-300 hover:border-iron-lime/20;
+}
+
+.btn {
+  @apply bg-iron-lime text-dark border border-iron-lime px-6 py-3 rounded font-space font-semibold text-base uppercase tracking-wider transition-all duration-200 hover:shadow-[0_0_20px_rgba(223,255,0,0.3)] hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+/* Badges */
+.badge {
+  @apply inline-block px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wider border;
+}
+
+.badge-active {
+  @apply bg-emerald-500/10 text-emerald-400 border-emerald-500/20;
+}
+
+.badge-inactive, .badge-expired {
+  @apply bg-red-500/10 text-red-400 border-red-500/20;
+}
+
+.badge-pending {
+  @apply bg-amber-500/10 text-amber-400 border-amber-500/20;
+}
+
+/* Table styling */
+.iron-table {
+  @apply w-full border-collapse;
+}
+
+.iron-table th {
+  @apply text-left px-5 py-4 border-b border-border text-iron-text-secondary font-space font-bold text-xl uppercase tracking-widest;
+}
+
+.iron-table td {
+  @apply px-5 py-5 border-b border-border/50 text-white text-xl font-medium;
+}
+
+.iron-table tr:hover {
+  @apply bg-white/[0.02];
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  @apply w-1.5;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-dark;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-border rounded-full hover:bg-iron-lime transition-colors;
+}
+
+/* Transition for smooth theme switch */
+*, *::before, *::after {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+}
+
+/* ===================== LIGHT THEME ===================== */
+html.light {
+  --color-dark: #F0F0F5;
+  --color-surface: #FFFFFF;
+  --color-border: #E4E4EB;
+  --color-iron-lime: #2563EB; /* Brand Blue in light mode */
+  --color-iron-blue: #1A3AFF;
+  --color-iron-text-primary: #0A0A0E;
+  --color-iron-text-secondary: #52525B;
+  color-scheme: light;
+}
+
+html.light body {
+  color: #0A0A0E;
+  background: #F0F0F5;
+}
+
+html.light h1, html.light h2, html.light h3, html.light h4, html.light h5, html.light h6 {
+  color: #0A0A0E;
+}
+
+/* btn uses text-dark which is too dark on blue bg — make it white */
+html.light .btn {
+  color: #FFFFFF;
+  border-color: #2563EB;
+}
+
+html.light .main-content {
+  background: #E8E8F0;
+}
+
+html.light .top-bar,
+html.light .sidebar {
+  background: #FFFFFF;
+  border-color: #E4E4EB;
+}
+
+/* Cards in light mode */
+html.light .card,
+html.light .stat-card {
+  background: #FFFFFF;
+  border-color: #E4E4EB;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+}
+
+/* Table styling */
+html.light .iron-table th {
+  border-color: #E4E4EB;
+  color: #71717A;
+}
+
+html.light .iron-table td {
+  color: #0A0A0E;
+  border-color: #F0F0F5;
+}
+
+html.light .iron-table tr:hover {
+  background: rgba(0,0,0,0.02);
+}
+
+/* ===================== ROBUST UTILITY OVERRIDES ===================== */
+
+/* Critical Fix: text-white/opacity patterns */
+html.light [class*="text-white"] {
+  color: #0A0A0E !important;
+}
+
+html.light [class*="text-white/80"],
+html.light [class*="text-white/70"] {
+  color: rgba(10, 10, 14, 0.8) !important;
+}
+
+html.light [class*="text-white/50"],
+html.light [class*="text-white/40"] {
+  color: rgba(10, 10, 14, 0.5) !important;
+}
+
+/* Fix: text-iron-text-secondary for better contrast */
+html.light .text-iron-text-secondary {
+  color: #52525B !important;
+}
+
+/* Fix: bg-white/opacity patterns (mostly for tracks and subtle buttons) */
+html.light [class*="bg-white/"] {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Ensure progress bar tracks are visible */
+html.light .bg-white\/5 {
+  background-color: #E4E4EB !important;
+}
+
+/* Fixed inputs and selects */
+html.light input,
+html.light select,
+html.light textarea,
+html.light [class*="bg-[#18181A]"],
+html.light [class*="bg-[#0D0D12]"],
+html.light [class*="bg-[#111116]"] {
+  background-color: #F8F8FC !important;
+  color: #0A0A0E !important;
+  border-color: #D4D4DC !important;
+}
+
+html.light input::placeholder {
+  color: #A1A1AA !important;
+}
+
+/* Modals */
+html.light .bg-dark\/80 {
+  background-color: rgba(240, 240, 245, 0.8) !important;
+}
+
+/* Specific Badge handling */
+html.light .badge-active {
+  background-color: rgba(5, 150, 105, 0.1) !important;
+  color: #059669 !important;
+  border-color: rgba(5, 150, 105, 0.2) !important;
+}
+
+/* Scrollbar in light mode */
+html.light ::-webkit-scrollbar-track {
+  background: #F0F0F5;
+}
+
+html.light ::-webkit-scrollbar-thumb {
+  background: #D4D4DC;
+}
