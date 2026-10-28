@@ -35,5 +35,4 @@ node_modules/
 coverage/
 .DS_Store
 
-# repowise API keys (local)
-.repowise/.env
+.claude
