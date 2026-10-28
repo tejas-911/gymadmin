@@ -5,82 +5,66 @@ A full-stack gym management platform built with Express.js, React, and MySQL.
 ## Quick Start
 
 ### Prerequisites
-- Node.js (v16+)
-- MySQL 8.0+
-- npm or yarn
+- Node.js 20.19+ or 22.12+ (required by Vite 8)
+- MySQL 8.0+, with the `mysql` command-line client on your `PATH`
 
-### Backend Setup
+Run every command below from the project root (the folder containing `gym-backend` and `gym-frontend`). They work as written in PowerShell and bash.
 
-1. **Navigate to backend directory:**
-   ```bash
-   cd gym-backend
-   ```
+### 1. Install dependencies
 
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+```bash
+npm install --prefix gym-backend
+npm install --prefix gym-frontend
+```
 
-3. **Create `.env` file** (copy from `.env.example` if it exists):
-   ```env
-   PORT=5000
-   JWT_SECRET=your_secret_key_here
-   DB_HOST=localhost
-   DB_USER=root
-   DB_PASSWORD=your_password_here
-   DB_NAME=gym_db
-   NODE_ENV=development
-   ```
+### 2. Configure the backend
 
-4. **Initialize the database:**
-   ```bash
-   mysql -u root -p gym_db < sql/schema.sql
-   mysql -u root -p gym_db < sql/seed.sql
-   mysql -u root -p gym_db < sql/advanced_db_features.sql
-   ```
+Copy the example env file, then open `gym-backend/.env` and set `DB_PASSWORD` to your MySQL root password and `JWT_SECRET` to any long random string. Login fails without `JWT_SECRET`.
 
-5. **Start the server:**
-   ```bash
-   npm start
-   # Or with nodemon for development:
-   npm run dev
-   ```
+```bash
+cp gym-backend/.env.example gym-backend/.env
+```
 
-The server will run on `http://localhost:5000`
+The frontend needs no `.env`; it calls `http://localhost:5000/api` by default. To point it elsewhere, copy `gym-frontend/.env.example` to `gym-frontend/.env` and edit `VITE_API_BASE_URL`.
 
-### Frontend Setup
+### 3. Create the database
 
-1. **Navigate to frontend directory:**
-   ```bash
-   cd gym-frontend
-   ```
+`schema.sql` creates the `gym_db` database itself, so no database name is passed. The scripts must run in this order. You will be asked for your MySQL password.
 
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+```bash
+mysql -u root -p -e "source gym-backend/sql/schema.sql; source gym-backend/sql/seed.sql; source gym-backend/sql/advanced_db_features.sql"
+```
 
-3. **Create `.env` file** (copy from `.env.example`):
-   ```env
-   VITE_API_BASE_URL=http://localhost:5000/api
-   ```
+To start over with a clean database, drop it first (this permanently deletes all data in `gym_db`), then run the command above again:
 
-4. **Start the development server:**
-   ```bash
-   npm run dev
-   ```
+```bash
+mysql -u root -p -e "DROP DATABASE IF EXISTS gym_db"
+```
 
-The frontend will run on `http://localhost:5173`
+### 4. Start the app
+
+Use two terminals and keep both running.
+
+```bash
+npm start --prefix gym-backend
+```
+
+```bash
+npm run dev --prefix gym-frontend
+```
+
+The API runs on `http://localhost:5000`. Open the URL Vite prints (usually `http://localhost:5173`) and sign in with the seeded admin account: `admin@gym.com` / `admin123`.
+
+For auto-restart on backend changes, use `npm run dev --prefix gym-backend` instead (nodemon is installed with the backend's dev dependencies).
 
 ## Project Architecture
 
 ### Backend Structure
 ```
 gym-backend/
-├── controllers/       # Request handlers
+├── controllers/      # Request handlers and database queries
 ├── routes/           # API route definitions
-├── services/         # Business logic & database queries
-├── middleware/       # Express middleware (auth, errors)
+├── middleware/       # JWT auth middleware
 ├── db.js             # Database connection pool
 ├── server.js         # Express app setup
 └── sql/              # Database scripts
@@ -94,9 +78,10 @@ gym-backend/
 gym-frontend/
 ├── src/
 │   ├── pages/        # Full-page components
-│   ├── components/   # Reusable UI components
-│   ├── context/      # React Context (theme, auth)
-│   ├── services/     # API communication layer
+│   ├── components/   # Shell (sidebar, top bar) and shared dialogs
+│   ├── context/      # Theme context
+│   ├── hooks/        # Dialog focus and menu-dismiss hooks
+│   ├── api.js        # API base URL (reads VITE_API_BASE_URL)
 │   ├── App.jsx       # Main router
 │   └── index.css     # Global styles & theme
 └── .env.example      # Environment template
@@ -155,29 +140,23 @@ See `sql/advanced_db_features.sql` for implementation details.
 
 ## Development
 
-### Running Tests
+### Linting
+There is no automated test suite yet. The frontend has ESLint:
 ```bash
-# Backend
-cd gym-backend
-npm test
-
-# Frontend
-cd gym-frontend
-npm run test
+npm run lint --prefix gym-frontend
 ```
 
 ### Building for Production
 ```bash
-# Frontend
-cd gym-frontend
-npm run build
+npm run build --prefix gym-frontend
 ```
+The static build goes to `gym-frontend/dist/`.
 
 ### Environment Variables
 
 | Variable | Purpose |
 |----------|---------|
-| `VITE_API_BASE_URL` (Frontend) | API server base URL |
+| `VITE_API_BASE_URL` (Frontend) | API server base URL (default: `http://localhost:5000/api`; restart `npm run dev` after changing it) |
 | `DB_HOST` (Backend) | MySQL host |
 | `DB_USER` (Backend) | MySQL username |
 | `DB_PASSWORD` (Backend) | MySQL password |
@@ -192,15 +171,26 @@ npm run build
 - Ensure MySQL is running and accessible
 
 ### "Cannot find module 'dotenv'"
-- Run `npm install` in the backend directory
+- Run `npm install --prefix gym-backend`
 
-### Frontend showing "Cannot reach API"
-- Ensure backend is running on `http://localhost:5000`
-- Check `VITE_API_BASE_URL` in frontend `.env`
+### "Login failed! Check server connection."
+- Ensure the backend is running on `http://localhost:5000`
+- Check `VITE_API_BASE_URL` in `gym-frontend/.env`, if you created one
+- Make sure `JWT_SECRET` is set in `gym-backend/.env`
 
-### Database errors on startup
+### "Port 5000 is already in use"
+- Another copy of the backend is already running. Stop it, or use the one that is running.
+
+### "Unknown database 'gym_db'" or missing tables
 - Verify MySQL is running
-- Run SQL scripts in order: `schema.sql` → `seed.sql` → `advanced_db_features.sql`
+- Re-run the step 3 command; the scripts must run in order: `schema.sql` → `seed.sql` → `advanced_db_features.sql`
+
+### "'mysql' is not recognized" / "mysql: command not found"
+- The MySQL installer on Windows does not add the client to `PATH`. Add `C:\Program Files\MySQL\MySQL Server 8.0\bin` to your `PATH` and open a new terminal, or call it by full path in PowerShell: `& "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" -u root -p -e "..."`
+- Alternatively, open the three scripts in MySQL Workbench and run them in the same order.
+
+### `<` redirection errors in PowerShell
+- PowerShell does not support `mysql ... < file.sql`. Use the `source` form from step 3.
 
 ## License
 
