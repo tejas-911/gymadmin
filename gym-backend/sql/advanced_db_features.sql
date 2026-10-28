@@ -557,19 +557,22 @@ END //
 DELIMITER ;
 
 
--- E4. BEFORE INSERT on Subscription — Auto-expire overlapping subscriptions
+-- E4. BEFORE INSERT on Subscription — Validate dates, auto-expire past-dated subscriptions
+-- A trigger cannot UPDATE the table it fires on (MySQL error 1442), so expiring a member's
+-- older subscriptions happens in sp_renew_subscription and the subscription API instead.
 DROP TRIGGER IF EXISTS trg_subscription_auto_expire;
 DELIMITER //
 CREATE TRIGGER trg_subscription_auto_expire
 BEFORE INSERT ON Subscription
 FOR EACH ROW
 BEGIN
-    -- Expire any existing active subscription for this member
-    UPDATE Subscription
-    SET status = 'Expired'
-    WHERE member_id = NEW.member_id
-      AND status = 'Active'
-      AND end_date >= CURDATE();
+    IF NEW.end_date < NEW.start_date THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Subscription end_date cannot be before start_date';
+    END IF;
+
+    IF NEW.end_date < CURDATE() THEN
+        SET NEW.status = 'Expired';
+    END IF;
 END //
 DELIMITER ;
 

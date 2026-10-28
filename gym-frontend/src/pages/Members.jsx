@@ -1,17 +1,17 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE } from '../api';
 import {
   Search, X, Dumbbell, Loader2, Clock, IndianRupee,
   UserCheck, Pencil, CreditCard, Banknote, Smartphone,
   Building2, CheckCircle, AlertCircle, BadgeCheck, CalendarDays
 } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
 import useDialog from '../hooks/useDialog';
 
-const API = 'http://localhost:5000/api/members';
-const PLANS_API = 'http://localhost:5000/api/plans';
-const SUB_SP_API = 'http://localhost:5000/api/db/procedures/renew-subscription';
+const API = `${API_BASE}/members`;
+const PLANS_API = `${API_BASE}/plans`;
+const SUB_SP_API = `${API_BASE}/db/procedures/renew-subscription`;
 
 const METHOD_ICONS = {
   Card: <CreditCard size={14} />,
@@ -36,8 +36,6 @@ const initialFormState = {
 };
 
 export default function Members() {
-  const { theme } = useTheme();
-  const isLight = theme === 'light';
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -213,12 +211,12 @@ export default function Members() {
   return (
     <div className="space-y-8 pb-12 font-manrope">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
         <div>
-          <h2 className="text-4xl font-space font-bold tracking-tighter mb-2" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Members</h2>
-          <p className="text-iron-text-secondary font-medium italic text-sm">
+          <h2 className="text-4xl font-space font-bold tracking-tighter mb-2 text-fg">Members</h2>
+          <p className="text-iron-text-secondary font-medium text-sm">
             {data.length} total · {activeCount} active
-            {hasEnrichedData && <span className="ml-2 px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-[11px] font-black tracking-widest">View + Functions Active</span>}
+            {hasEnrichedData && <span className="ml-2 px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-[11px] font-bold tracking-widest">View + Functions Active</span>}
           </p>
         </div>
         <button className="btn flex items-center gap-2 group" onClick={openCreateModal}>
@@ -252,7 +250,7 @@ export default function Members() {
         <div className="overflow-x-auto">
           <table className="iron-table">
             <thead>
-              <tr className="bg-white/[0.01]">
+              <tr className="bg-fg/[0.01]">
                 <th>Member</th>
                 <th>Contact</th>
                 {hasEnrichedData && <th>Age</th>}
@@ -264,16 +262,16 @@ export default function Members() {
                 <th>Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.03]">
+            <tbody className="divide-y divide-fg/[0.03]">
               {loading ? (
                 <tr>
-                  <td colSpan={hasEnrichedData ? 8 : 6} className="py-20 text-center text-iron-text-secondary font-space tracking-widest text-xs italic">
+                  <td colSpan={hasEnrichedData ? 8 : 6} className="py-20 text-center text-iron-text-secondary font-space tracking-widest text-xs">
                     Retrieving member directory...
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={hasEnrichedData ? 8 : 6} className="py-20 text-center text-iron-text-secondary italic">
+                  <td colSpan={hasEnrichedData ? 8 : 6} className="py-20 text-center text-iron-text-secondary">
                     No members found matching your criteria.
                   </td>
                 </tr>
@@ -291,15 +289,15 @@ export default function Members() {
                             {getInitials(name)}
                           </div>
                           <div className="flex flex-col">
-                            <span className="font-bold group-hover:text-iron-lime transition-colors" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>{name}</span>
+                            <span className="font-bold group-hover:text-iron-lime transition-colors text-fg">{name}</span>
                             <span className="text-xs font-bold text-iron-text-secondary tracking-tighter">ID: IC-{member.member_id}</span>
                           </div>
                         </div>
                       </td>
                       <td>
                         <div className="flex flex-col gap-0.5">
-                          <span className="text-xs text-white/80">{member.email}</span>
-                          <span className="text-xs font-medium text-iron-text-secondary tracking-tighter italic">{member.phone || '—'}</span>
+                          <span className="text-xs text-fg/80">{member.email}</span>
+                          <span className="text-xs font-medium text-iron-text-secondary tracking-tighter">{member.phone || '—'}</span>
                         </div>
                       </td>
 
@@ -308,7 +306,7 @@ export default function Members() {
                         <>
                           {/* fn_member_age() */}
                           <td>
-                            <span className="text-sm font-space font-bold" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>
+                            <span className="text-sm font-space font-bold text-fg">
                               {member.age != null ? member.age : '—'}
                             </span>
                             {member.age != null && <span className="text-iron-text-secondary text-xs ml-1">yrs</span>}
@@ -318,13 +316,13 @@ export default function Members() {
                           <td>
                             <div className="flex flex-col gap-1.5">
                               {member.plan_name ? (
-                                <span className="px-2.5 py-0.5 bg-iron-blue/10 text-iron-blue border border-iron-blue/20 rounded text-[11px] font-black tracking-widest w-fit">
+                                <span className="px-2.5 py-0.5 bg-iron-blue/10 text-blue-400 border border-iron-blue/20 rounded text-[11px] font-bold tracking-widest w-fit">
                                   {member.plan_name}
                                 </span>
                               ) : (
-                                <span className="text-iron-text-secondary text-xs italic">No plan</span>
+                                <span className="text-iron-text-secondary text-xs">No plan</span>
                               )}
-                              <span className={`text-xs font-bold italic ${
+                              <span className={`text-xs font-bold ${
                                 (member.subscription_status_label || '').includes('Expiring') ? 'text-amber-400' :
                                 (member.subscription_status_label || '').includes('Expired') ? 'text-red-400' :
                                 (member.subscription_status_label || '').includes('Active') ? 'text-emerald-400' :
@@ -333,7 +331,7 @@ export default function Members() {
                                 {member.subscription_status_label || '—'}
                               </span>
                               {member.days_remaining != null && member.days_remaining > 0 && member.days_remaining <= 7 && (
-                                <span className="flex items-center gap-1 text-amber-400 text-[11px] font-black tracking-widest">
+                                <span className="flex items-center gap-1 text-amber-400 text-[11px] font-bold tracking-widest">
                                   <Clock size={10} /> Renew Soon
                                 </span>
                               )}
@@ -344,7 +342,7 @@ export default function Members() {
                           <td>
                             <div className="flex items-center gap-1.5">
                               <IndianRupee size={12} className="text-emerald-500" />
-                              <span className="font-space font-bold text-sm" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>
+                              <span className="font-space font-bold text-sm text-fg">
                                 {member.lifetime_revenue != null ? parseFloat(member.lifetime_revenue).toFixed(2) : '0.00'}
                               </span>
                             </div>
@@ -369,8 +367,8 @@ export default function Members() {
 
                       <td>
                         <div className="flex items-center gap-2">
-                          <div className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-iron-lime shadow-[0_0_8px_rgba(223,255,0,0.5)]' : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]'}`} />
-                          <span className={`text-xs font-black tracking-widest ${isActive ? 'text-iron-lime' : 'text-red-400'}`}>
+                          <div className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-iron-lime' : 'bg-red-500'}`} />
+                          <span className={`text-xs font-bold tracking-widest ${isActive ? 'text-iron-lime' : 'text-red-400'}`}>
                             {isActive ? 'Active' : 'Inactive'}
                           </span>
                         </div>
@@ -379,14 +377,14 @@ export default function Members() {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => openEditModal(member)}
-                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/10 text-xs font-black tracking-widest text-iron-text-secondary hover:text-white hover:border-iron-lime/30 transition-all"
+                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-fg/[0.03] border border-fg/10 text-xs font-bold tracking-widest text-iron-text-secondary hover:text-fg hover:border-iron-lime/30 transition-all"
                           >
                             <Pencil size={12} />
                             Edit
                           </button>
                           <button
                             onClick={() => openSubModal(member)}
-                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-iron-lime/10 border border-iron-lime/20 text-xs font-black tracking-widest text-iron-lime hover:bg-iron-lime/20 hover:border-iron-lime/40 transition-all"
+                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-iron-lime/10 border border-iron-lime/20 text-xs font-bold tracking-widest text-iron-lime hover:bg-iron-lime/20 hover:border-iron-lime/40 transition-all"
                           >
                             <BadgeCheck size={12} />
                             Subscribe
@@ -401,8 +399,8 @@ export default function Members() {
           </table>
         </div>
 
-        <div className="p-6 bg-white/[0.01] border-t border-white/[0.03] flex items-center justify-between">
-          <p className="text-xs font-bold text-iron-text-secondary tracking-widest italic">
+        <div className="p-6 bg-fg/[0.01] border-t border-fg/[0.03] flex items-center justify-between">
+          <p className="text-xs font-bold text-iron-text-secondary tracking-widest">
             Showing {filtered.length} of {data.length} members
           </p>
         </div>
@@ -415,21 +413,21 @@ export default function Members() {
           <div ref={modalDialogRef} role="dialog" aria-modal="true" aria-labelledby="members-showModal-title" tabIndex={-1} className="bg-surface border border-border rounded-xl w-full max-w-[640px] relative z-[210] shadow-[0_30px_100px_rgba(0,0,0,0.5)] overflow-hidden">
             <div className="p-6 pb-4 flex items-center justify-between">
               <div>
-                <h2 id="members-showModal-title" className="text-xl font-bold" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>{editingId ? 'Edit Member' : 'Register Member'}</h2>
-                <p className="text-iron-text-secondary text-xs italic mt-1">
+                <h2 id="members-showModal-title" className="text-xl font-bold text-fg">{editingId ? 'Edit Member' : 'Register Member'}</h2>
+                <p className="text-iron-text-secondary text-xs mt-1">
                   {editingId ? 'Update profile details and membership status' : 'Uses sp_register_member stored procedure'}
                 </p>
               </div>
-              <button aria-label="Close dialog" onClick={() => setShowModal(false)} className="text-iron-text-secondary hover:text-white transition-colors">
+              <button aria-label="Close dialog" onClick={() => setShowModal(false)} className="text-iron-text-secondary hover:text-fg transition-colors">
                 <X size={20} />
               </button>
             </div>
-            <div className="w-full h-px bg-white/5" />
+            <div className="w-full h-px bg-fg/5" />
 
             <form onSubmit={handleSave} className="p-6 space-y-6">
               <p className="text-xs text-iron-text-secondary">Fields marked <span aria-hidden="true" className="text-red-400">*</span><span className="sr-only">with an asterisk</span> are required.</p>
               {modalError && (
-                <div role="alert" className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-xl flex items-center gap-3 italic">
+                <div role="alert" className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-xl flex items-center gap-3">
                   <div className="w-1 h-1 bg-red-400 rounded-full" />
                   {modalError}
                 </div>
@@ -497,13 +495,13 @@ export default function Members() {
                 )}
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
+              <div className="flex justify-end gap-3 pt-4 border-t border-fg/5">
                 <button type="button" onClick={() => setShowModal(false)}
-                  className="px-6 py-3 rounded-lg border border-border text-xs font-bold tracking-widest hover:bg-black/5 transition-all" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>
+                  className="px-6 py-3 rounded-lg border border-border text-xs font-bold tracking-widest hover:bg-black/5 transition-all text-fg">
                   Cancel
                 </button>
                 <button type="submit" disabled={isSubmitting}
-                  className="px-6 py-3 rounded-lg bg-iron-lime text-dark text-xs font-black tracking-widest hover:shadow-[0_0_20px_rgba(223,255,0,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                  className="px-6 py-3 rounded-lg bg-iron-lime text-on-accent text-xs font-bold tracking-widest hover:shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2">
                   {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <span>{editingId ? 'Save Changes' : 'Register Member'}</span>}
                 </button>
               </div>
@@ -519,20 +517,20 @@ export default function Members() {
           <div ref={subModalDialogRef} role="dialog" aria-modal="true" aria-labelledby="members-showSubModal-title" tabIndex={-1} className="bg-surface border border-border rounded-xl w-full max-w-[560px] relative z-[210] shadow-[0_30px_100px_rgba(0,0,0,0.5)] overflow-hidden">
 
             {/* Header */}
-            <div className="p-6 pb-4 border-b border-white/5">
-              <div className="flex items-center justify-between">
+            <div className="p-6 pb-4 border-b border-fg/5">
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
                 <div className="flex items-center gap-4">
                   <div className="w-11 h-11 rounded-xl bg-iron-lime/10 flex items-center justify-center">
                     <BadgeCheck size={20} className="text-iron-lime" />
                   </div>
                   <div>
-                    <h2 id="members-showSubModal-title" className="text-xl font-bold text-white">Assign Membership</h2>
-                    <p className="text-iron-text-secondary text-xs italic mt-0.5">
-                      Subscribing: <span className="text-white font-bold">{subTarget?.member_name || subTarget?.name}</span>
+                    <h2 id="members-showSubModal-title" className="text-xl font-bold text-fg">Assign Membership</h2>
+                    <p className="text-iron-text-secondary text-xs mt-0.5">
+                      Subscribing: <span className="text-fg font-bold">{subTarget?.member_name || subTarget?.name}</span>
                     </p>
                   </div>
                 </div>
-                <button aria-label="Close dialog" onClick={() => setShowSubModal(false)} className="text-iron-text-secondary hover:text-white transition-colors">
+                <button aria-label="Close dialog" onClick={() => setShowSubModal(false)} className="text-iron-text-secondary hover:text-fg transition-colors">
                   <X size={20} />
                 </button>
               </div>
@@ -576,20 +574,20 @@ export default function Members() {
                           onClick={() => setSubForm(f => ({ ...f, plan_id: String(p.plan_id) }))}
                           className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all text-left ${
                             isSelected
-                              ? 'bg-iron-lime/10 border-iron-lime/40 shadow-[0_0_15px_rgba(223,255,0,0.08)]'
-                              : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.04] hover:border-white/10'
+                              ? 'bg-iron-lime/10 border-iron-lime/40'
+                              : 'bg-fg/[0.02] border-fg/5 hover:bg-fg/[0.04] hover:border-fg/10'
                           }`}
                         >
                           <div>
-                            <p className={`font-bold text-sm ${isSelected ? 'text-white' : 'text-iron-text-secondary'}`}>
+                            <p className={`font-bold text-sm ${isSelected ? 'text-fg' : 'text-iron-text-secondary'}`}>
                               {p.plan_name}
                             </p>
                             {p.description && (
-                              <p className="text-iron-text-secondary text-xs italic mt-0.5">{p.description}</p>
+                              <p className="text-iron-text-secondary text-xs mt-0.5">{p.description}</p>
                             )}
                           </div>
                           <div className="text-right shrink-0 ml-4">
-                            <p className={`text-lg font-space font-black ${isSelected ? 'text-iron-lime' : 'text-white'}`}>
+                            <p className={`text-lg font-space font-bold ${isSelected ? 'text-iron-lime' : 'text-fg'}`}>
                               ₹{parseFloat(p.price).toLocaleString('en-IN')}
                             </p>
                             <p className="text-iron-text-secondary text-[11px] font-bold tracking-widest">
@@ -600,7 +598,7 @@ export default function Members() {
                       );
                     })}
                     {plans.length === 0 && !plansLoading && (
-                      <p className="text-iron-text-secondary text-xs italic py-2">No membership plans found. Create one from the Payments page first.</p>
+                      <p className="text-iron-text-secondary text-xs py-2">No membership plans found. Create one from the Payments page first.</p>
                     )}
                   </div>
                 )}
@@ -608,11 +606,11 @@ export default function Members() {
 
               {/* Duration preview */}
               {selectedPlan && (
-                <div className="flex items-center gap-3 p-4 bg-white/[0.02] border border-white/5 rounded-xl">
+                <div className="flex items-center gap-3 p-4 bg-fg/[0.02] border border-fg/5 rounded-xl">
                   <CalendarDays size={16} className="text-iron-lime shrink-0" />
                   <div className="flex-1">
                     <p className="text-iron-text-secondary text-xs">Subscription Period</p>
-                    <p className="text-white text-sm font-bold mt-0.5">
+                    <p className="text-fg text-sm font-bold mt-0.5">
                       {new Date(today).toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'})}
                       {' → '}
                       {new Date(endDate).toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'})}
@@ -620,7 +618,7 @@ export default function Members() {
                   </div>
                   <div className="text-right">
                     <p className="text-iron-text-secondary text-xs">Total</p>
-                    <p className="text-iron-lime font-space font-black text-base mt-0.5">
+                    <p className="text-iron-lime font-space font-bold text-base mt-0.5">
                       ₹{parseFloat(selectedPlan.price).toLocaleString('en-IN')}
                     </p>
                   </div>
@@ -643,8 +641,8 @@ export default function Members() {
                         onClick={() => setSubForm(f => ({ ...f, payment_method: method }))}
                         className={`flex flex-col items-center gap-2 py-3 px-2 rounded-xl border text-xs font-bold transition-all ${
                           isActive
-                            ? 'bg-iron-lime/10 border-iron-lime/30 text-white'
-                            : 'bg-white/[0.02] border-white/5 text-iron-text-secondary hover:border-white/10 hover:text-white'
+                            ? 'bg-iron-lime/10 border-iron-lime/30 text-fg'
+                            : 'bg-fg/[0.02] border-fg/5 text-iron-text-secondary hover:border-fg/10 hover:text-fg'
                         }`}
                       >
                         <span className={isActive ? 'text-iron-lime' : ''}>{METHOD_ICONS[method]}</span>
@@ -656,18 +654,18 @@ export default function Members() {
               </div>
 
               {/* Actions */}
-              <div className="flex justify-end gap-3 pt-2 border-t border-white/5">
+              <div className="flex justify-end gap-3 pt-2 border-t border-fg/5">
                 <button
                   type="button"
                   onClick={() => setShowSubModal(false)}
-                  className="px-6 py-3 rounded-lg border border-white/10 text-xs font-bold tracking-widest text-white hover:bg-white/5 transition-all"
+                  className="px-6 py-3 rounded-lg border border-fg/10 text-xs font-bold tracking-widest text-fg hover:bg-fg/5 transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={subSubmitting || !subForm.plan_id}
-                  className="px-8 py-3 rounded-lg bg-iron-lime text-dark text-xs font-black tracking-widest hover:shadow-[0_0_20px_rgba(223,255,0,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100"
+                  className="px-8 py-3 rounded-lg bg-iron-lime text-on-accent text-xs font-bold tracking-widest hover:shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100"
                 >
                   {subSubmitting ? <Loader2 size={15} className="animate-spin" /> : <BadgeCheck size={15} />}
                   {subSubmitting ? 'Assigning...' : 'Confirm Subscription'}

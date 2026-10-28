@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { API_BASE } from '../api';
 import {
   ShoppingBag, Plus, X, Loader2, Search,
   Package, AlertTriangle, CheckCircle
 } from 'lucide-react';
 import useDialog from '../hooks/useDialog';
 
-const API_SUPP = 'http://localhost:5000/api/supplements';
-const API_MEM = 'http://localhost:5000/api/members';
+const API_SUPP = `${API_BASE}/supplements`;
+const API_MEM = `${API_BASE}/members`;
 
 function getHeaders() {
   const token = localStorage.getItem('token');
@@ -139,13 +140,13 @@ export default function Supplements() {
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
-          <h2 className="text-4xl font-space font-bold tracking-tighter text-white mb-2">Supplements</h2>
-          <p className="text-iron-text-secondary font-medium italic text-sm">{data.length} products · {totalStock} units in stock</p>
+          <h2 className="text-4xl font-space font-bold tracking-tighter text-fg mb-2">Supplements</h2>
+          <p className="text-iron-text-secondary font-medium text-sm">{data.length} products · {totalStock} units in stock</p>
         </div>
         <button onClick={() => { setShowModal(true); setModalError(''); fetchMembers(); }} className="btn flex items-center gap-2">
           <Plus size={14} /> Record Sale
         </button>
-        <button onClick={() => openRestockModal()} className="px-4 py-3 rounded-lg bg-white/[0.03] border border-white/10 text-xs font-black tracking-widest text-white hover:bg-white/5 transition-all">
+        <button onClick={() => openRestockModal()} className="px-4 py-3 rounded-lg bg-fg/[0.03] border border-fg/10 text-xs font-bold tracking-widest text-fg hover:bg-fg/5 transition-all">
           Restock
         </button>
       </div>
@@ -158,26 +159,26 @@ export default function Supplements() {
       )}
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="stat-card">
           <p className="text-xs font-space font-bold tracking-[0.2em] text-iron-text-secondary mb-3">Total Products</p>
-          <p className="text-4xl font-space font-black text-white">{data.length}</p>
+          <p className="text-4xl font-space font-bold text-fg">{data.length}</p>
         </div>
         <div className="stat-card">
           <p className="text-xs font-space font-bold tracking-[0.2em] text-iron-text-secondary mb-3">Total Stock</p>
           <div className="flex items-end gap-2">
-            <p className="text-4xl font-space font-black text-white">{totalStock}</p>
+            <p className="text-4xl font-space font-bold text-fg">{totalStock}</p>
             <span className="text-iron-text-secondary text-xs mb-1">units</span>
           </div>
         </div>
         <div className="stat-card">
           <p className="text-xs font-space font-bold tracking-[0.2em] text-iron-text-secondary mb-3">Low Stock Alerts</p>
-          <p className={`text-4xl font-space font-black ${lowStockCount > 0 ? 'text-red-400' : 'text-emerald-400'}`}>{lowStockCount}</p>
+          <p className={`text-4xl font-space font-bold ${lowStockCount > 0 ? 'text-red-400' : 'text-emerald-400'}`}>{lowStockCount}</p>
         </div>
         <div className="stat-card">
           <p className="text-xs font-space font-bold tracking-[0.2em] text-iron-text-secondary mb-3">Avg Price</p>
           <div className="flex items-end gap-1">
-            <p className="text-4xl font-space font-black text-white">
+            <p className="text-4xl font-space font-bold text-fg">
               {data.length > 0 ? formatINR(data.reduce((s, d) => s + parseFloat(d.price), 0) / data.length) : formatINR(0)}
             </p>
           </div>
@@ -189,7 +190,7 @@ export default function Supplements() {
         <div className="relative group">
           <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-iron-text-secondary group-focus-within:text-iron-lime transition-colors" />
           <input type="text" placeholder="Search supplements by name or brand..." aria-label="Search supplements"
-            className="w-full bg-white/[0.03] border border-white/5 rounded-xl py-3 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-iron-lime/20 focus:bg-white/[0.05] transition-all"
+            className="w-full bg-fg/[0.03] border border-fg/5 rounded-xl py-3 pl-12 pr-4 text-sm text-fg focus:outline-none focus:border-iron-lime/20 focus:bg-fg/[0.05] transition-all"
             value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
         </div>
       </div>
@@ -202,7 +203,7 @@ export default function Supplements() {
             <p className="text-iron-text-secondary text-xs font-space tracking-widest">Loading inventory...</p>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="col-span-full py-20 text-center text-iron-text-secondary italic">No supplements found.</div>
+          <div className="col-span-full py-20 text-center text-iron-text-secondary">No supplements found.</div>
         ) : (
           filtered.map(item => {
             const level = stockLevel(item.stock_quantity);
@@ -213,15 +214,15 @@ export default function Supplements() {
                   <div className="w-12 h-12 rounded-xl bg-iron-lime/10 flex items-center justify-center text-iron-lime group-hover:scale-110 transition-transform">
                     <Package size={20} />
                   </div>
-                  <span className="text-iron-text-secondary text-xs font-black tracking-widest font-space">#{item.supplement_id}</span>
+                  <span className="text-iron-text-secondary text-xs font-bold tracking-widest font-space">#{item.supplement_id}</span>
                 </div>
-                <h3 className="text-white font-bold text-sm mb-1 group-hover:text-iron-lime transition-colors">{item.name}</h3>
-                <p className="text-iron-text-secondary text-xs italic mb-4">{item.brand || 'Unknown Brand'}</p>
+                <h3 className="text-fg font-bold text-sm mb-1 group-hover:text-iron-lime transition-colors">{item.name}</h3>
+                <p className="text-iron-text-secondary text-xs mb-4">{item.brand || 'Unknown Brand'}</p>
 
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-emerald-400 font-space font-black text-sm">₹</span>
-                    <span className="text-white font-space font-bold text-lg">{parseFloat(item.price).toFixed(2)}</span>
+                    <span className="text-emerald-400 font-space font-bold text-sm">₹</span>
+                    <span className="text-fg font-space font-bold text-lg">{parseFloat(item.price).toFixed(2)}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     {level === 'low' && <AlertTriangle size={12} className="text-red-400" />}
@@ -231,14 +232,14 @@ export default function Supplements() {
                 </div>
 
                 {/* Stock bar */}
-                <div className="w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
+                <div className="w-full bg-fg/5 rounded-full h-1.5 overflow-hidden">
                   <div className={`h-full rounded-full transition-all duration-700 ${
                     level === 'high' ? 'bg-emerald-400' : level === 'medium' ? 'bg-amber-400' : 'bg-red-400'
                   }`} style={{ width: `${pct}%` }} />
                 </div>
                 <button
                   onClick={() => openRestockModal(item.supplement_id)}
-                  className="mt-4 w-full py-2 bg-white/[0.03] border border-white/10 rounded-lg text-xs font-black tracking-widest text-iron-text-secondary hover:text-white hover:border-iron-lime/30 transition-all"
+                  className="mt-4 w-full py-2 bg-fg/[0.03] border border-fg/10 rounded-lg text-xs font-bold tracking-widest text-iron-text-secondary hover:text-fg hover:border-iron-lime/30 transition-all"
                 >
                   Restock
                 </button>
@@ -255,14 +256,14 @@ export default function Supplements() {
           <div ref={modalDialogRef} role="dialog" aria-modal="true" aria-labelledby="supplements-showModal-title" tabIndex={-1} className="bg-surface border border-border rounded-xl w-full max-w-md relative z-[210] shadow-[0_30px_100px_rgba(0,0,0,0.5)] overflow-hidden">
             <div className="p-6 pb-4 flex items-center justify-between">
               <div>
-                <h2 id="supplements-showModal-title" className="text-xl font-bold text-white">Record Sale</h2>
-                <p className="text-iron-text-secondary text-xs italic mt-1">Stock auto-updated via trg_supplement_stock_update trigger</p>
+                <h2 id="supplements-showModal-title" className="text-xl font-bold text-fg">Record Sale</h2>
+                <p className="text-iron-text-secondary text-xs mt-1">Stock auto-updated via trg_supplement_stock_update trigger</p>
               </div>
-              <button aria-label="Close dialog" onClick={() => setShowModal(false)} className="text-iron-text-secondary hover:text-white transition-colors">
+              <button aria-label="Close dialog" onClick={() => setShowModal(false)} className="text-iron-text-secondary hover:text-fg transition-colors">
                 <X size={20} />
               </button>
             </div>
-            <div className="w-full h-px bg-white/5" />
+            <div className="w-full h-px bg-fg/5" />
 
             <form onSubmit={handleSale} className="p-6 space-y-4">
               <p className="text-xs text-iron-text-secondary">Fields marked <span aria-hidden="true" className="text-red-400">*</span><span className="sr-only">with an asterisk</span> are required.</p>
@@ -275,7 +276,7 @@ export default function Supplements() {
               <div className="space-y-1.5">
                 <label htmlFor="supplements-member-id" className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] block">Member <span aria-hidden="true" className="text-red-400">*</span></label>
                 <select id="supplements-member-id" required value={formData.member_id} onChange={e => setFormData({ ...formData, member_id: e.target.value })}
-                  className="w-full bg-[#18181A] border border-white/5 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-iron-lime/30">
+                  className="w-full bg-raised border border-fg/5 rounded-xl py-3 px-4 text-sm text-fg focus:outline-none focus:border-iron-lime/30">
                   <option value="">Select member...</option>
                   {members.map(m => (
                     <option key={m.member_id} value={m.member_id}>{m.member_name || m.name} (ID: {m.member_id})</option>
@@ -286,7 +287,7 @@ export default function Supplements() {
               <div className="space-y-1.5">
                 <label htmlFor="supplements-supplement-id" className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] block">Supplement <span aria-hidden="true" className="text-red-400">*</span></label>
                 <select id="supplements-supplement-id" required value={formData.supplement_id} onChange={e => setFormData({ ...formData, supplement_id: e.target.value })}
-                  className="w-full bg-[#18181A] border border-white/5 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-iron-lime/30">
+                  className="w-full bg-raised border border-fg/5 rounded-xl py-3 px-4 text-sm text-fg focus:outline-none focus:border-iron-lime/30">
                   <option value="">Select supplement...</option>
                   {data.map(s => (
                     <option key={s.supplement_id} value={s.supplement_id}>
@@ -301,12 +302,12 @@ export default function Supplements() {
                   <label htmlFor="supplements-quantity" className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] block">Quantity <span aria-hidden="true" className="text-red-400">*</span></label>
                   <input id="supplements-quantity" required type="number" min="1" max={previewSupplement ? previewSupplement.stock_quantity : 99}
                     value={formData.quantity} onChange={e => setFormData({ ...formData, quantity: parseInt(e.target.value) || 1 })}
-                    className="w-full bg-[#18181A] border border-white/5 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-iron-lime/30" />
+                    className="w-full bg-raised border border-fg/5 rounded-xl py-3 px-4 text-sm text-fg focus:outline-none focus:border-iron-lime/30" />
                 </div>
                 <div className="space-y-1.5">
                   <label htmlFor="supplements-payment-method" className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] block">Payment</label>
                   <select id="supplements-payment-method" value={formData.payment_method} onChange={e => setFormData({ ...formData, payment_method: e.target.value })}
-                    className="w-full bg-[#18181A] border border-white/5 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-iron-lime/30">
+                    className="w-full bg-raised border border-fg/5 rounded-xl py-3 px-4 text-sm text-fg focus:outline-none focus:border-iron-lime/30">
                     <option>Card</option><option>Cash</option><option>UPI</option><option>Bank Transfer</option>
                   </select>
                 </div>
@@ -315,14 +316,14 @@ export default function Supplements() {
               <div className="space-y-1.5">
                 <label htmlFor="supplements-sale-date" className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] block">Sale Date <span aria-hidden="true" className="text-red-400">*</span></label>
                 <input id="supplements-sale-date" required type="date" value={formData.sale_date} onChange={e => setFormData({ ...formData, sale_date: e.target.value })}
-                  className="w-full bg-[#18181A] border border-white/5 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-iron-lime/30 [color-scheme:dark]" />
+                  className="w-full bg-raised border border-fg/5 rounded-xl py-3 px-4 text-sm text-fg focus:outline-none focus:border-iron-lime/30 [color-scheme:dark]" />
               </div>
 
               {/* Total preview */}
               {previewSupplement && (
                 <div className="flex items-center justify-between p-4 bg-iron-lime/5 border border-iron-lime/20 rounded-xl">
                   <span className="text-iron-text-secondary text-xs font-bold tracking-widest">Total</span>
-                  <span className="text-iron-lime font-space font-black text-xl">{formatINR(previewTotal)}</span>
+                  <span className="text-iron-lime font-space font-bold text-xl">{formatINR(previewTotal)}</span>
                 </div>
               )}
 
@@ -333,7 +334,7 @@ export default function Supplements() {
                   {isSubmitting ? 'Processing...' : 'Record Sale'}
                 </button>
                 <button type="button" onClick={() => setShowModal(false)}
-                  className="flex-1 py-3 px-6 bg-white/[0.03] border border-white/10 rounded text-white text-xs font-space font-semibold tracking-wider hover:bg-white/5 transition-colors">
+                  className="flex-1 py-3 px-6 bg-fg/[0.03] border border-fg/10 rounded text-fg text-xs font-space font-semibold tracking-wider hover:bg-fg/5 transition-colors">
                   Cancel
                 </button>
               </div>
@@ -348,14 +349,14 @@ export default function Supplements() {
           <div ref={restockModalDialogRef} role="dialog" aria-modal="true" aria-labelledby="supplements-showRestockModal-title" tabIndex={-1} className="bg-surface border border-border rounded-xl w-full max-w-md relative z-[210] shadow-[0_30px_100px_rgba(0,0,0,0.5)] overflow-hidden">
             <div className="p-6 pb-4 flex items-center justify-between">
               <div>
-                <h2 id="supplements-showRestockModal-title" className="text-xl font-bold text-white">Restock Supplement</h2>
-                <p className="text-iron-text-secondary text-xs italic mt-1">Increase available inventory</p>
+                <h2 id="supplements-showRestockModal-title" className="text-xl font-bold text-fg">Restock Supplement</h2>
+                <p className="text-iron-text-secondary text-xs mt-1">Increase available inventory</p>
               </div>
-              <button aria-label="Close dialog" onClick={() => setShowRestockModal(false)} className="text-iron-text-secondary hover:text-white transition-colors">
+              <button aria-label="Close dialog" onClick={() => setShowRestockModal(false)} className="text-iron-text-secondary hover:text-fg transition-colors">
                 <X size={20} />
               </button>
             </div>
-            <div className="w-full h-px bg-white/5" />
+            <div className="w-full h-px bg-fg/5" />
 
             <form onSubmit={handleRestock} className="p-6 space-y-4">
               <p className="text-xs text-iron-text-secondary">Fields marked <span aria-hidden="true" className="text-red-400">*</span><span className="sr-only">with an asterisk</span> are required.</p>
@@ -371,7 +372,7 @@ export default function Supplements() {
                   required
                   value={restockData.supplement_id}
                   onChange={e => setRestockData({ ...restockData, supplement_id: e.target.value })}
-                  className="w-full bg-[#18181A] border border-white/5 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-iron-lime/30"
+                  className="w-full bg-raised border border-fg/5 rounded-xl py-3 px-4 text-sm text-fg focus:outline-none focus:border-iron-lime/30"
                 >
                   <option value="">Select supplement...</option>
                   {data.map(s => (
@@ -390,7 +391,7 @@ export default function Supplements() {
                   type="number"
                   value={restockData.quantity}
                   onChange={e => setRestockData({ ...restockData, quantity: parseInt(e.target.value, 10) || 1 })}
-                  className="w-full bg-[#18181A] border border-white/5 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-iron-lime/30"
+                  className="w-full bg-raised border border-fg/5 rounded-xl py-3 px-4 text-sm text-fg focus:outline-none focus:border-iron-lime/30"
                 />
               </div>
 
@@ -400,7 +401,7 @@ export default function Supplements() {
                   {restockSubmitting ? 'Updating...' : 'Restock'}
                 </button>
                 <button type="button" onClick={() => setShowRestockModal(false)}
-                  className="flex-1 py-3 px-6 bg-white/[0.03] border border-white/10 rounded text-white text-xs font-space font-semibold tracking-wider hover:bg-white/5 transition-colors">
+                  className="flex-1 py-3 px-6 bg-fg/[0.03] border border-fg/10 rounded text-fg text-xs font-space font-semibold tracking-wider hover:bg-fg/5 transition-colors">
                   Cancel
                 </button>
               </div>

@@ -1,14 +1,17 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
+import { API_BASE } from '../api';
 import { useTheme } from '../context/ThemeContext';
 import {
   Plus, X, Loader2, AlertCircle, CheckCircle,
   LayoutGrid, List, Users, CalendarCheck, TrendingUp,
-  Star, ChevronRight, Trash2, Phone, Briefcase, UserPlus
+  Star, ChevronRight, Trash2, Phone, Briefcase, UserPlus, MoreHorizontal
 } from 'lucide-react';
 import useDialog from '../hooks/useDialog';
+import useDismiss from '../hooks/useDismiss';
+import ConfirmDialog from '../components/ConfirmDialog';
 
-const API    = 'http://localhost:5000/api/trainers';
+const API    = `${API_BASE}/trainers`;
 const PAGE   = 6;
 
 function getHeaders() {
@@ -34,12 +37,12 @@ function getRating(id) {
 
 /* ── Specialization → badge & gradient ──────────────────────── */
 const SPEC_MAP = [
-  { keys: ['strength','power','weight','barbell','gym'],  label: 'Strength', color: '#DFFF00', textCls: 'text-dark',  bgCls: 'bg-iron-lime' },
-  { keys: ['cardio','running','cycling','endurance','hiit'], label: 'Cardio',   color: '#60A5FA', textCls: 'text-dark',  bgCls: 'bg-blue-400'  },
-  { keys: ['yoga','flexibility','pilates','stretch'],      label: 'Yoga',     color: '#C084FC', textCls: 'text-dark',  bgCls: 'bg-purple-400'},
-  { keys: ['nutrition','diet','wellness'],                 label: 'Nutrition',color: '#34D399', textCls: 'text-dark',  bgCls: 'bg-emerald-400'},
-  { keys: ['boxing','combat','martial','mma','kick'],      label: 'Combat',   color: '#FB923C', textCls: 'text-dark',  bgCls: 'bg-orange-400'},
-  { keys: ['recovery','rehab','physio'],                   label: 'Recovery', color: '#F472B6', textCls: 'text-dark',  bgCls: 'bg-pink-400'  },
+  { keys: ['strength','power','weight','barbell','gym'],  label: 'Strength', color: '#DFFF00', colorLight: '#1D4ED8', textCls: 'text-on-accent',  bgCls: 'bg-iron-lime' },
+  { keys: ['cardio','running','cycling','endurance','hiit'], label: 'Cardio',   color: '#60A5FA', colorLight: '#1D4ED8', textCls: 'text-ink',  bgCls: 'bg-blue-400'  },
+  { keys: ['yoga','flexibility','pilates','stretch'],      label: 'Yoga',     color: '#C084FC', colorLight: '#7E22CE', textCls: 'text-ink',  bgCls: 'bg-purple-400'},
+  { keys: ['nutrition','diet','wellness'],                 label: 'Nutrition',color: '#34D399', colorLight: '#047857', textCls: 'text-ink',  bgCls: 'bg-emerald-400'},
+  { keys: ['boxing','combat','martial','mma','kick'],      label: 'Combat',   color: '#FB923C', colorLight: '#C2410C', textCls: 'text-ink',  bgCls: 'bg-orange-400'},
+  { keys: ['recovery','rehab','physio'],                   label: 'Recovery', color: '#F472B6', colorLight: '#BE185D', textCls: 'text-ink',  bgCls: 'bg-pink-400'  },
 ];
 
 function getSpec(specialization = '') {
@@ -48,7 +51,7 @@ function getSpec(specialization = '') {
   if (match) return match;
   // fallback — use first word capitalised
   const word = specialization.split(' ')[0] || 'General';
-  return { label: word, color: '#71717A', textCls: 'text-white', bgCls: 'bg-white/20' };
+  return { label: word, color: '#A1A1AA', colorLight: '#52525B', textCls: 'text-fg', bgCls: 'bg-fg/10' };
 }
 
 const CARD_GRADIENTS = [
@@ -86,14 +89,15 @@ const initForm = {
 ══════════════════════════════════════════════════════════════════ */
 function TrainerCard({ trainer, onDelete, onManage, isLight }) {
   const spec    = getSpec(trainer.specialization);
-  const drawColor = isLight && spec.color === '#DFFF00' ? '#2563EB' : spec.color;
+  const drawColor = isLight ? spec.colorLight : spec.color;
   const rating  = getRating(trainer.trainer_id);
   const grad    = cardGradient(trainer.trainer_id, isLight);
   const clients = trainer.active_clients ?? 0;
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useDismiss(menuOpen, () => setMenuOpen(false));
 
   return (
-    <div className={`relative rounded-2xl overflow-hidden border border-white/5 bg-gradient-to-b ${grad} group cursor-pointer hover:border-white/10 transition-all duration-300 hover:-translate-y-1 ${isLight ? 'hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)]' : 'hover:shadow-[0_20px_60px_rgba(0,0,0,0.5)]'}`}>
+    <div className={`relative rounded-2xl overflow-hidden border border-fg/5 bg-gradient-to-b ${grad} group cursor-pointer hover:border-fg/10 transition-all duration-300 hover:-translate-y-1 ${isLight ? 'hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)]' : 'hover:shadow-[0_20px_60px_rgba(0,0,0,0.5)]'}`}>
 
       {/* Large initials visual */}
       <div className="h-52 flex items-center justify-center relative overflow-hidden">
@@ -102,24 +106,23 @@ function TrainerCard({ trainer, onDelete, onManage, isLight }) {
           <div className="w-32 h-32 rounded-full blur-3xl" style={{ backgroundColor: drawColor }} />
         </div>
         {/* Initials */}
-        <div className="relative z-10 w-24 h-24 rounded-full border-2 flex items-center justify-center text-3xl font-black font-space"
+        <div className="relative z-10 w-24 h-24 rounded-full border-2 flex items-center justify-center text-3xl font-bold font-space"
           style={{ borderColor: drawColor, color: drawColor, backgroundColor: `${drawColor}15` }}>
           {getInitials(trainer.name)}
         </div>
         {/* Status badge */}
         <div className="absolute top-3 left-3">
-          <span className={`px-2.5 py-1 rounded text-[11px] font-black tracking-widest ${spec.bgCls} ${spec.textCls}`}>
+          <span className={`px-2.5 py-1 rounded text-[11px] font-bold tracking-widest ${spec.bgCls} ${spec.textCls}`}>
             {spec.label}
           </span>
         </div>
         {/* Action menu */}
-        <div className="absolute top-3 right-3" onClick={e => { e.stopPropagation(); setMenuOpen(v => !v); }}>
-          <button aria-label="Trainer actions" aria-expanded={menuOpen} className="w-7 h-7 rounded-lg bg-black/40 backdrop-blur border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-black/60 transition-colors">
-            <span className="text-base leading-none">⋯</span>
+        <div ref={menuRef} className="absolute top-3 right-3">
+          <button aria-label={`Actions for ${trainer.name}`} aria-expanded={menuOpen} onClick={e => { e.stopPropagation(); setMenuOpen(v => !v); }} className="w-8 h-8 rounded-lg bg-surface/80 border border-border flex items-center justify-center text-iron-text-secondary hover:text-fg transition-colors">
+            <MoreHorizontal size={14} />
           </button>
           {menuOpen && (
-            <div className="absolute right-0 top-full mt-1 w-32 bg-[#18181A] border border-border rounded-xl shadow-xl z-20 overflow-hidden py-1"
-              onMouseLeave={() => setMenuOpen(false)}>
+            <div className="absolute right-0 top-full mt-1 w-32 bg-raised border border-border rounded-xl shadow-xl z-20 overflow-hidden py-1">
               <button onClick={() => { onDelete(trainer.trainer_id); setMenuOpen(false); }}
                 className="w-full text-left px-4 py-2.5 text-xs font-bold tracking-widest text-red-400 hover:bg-red-500/10 transition-colors flex items-center gap-2">
                 <Trash2 size={11} /> Delete
@@ -130,28 +133,28 @@ function TrainerCard({ trainer, onDelete, onManage, isLight }) {
       </div>
 
       {/* Info section */}
-      <div className="px-4 pb-4 pt-1 border-t border-white/5">
-        <h3 className="text-white font-space font-black text-lg tracking-tight mb-3 group-hover:text-iron-lime transition-colors">
+      <div className="px-4 pb-4 pt-1 border-t border-fg/5">
+        <h3 className="text-fg font-space font-bold text-lg tracking-tight mb-3 group-hover:text-iron-lime transition-colors">
           {shortName(trainer.name)}
         </h3>
 
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 mb-4">
           <div>
             <p className="text-iron-text-secondary text-[11px] tracking-widest font-bold mb-0.5">Active Clients</p>
-            <p className="text-white text-xl font-space font-black">{clients}</p>
+            <p className="text-fg text-xl font-space font-bold">{clients}</p>
           </div>
           <div className="text-right">
             <p className="text-iron-text-secondary text-[11px] tracking-widest font-bold mb-0.5">Performance</p>
             <div className="flex items-center justify-end gap-1">
               <Star size={11} className="text-iron-lime fill-iron-lime" />
-              <p className="text-iron-lime text-xl font-space font-black">+{rating}</p>
+              <p className="text-iron-lime text-xl font-space font-bold">+{rating}</p>
             </div>
           </div>
         </div>
 
         <button
           onClick={() => onManage(trainer)}
-          className="w-full py-2 bg-white/[0.03] border border-white/5 rounded-lg text-xs font-black tracking-widest text-iron-text-secondary hover:text-white hover:border-white/20 hover:bg-white/5 transition-all flex items-center justify-center gap-2 group/btn"
+          className="w-full py-2 bg-fg/[0.03] border border-fg/5 rounded-lg text-xs font-bold tracking-widest text-iron-text-secondary hover:text-fg hover:border-fg/20 hover:bg-fg/5 transition-all flex items-center justify-center gap-2 group/btn"
         >
           Manage Profile
           <ChevronRight size={11} className="group-hover/btn:translate-x-0.5 transition-transform" />
@@ -164,43 +167,43 @@ function TrainerCard({ trainer, onDelete, onManage, isLight }) {
 /* ── List Row ────────────────────────────────────────────────── */
 function TrainerRow({ trainer, onDelete, onManage, isLight }) {
   const spec   = getSpec(trainer.specialization);
-  const drawColor = isLight && spec.color === '#DFFF00' ? '#2563EB' : spec.color;
+  const drawColor = isLight ? spec.colorLight : spec.color;
   const rating = getRating(trainer.trainer_id);
 
   return (
-    <div className="grid grid-cols-[2fr_1fr_1fr_1fr_100px] items-center px-6 py-4 border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors group border-l-2"
+    <div className="grid grid-cols-[2fr_1fr_1fr_1fr_100px] items-center px-6 py-4 border-b border-fg/[0.04] hover:bg-fg/[0.02] transition-colors group border-l-2"
       style={{ borderLeftColor: drawColor }}>
       <div className="flex items-center gap-4">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black font-space flex-shrink-0 border"
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold font-space flex-shrink-0 border"
           style={{ backgroundColor: `${drawColor}15`, color: drawColor, borderColor: `${drawColor}30` }}>
           {getInitials(trainer.name)}
         </div>
         <div>
-          <p className="text-white font-bold text-sm group-hover:text-iron-lime transition-colors">{trainer.name}</p>
+          <p className="text-fg font-bold text-sm group-hover:text-iron-lime transition-colors">{trainer.name}</p>
           <p className="text-iron-text-secondary text-xs">{trainer.specialization || '—'}</p>
         </div>
       </div>
       <div>
-        <span className={`px-2 py-0.5 rounded text-[11px] font-black tracking-widest ${spec.bgCls} ${spec.textCls}`}>
+        <span className={`px-2 py-0.5 rounded text-[11px] font-bold tracking-widest ${spec.bgCls} ${spec.textCls}`}>
           {spec.label}
         </span>
       </div>
       <div>
-        <p className="text-white text-sm font-bold">{trainer.active_clients ?? 0}</p>
+        <p className="text-fg text-sm font-bold">{trainer.active_clients ?? 0}</p>
         <p className="text-iron-text-secondary text-xs">clients</p>
       </div>
       <div className="flex items-center gap-1">
         <Star size={12} className="text-iron-lime fill-iron-lime" />
-        <span className="text-iron-lime font-black font-space text-sm">{rating}</span>
+        <span className="text-iron-lime font-bold font-space text-sm">{rating}</span>
       </div>
       <div className="flex justify-end">
         <div className="flex items-center gap-2">
           <button onClick={() => onManage(trainer)}
-            className="px-3 h-8 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center text-iron-text-secondary hover:text-white hover:border-white/20 transition-colors text-[10px] font-black tracking-widest">
+            className="px-3 h-8 rounded-lg bg-fg/[0.03] border border-fg/5 flex items-center justify-center text-iron-text-secondary hover:text-fg hover:border-fg/20 transition-colors text-[10px] font-bold tracking-widest">
             Edit
           </button>
           <button aria-label="Delete trainer" onClick={() => onDelete(trainer.trainer_id)}
-            className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center text-iron-text-secondary hover:text-red-400 hover:border-red-500/20 hover:bg-red-500/5 transition-colors">
+            className="w-8 h-8 rounded-lg bg-fg/[0.03] border border-fg/5 flex items-center justify-center text-iron-text-secondary hover:text-red-400 hover:border-red-500/20 hover:bg-red-500/5 transition-colors">
             <Trash2 size={13} />
           </button>
         </div>
@@ -258,12 +261,12 @@ export default function Trainers() {
 
   useEffect(() => { fetchStats(); fetchTrainers(true); }, []);
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Delete this trainer?')) return;
-    try {
-      await axios.delete(`${API}/${id}`, { headers: getHeaders() });
-      fetchStats(); fetchTrainers(true); setOffset(0);
-    } catch(e) { console.error(e); }
+  const [pendingDelete, setPendingDelete] = useState(null);
+  const handleDelete = (id) => setPendingDelete(id);
+  const confirmDelete = async () => {
+    await axios.delete(`${API}/${pendingDelete}`, { headers: getHeaders() });
+    setPendingDelete(null);
+    fetchStats(); fetchTrainers(true); setOffset(0);
   };
 
   const openModal = () => {
@@ -310,12 +313,14 @@ export default function Trainers() {
   const curPage    = Math.ceil(trainers.length / PAGE);
 
   return (
-    <div className="space-y-6 pb-10 font-manrope" onClick={() => {}}>
+    <div className="space-y-6 pb-10 font-manrope">
+      <ConfirmDialog open={pendingDelete !== null} title="Delete this trainer?" message="This permanently removes the trainer from the roster."
+        onConfirm={confirmDelete} onCancel={() => setPendingDelete(null)} />
 
       {/* ── Page Header ───────────────────────────────────────── */}
-      <div className="flex items-end justify-between">
+      <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
         <div>
-          <h2 className="text-5xl font-space font-black tracking-tighter text-white leading-none">
+          <h2 className="text-5xl font-space font-bold tracking-tighter text-fg leading-none">
             Trainers
           </h2>
           <p className="text-iron-text-secondary text-xs font-bold tracking-widest mt-2">
@@ -335,10 +340,10 @@ export default function Trainers() {
         <div className="stat-card space-y-3">
           <p className="text-xs font-space font-bold tracking-[0.2em] text-iron-text-secondary">Team Performance</p>
           <div className="flex items-baseline gap-2">
-            <p className="text-5xl font-space font-black text-white tracking-tighter">{stats.performance}</p>
-            <span className="text-iron-lime font-black text-xl">%</span>
+            <p className="text-5xl font-space font-bold text-fg tracking-tighter">{stats.performance}</p>
+            <span className="text-iron-lime font-bold text-xl">%</span>
           </div>
-          <div className="w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
+          <div className="w-full bg-fg/5 rounded-full h-1.5 overflow-hidden">
             <div className="h-full bg-iron-lime rounded-full transition-all duration-700"
               style={{ width: `${stats.performance}%` }} />
           </div>
@@ -353,10 +358,10 @@ export default function Trainers() {
             </div>
           </div>
           <div className="flex items-end gap-2">
-            <p className="text-5xl font-space font-black text-white tracking-tighter">{stats.sessions_today}</p>
+            <p className="text-5xl font-space font-bold text-fg tracking-tighter">{stats.sessions_today}</p>
             <TrendingUp size={18} className="text-iron-lime mb-2" />
           </div>
-          <p className="text-iron-text-secondary text-xs italic mt-1">Active gym sessions</p>
+          <p className="text-iron-text-secondary text-xs mt-1">Active gym sessions</p>
         </div>
 
         {/* Active Clients */}
@@ -367,23 +372,23 @@ export default function Trainers() {
               <Users size={16} />
             </div>
           </div>
-          <p className="text-5xl font-space font-black text-white tracking-tighter">{stats.active_clients}</p>
-          <p className="text-iron-text-secondary text-xs italic mt-3">Distinct members with an active workout or diet assignment</p>
+          <p className="text-5xl font-space font-bold text-fg tracking-tighter">{stats.active_clients}</p>
+          <p className="text-iron-text-secondary text-xs mt-3">Distinct members with an active workout or diet assignment</p>
         </div>
       </div>
 
       {/* ── Active Roster ──────────────────────────────────────── */}
       <div className="card !p-0 overflow-hidden">
         {/* Roster header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <h3 className="text-white font-space font-black tracking-widest text-sm">Active Roster</h3>
-          <div className="flex items-center gap-1 bg-white/[0.03] border border-white/5 rounded-lg p-1">
-            <button onClick={() => setViewMode('grid')}
-              className={`w-8 h-8 rounded flex items-center justify-center transition-all ${viewMode === 'grid' ? 'bg-iron-lime text-dark' : 'text-iron-text-secondary hover:text-white'}`}>
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 px-6 py-4 border-b border-border">
+          <h3 className="text-fg font-space font-bold tracking-widest text-sm">Active Roster</h3>
+          <div className="flex items-center gap-1 bg-fg/[0.03] border border-fg/5 rounded-lg p-1">
+            <button aria-label="Grid view" aria-pressed={viewMode === 'grid'} onClick={() => setViewMode('grid')}
+              className={`w-8 h-8 rounded flex items-center justify-center transition-all ${viewMode === 'grid' ? 'bg-iron-lime text-on-accent' : 'text-iron-text-secondary hover:text-fg'}`}>
               <LayoutGrid size={14} />
             </button>
-            <button onClick={() => setViewMode('list')}
-              className={`w-8 h-8 rounded flex items-center justify-center transition-all ${viewMode === 'list' ? 'bg-iron-lime text-dark' : 'text-iron-text-secondary hover:text-white'}`}>
+            <button aria-label="List view" aria-pressed={viewMode === 'list'} onClick={() => setViewMode('list')}
+              className={`w-8 h-8 rounded flex items-center justify-center transition-all ${viewMode === 'list' ? 'bg-iron-lime text-on-accent' : 'text-iron-text-secondary hover:text-fg'}`}>
               <List size={14} />
             </button>
           </div>
@@ -391,9 +396,9 @@ export default function Trainers() {
 
         {/* List header row */}
         {viewMode === 'list' && (
-          <div className="grid grid-cols-[2fr_1fr_1fr_1fr_100px] px-6 py-2 border-b border-border bg-white/[0.01]">
+          <div className="grid grid-cols-[2fr_1fr_1fr_1fr_100px] px-6 py-2 border-b border-border bg-fg/[0.01]">
             {['Trainer', 'Specialty', 'Clients', 'Rating', 'Actions'].map(h => (
-              <span key={h} className="text-xs font-black tracking-widest text-iron-text-secondary font-space">{h}</span>
+              <span key={h} className="text-xs font-bold tracking-widest text-iron-text-secondary font-space">{h}</span>
             ))}
           </div>
         )}
@@ -404,7 +409,7 @@ export default function Trainers() {
             <Loader2 size={16} className="animate-spin text-iron-lime" /> Loading roster...
           </div>
         ) : trainers.length === 0 ? (
-          <div className="py-24 text-center text-iron-text-secondary italic">
+          <div className="py-24 text-center text-iron-text-secondary">
             No trainers found. Click "Hire New Trainer" to add one.
           </div>
         ) : viewMode === 'grid' ? (
@@ -414,7 +419,7 @@ export default function Trainers() {
             ))}
           </div>
         ) : (
-          <div className="divide-y divide-white/[0.03]">
+          <div className="divide-y divide-fg/[0.03]">
             {trainers.map(t => (
               <TrainerRow key={t.trainer_id} trainer={t} onDelete={handleDelete} onManage={openManageModal} isLight={isLight} />
             ))}
@@ -426,14 +431,14 @@ export default function Trainers() {
           <div className="px-6 py-5 border-t border-border flex flex-col items-center gap-3">
             {hasMore && (
               <button onClick={() => fetchTrainers(false)} disabled={loadingMore}
-                className="flex items-center gap-2 px-10 py-3 border border-white/10 rounded-full text-xs font-black tracking-widest text-iron-text-secondary hover:text-white hover:border-white/30 hover:bg-white/[0.02] transition-all disabled:opacity-50">
+                className="flex items-center gap-2 px-10 py-3 border border-fg/10 rounded-full text-xs font-bold tracking-widest text-iron-text-secondary hover:text-fg hover:border-fg/30 hover:bg-fg/[0.02] transition-all disabled:opacity-50">
                 {loadingMore ? <><Loader2 size={13} className="animate-spin" /> Loading...</> : 'Load More Trainers'}
               </button>
             )}
             <p className="text-iron-text-secondary text-xs tracking-widest font-bold">
               Page {curPage} of {totalPages}&nbsp;
               <span className="mx-2 opacity-30">|</span>
-              <button onClick={() => fetchTrainers(true)} className="hover:text-white transition-colors">Show All</button>
+              <button onClick={() => fetchTrainers(true)} className="hover:text-fg transition-colors">Show All</button>
             </p>
           </div>
         )}
@@ -446,13 +451,13 @@ export default function Trainers() {
           <div ref={modalDialogRef} role="dialog" aria-modal="true" aria-labelledby="trainers-showModal-title" tabIndex={-1} className="bg-surface border border-border rounded-2xl w-full max-w-md shadow-2xl"
             onClick={e => e.stopPropagation()}>
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-border">
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 px-6 py-5 border-b border-border">
               <div>
-                <h2 id="trainers-showModal-title" className="text-white font-space font-bold text-base tracking-wide">{editingId ? 'Manage Trainer Profile' : 'Hire New Trainer'}</h2>
-                <p className="text-iron-text-secondary text-xs italic mt-0.5">{editingId ? 'Update trainer profile and login details' : 'Add a trainer to the active roster'}</p>
+                <h2 id="trainers-showModal-title" className="text-fg font-space font-bold text-base tracking-wide">{editingId ? 'Manage Trainer Profile' : 'Hire New Trainer'}</h2>
+                <p className="text-iron-text-secondary text-xs mt-0.5">{editingId ? 'Update trainer profile and login details' : 'Add a trainer to the active roster'}</p>
               </div>
               <button aria-label="Close dialog" onClick={() => setShowModal(false)}
-                className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center text-iron-text-secondary hover:text-white transition-colors">
+                className="w-8 h-8 rounded-lg bg-fg/[0.03] border border-fg/5 flex items-center justify-center text-iron-text-secondary hover:text-fg transition-colors">
                 <X size={15} />
               </button>
             </div>
@@ -478,7 +483,7 @@ export default function Trainers() {
                 <input id="trainers-name" required type="text" placeholder="e.g. Arjun Kumar"
                   value={formData.name}
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors placeholder:text-iron-text-secondary/50" />
+                  className="w-full bg-raised border border-border rounded-xl px-4 py-3 text-sm text-fg outline-none focus:border-iron-lime/50 transition-colors placeholder:text-iron-text-secondary/50" />
               </div>
 
               {/* Specialization + Phone */}
@@ -488,14 +493,14 @@ export default function Trainers() {
                   <input id="trainers-specialization" type="text" placeholder="e.g. Strength Training"
                     value={formData.specialization}
                     onChange={e => setFormData({ ...formData, specialization: e.target.value })}
-                    className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors placeholder:text-iron-text-secondary/50" />
+                    className="w-full bg-raised border border-border rounded-xl px-4 py-3 text-sm text-fg outline-none focus:border-iron-lime/50 transition-colors placeholder:text-iron-text-secondary/50" />
                 </div>
                 <div className="space-y-1">
                   <label htmlFor="trainers-phone" className="text-iron-text-secondary text-xs tracking-widest font-space font-bold">Phone</label>
                   <input id="trainers-phone" type="text" placeholder="e.g. 9876543210"
                     value={formData.phone}
                     onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors placeholder:text-iron-text-secondary/50" />
+                    className="w-full bg-raised border border-border rounded-xl px-4 py-3 text-sm text-fg outline-none focus:border-iron-lime/50 transition-colors placeholder:text-iron-text-secondary/50" />
                 </div>
               </div>
 
@@ -506,14 +511,14 @@ export default function Trainers() {
                   <input id="trainers-salary" type="number" min="0" placeholder="e.g. 35000"
                     value={formData.salary}
                     onChange={e => setFormData({ ...formData, salary: e.target.value })}
-                    className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors" />
+                    className="w-full bg-raised border border-border rounded-xl px-4 py-3 text-sm text-fg outline-none focus:border-iron-lime/50 transition-colors" />
                 </div>
                 <div className="space-y-1">
                   <label htmlFor="trainers-hire-date" className="text-iron-text-secondary text-xs tracking-widest font-space font-bold">Hire Date</label>
                   <input id="trainers-hire-date" type="date"
                     value={formData.hire_date}
                     onChange={e => setFormData({ ...formData, hire_date: e.target.value })}
-                    className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors" />
+                    className="w-full bg-raised border border-border rounded-xl px-4 py-3 text-sm text-fg outline-none focus:border-iron-lime/50 transition-colors" />
                 </div>
               </div>
 
@@ -523,7 +528,7 @@ export default function Trainers() {
                   <input id="trainers-email" type="email" placeholder="trainer@example.com"
                     value={formData.email}
                     onChange={e => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors placeholder:text-iron-text-secondary/50" />
+                    className="w-full bg-raised border border-border rounded-xl px-4 py-3 text-sm text-fg outline-none focus:border-iron-lime/50 transition-colors placeholder:text-iron-text-secondary/50" />
                 </div>
                 <div className="space-y-1">
                   <label htmlFor="trainers-password" className="text-iron-text-secondary text-xs tracking-widest font-space font-bold">
@@ -532,7 +537,7 @@ export default function Trainers() {
                   <input id="trainers-password" type="password" placeholder={editingId ? 'Leave blank to keep current' : 'Optional'}
                     value={formData.password}
                     onChange={e => setFormData({ ...formData, password: e.target.value })}
-                    className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors placeholder:text-iron-text-secondary/50" />
+                    className="w-full bg-raised border border-border rounded-xl px-4 py-3 text-sm text-fg outline-none focus:border-iron-lime/50 transition-colors placeholder:text-iron-text-secondary/50" />
                 </div>
               </div>
 
@@ -542,7 +547,7 @@ export default function Trainers() {
                   {submitting ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><UserPlus size={13} /> {editingId ? 'Save Profile' : 'Add Trainer'}</>}
                 </button>
                 <button type="button" onClick={() => setShowModal(false)}
-                  className="flex-1 py-3 px-6 bg-white/[0.03] border border-white/10 rounded text-white text-xs font-space font-semibold tracking-wider hover:bg-white/5 transition-colors">
+                  className="flex-1 py-3 px-6 bg-fg/[0.03] border border-fg/10 rounded text-fg text-xs font-space font-semibold tracking-wider hover:bg-fg/5 transition-colors">
                   Cancel
                 </button>
               </div>

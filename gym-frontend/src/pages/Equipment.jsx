@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
+import { API_BASE } from '../api';
 import {
   Package, Zap, AlertTriangle, Search, Plus, X,
   Loader2, AlertCircle, CheckCircle, CalendarClock,
@@ -8,7 +9,7 @@ import {
 } from 'lucide-react';
 import useDialog from '../hooks/useDialog';
 
-const API = 'http://localhost:5000/api/equipment';
+const API = `${API_BASE}/equipment`;
 
 function getHeaders() {
   const token = localStorage.getItem('token');
@@ -30,14 +31,14 @@ const CATEGORY_CFG = {
   Strength: { cls: 'bg-iron-lime/15 text-iron-lime border-iron-lime/20',  Icon: Dumbbell },
   Cardio:   { cls: 'bg-iron-blue/15 text-blue-400  border-iron-blue/20',  Icon: Bike     },
   Recovery: { cls: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20', Icon: Heart },
-  General:  { cls: 'bg-white/5 text-iron-text-secondary border-white/10',  Icon: LayoutGrid },
+  General:  { cls: 'bg-fg/5 text-iron-text-secondary border-fg/10',  Icon: LayoutGrid },
 };
 
 function CategoryBadge({ category }) {
   const cfg = CATEGORY_CFG[category] || CATEGORY_CFG.General;
   const Icon = cfg.Icon;
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-black tracking-widest border ${cfg.cls}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-bold tracking-widest border ${cfg.cls}`}>
       <Icon size={10} /> {category}
     </span>
   );
@@ -46,7 +47,7 @@ function CategoryBadge({ category }) {
 // ── Condition text colour ───────────────────────────────────────
 const CONDITION_COLOR = {
   New:           'text-iron-lime font-bold',
-  Good:          'text-white font-semibold',
+  Good:          'text-fg font-semibold',
   'Needs Repair':'text-amber-400 font-bold',
   'Out of Order':'text-red-400 font-bold',
 };
@@ -62,8 +63,8 @@ function StatusDot({ status }) {
   const cfg = STATUS_CFG[status] || STATUS_CFG['Available'];
   return (
     <div className="flex items-center gap-2">
-      <span className={`w-2 h-2 rounded-full ${cfg.dot} ${cfg.dot === 'bg-emerald-400' ? 'shadow-[0_0_6px_rgba(52,211,153,0.6)]' : ''}`} />
-      <span className="text-xs text-white/80 font-medium">{cfg.label}</span>
+      <span className={`w-2 h-2 rounded-full ${cfg.dot} ${cfg.dot === 'bg-emerald-400' ? '' : ''}`} />
+      <span className="text-xs text-fg/80 font-medium">{cfg.label}</span>
     </div>
   );
 }
@@ -85,11 +86,11 @@ function MaintenanceItem({ item }) {
 
   return (
     <div className={`pl-4 border-l-2 ${borderCls} py-1 space-y-1`}>
-      <p className={`text-xs font-black tracking-widest ${labelCls}`}>
+      <p className={`text-xs font-bold tracking-widest ${labelCls}`}>
         {item.date_label}
         {isPast && <span className="ml-1 text-red-400">(Overdue)</span>}
       </p>
-      <p className="text-white text-sm font-bold">{item.equipment_name}</p>
+      <p className="text-fg text-sm font-bold">{item.equipment_name}</p>
       {item.description && (
         <p className="text-iron-text-secondary text-xs leading-relaxed line-clamp-2">{item.description}</p>
       )}
@@ -123,6 +124,7 @@ export default function Equipment() {
   const [repairDesc, setRepairDesc]           = useState('');
   const [repairCost, setRepairCost]           = useState(0);
   const [repairSubmitting, setRepairSubmitting] = useState(false);
+  const [actionError, setActionError] = useState('');
   const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
   const maintenanceModalDialogRef = useDialog(showMaintenanceModal, () => setShowMaintenanceModal(false));
 
@@ -180,8 +182,7 @@ export default function Equipment() {
       fetchEquipment(search);
       fetchMaintenance();
     } catch (e) {
-      console.error(e);
-      alert('Failed to update repair status.');
+      setActionError(e.response?.data?.message || "Couldn't mark this item as repaired. Check the server connection and try again.");
     }
   };
 
@@ -205,8 +206,7 @@ export default function Equipment() {
       fetchEquipment(search);
       fetchMaintenance();
     } catch (e) {
-      console.error(e);
-      alert('Failed to send to repair.');
+      setActionError(e.response?.data?.message || "Couldn't send this item to repair. Check the server connection and try again.");
     } finally {
       setRepairSubmitting(false);
     }
@@ -220,24 +220,31 @@ export default function Equipment() {
 
   return (
     <div className="space-y-6 pb-10 font-manrope">
+      {actionError && (
+        <div role="alert" className="fixed bottom-6 right-4 left-4 sm:left-auto sm:max-w-sm z-[120] flex items-start gap-3 bg-surface border border-red-500/30 text-red-400 text-xs rounded-xl px-4 py-3 shadow-2xl">
+          <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+          <span className="flex-1">{actionError}</span>
+          <button onClick={() => setActionError('')} aria-label="Dismiss" className="-m-1 p-1 rounded text-iron-text-secondary hover:text-fg"><X size={14} /></button>
+        </div>
+      )}
 
       {/* ── Stats Row ─────────────────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         {/* Total Equipment */}
         <div className="stat-card group">
           <div className="flex items-start justify-between mb-4">
-            <p className="text-[10px] font-space font-black tracking-[0.2em] text-iron-text-secondary">Total Equipment</p>
-            <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-iron-text-secondary group-hover:bg-iron-lime/10 group-hover:text-iron-lime transition-colors">
+            <p className="text-[10px] font-space font-bold tracking-[0.2em] text-iron-text-secondary">Total Equipment</p>
+            <div className="w-8 h-8 rounded-lg bg-fg/5 flex items-center justify-center text-iron-text-secondary group-hover:bg-iron-lime/10 group-hover:text-iron-lime transition-colors">
               <Package size={14} />
             </div>
           </div>
-          <div className="flex items-end justify-between">
-            <p className="text-4xl font-space font-black text-white tracking-tighter">
+          <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
+            <p className="text-4xl font-space font-bold text-fg tracking-tighter">
               {stats?.total ?? '00'}
             </p>
             <div className="text-right">
-              <p className="text-[10px] font-black tracking-widest text-iron-lime">Reliability</p>
-              <p className="text-sm font-space font-black text-white tracking-tight">{stats?.reliability_score ?? '000'}</p>
+              <p className="text-[10px] font-bold tracking-widest text-iron-lime">Reliability</p>
+              <p className="text-sm font-space font-bold text-fg tracking-tight">{stats?.reliability_score ?? '000'}</p>
             </div>
           </div>
         </div>
@@ -245,15 +252,15 @@ export default function Equipment() {
         {/* Active Equipment */}
         <div className="stat-card group">
           <div className="flex items-start justify-between mb-4">
-            <p className="text-[10px] font-space font-black tracking-[0.2em] text-iron-text-secondary">Active Assets</p>
+            <p className="text-[10px] font-space font-bold tracking-[0.2em] text-iron-text-secondary">Active Assets</p>
             <div className="w-8 h-8 rounded-lg bg-iron-lime/10 flex items-center justify-center text-iron-lime">
               <Zap size={14} />
             </div>
           </div>
-          <p className="text-4xl font-space font-black text-white tracking-tighter">
+          <p className="text-4xl font-space font-bold text-fg tracking-tighter">
             {stats?.active ?? '00'}
           </p>
-          <div className="mt-2 h-1 w-full bg-white/5 rounded-full overflow-hidden">
+          <div className="mt-2 h-1 w-full bg-fg/5 rounded-full overflow-hidden">
             <div className="h-full bg-iron-lime rounded-full" style={{ width: `${Math.min((stats?.active / (stats?.total || 1)) * 100, 100)}%` }} />
           </div>
         </div>
@@ -261,34 +268,34 @@ export default function Equipment() {
         {/* Utilization % */}
         <div className="stat-card group">
           <div className="flex items-start justify-between mb-4">
-            <p className="text-[10px] font-space font-black tracking-[0.2em] text-iron-text-secondary">Utilization %</p>
-            <div className="w-8 h-8 rounded-lg bg-iron-blue/10 flex items-center justify-center text-iron-blue">
+            <p className="text-[10px] font-space font-bold tracking-[0.2em] text-iron-text-secondary">Utilization %</p>
+            <div className="w-8 h-8 rounded-lg bg-iron-blue/10 flex items-center justify-center text-blue-400">
               <LayoutGrid size={14} />
             </div>
           </div>
           <div className="flex items-end gap-2">
-            <p className="text-4xl font-space font-black text-white tracking-tighter">
+            <p className="text-4xl font-space font-bold text-fg tracking-tighter">
               {stats?.utilization ?? '0.0'}%
             </p>
-            <span className="text-emerald-400 text-[10px] font-black mb-1.5">Optimal</span>
+            <span className="text-emerald-400 text-[10px] font-bold mb-1.5">Optimal</span>
           </div>
         </div>
 
         {/* Maintenance Due */}
         <div className="stat-card group border-red-500/20">
           <div className="flex items-start justify-between mb-4">
-            <p className="text-[10px] font-space font-black tracking-[0.2em] text-iron-text-secondary">Maintenance Due</p>
+            <p className="text-[10px] font-space font-bold tracking-[0.2em] text-iron-text-secondary">Maintenance Due</p>
             <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center text-red-400">
               <AlertTriangle size={14} />
             </div>
           </div>
-          <div className="flex items-end justify-between">
-            <p className="text-4xl font-space font-black text-red-500 tracking-tighter">
+          <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
+            <p className="text-4xl font-space font-bold text-red-500 tracking-tighter">
               {stats?.maintenance_due !== undefined ? String(stats.maintenance_due).padStart(2, '0') : '00'}
             </p>
             <div className="flex items-center gap-1">
               <ShieldAlert size={12} className="text-red-500" />
-              <span className="text-[10px] font-black tracking-widest text-red-500">Urgent</span>
+              <span className="text-[10px] font-bold tracking-widest text-red-500">Urgent</span>
             </div>
           </div>
         </div>
@@ -303,10 +310,10 @@ export default function Equipment() {
           <div className="px-6 py-5 border-b border-border">
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div>
-                <h2 className="text-white font-space font-black text-lg italic tracking-tight">Gym Inventory</h2>
-                <p className="text-iron-text-secondary text-xs italic mt-0.5">Real-time equipment performance and status</p>
+                <h2 className="text-fg font-space font-bold text-lg tracking-tight">Gym Inventory</h2>
+                <p className="text-iron-text-secondary text-xs mt-0.5">Real-time equipment performance and status</p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 {/* Search */}
                 <form onSubmit={handleSearch} className="relative flex items-center">
                   <Search size={13} className="absolute left-3 text-iron-text-secondary pointer-events-none" />
@@ -316,10 +323,10 @@ export default function Equipment() {
                     aria-label="Search equipment"
                     value={searchInput}
                     onChange={e => setSearchInput(e.target.value)}
-                    className="bg-[#18181A] border border-border rounded-lg pl-8 pr-8 py-2 text-xs text-white placeholder:text-iron-text-secondary/60 outline-none focus:border-iron-lime/40 transition-colors w-48"
+                    className="bg-raised border border-border rounded-lg pl-8 pr-8 py-2 text-xs text-fg placeholder:text-iron-text-secondary/60 outline-none focus:border-iron-lime/40 transition-colors w-48"
                   />
                   {searchInput && (
-                    <button type="button" onClick={clearSearch} aria-label="Clear search" className="absolute right-2 text-iron-text-secondary hover:text-white">
+                    <button type="button" onClick={clearSearch} aria-label="Clear search" className="absolute right-2 text-iron-text-secondary hover:text-fg">
                       <X size={12} />
                     </button>
                   )}
@@ -357,7 +364,7 @@ export default function Equipment() {
                   </tr>
                 ) : equipment.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-16 text-center text-iron-text-secondary italic text-sm">
+                    <td colSpan={7} className="py-16 text-center text-iron-text-secondary text-sm">
                       No equipment found. Click "+ Add Equipment" to get started.
                     </td>
                   </tr>
@@ -365,23 +372,23 @@ export default function Equipment() {
                   equipment.map(item => (
                     <tr key={item.equipment_id} className="group">
                       <td>
-                        <span className="text-iron-text-secondary text-xs font-black tracking-widest font-space">
+                        <span className="text-iron-text-secondary text-xs font-bold tracking-widest font-space">
                           #{item.equipment_id.toString().padStart(3, '0')}
                         </span>
                       </td>
                       <td>
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/5 flex items-center justify-center text-sm flex-shrink-0">
+                          <div className="w-8 h-8 rounded-lg bg-fg/[0.04] border border-fg/5 flex items-center justify-center text-sm flex-shrink-0">
                             {EQUIP_ICONS[item.category] || '⚙️'}
                           </div>
-                          <span className="text-white font-semibold text-sm group-hover:text-iron-lime transition-colors">
+                          <span className="text-fg font-semibold text-sm group-hover:text-iron-lime transition-colors">
                             {item.equipment_name}
                           </span>
                         </div>
                       </td>
                       <td><CategoryBadge category={item.category} /></td>
                       <td>
-                        <span className={`text-sm ${CONDITION_COLOR[item.condition_status] || 'text-white'}`}>
+                        <span className={`text-sm ${CONDITION_COLOR[item.condition_status] || 'text-fg'}`}>
                           {item.condition_status}
                         </span>
                       </td>
@@ -391,11 +398,11 @@ export default function Equipment() {
                       <td><StatusDot status={item.display_status} /></td>
                       <td className="text-right">
                         {(item.condition_status === 'Needs Repair' || item.condition_status === 'Out of Order') ? (
-                          <button onClick={() => handleRepair(item.equipment_id)} className="px-3 py-1 bg-iron-lime/10 text-iron-lime text-[10px] font-black tracking-widest rounded hover:bg-iron-lime/20 transition-colors whitespace-nowrap">
+                          <button onClick={() => handleRepair(item.equipment_id)} className="px-3 py-1 bg-iron-lime/10 text-iron-lime text-[10px] font-bold tracking-widest rounded hover:bg-iron-lime/20 transition-colors whitespace-nowrap">
                             Mark Repaired
                           </button>
                         ) : (
-                          <button onClick={() => handleSendToRepair(item.equipment_id)} className="px-3 py-1 bg-red-500/10 text-red-500 text-[10px] font-black tracking-widest rounded hover:bg-red-500/20 transition-colors whitespace-nowrap">
+                          <button onClick={() => handleSendToRepair(item.equipment_id)} className="px-3 py-1 bg-red-500/10 text-red-500 text-[10px] font-bold tracking-widest rounded hover:bg-red-500/20 transition-colors whitespace-nowrap">
                             Send Repair
                           </button>
                         )}
@@ -409,9 +416,9 @@ export default function Equipment() {
 
           {/* Table footer */}
           {equipment.length > 0 && (
-            <div className="px-6 py-3 border-t border-border bg-white/[0.01]">
-              <p className="text-iron-text-secondary text-xs italic">
-                Showing <span className="text-white font-semibold">{equipment.length}</span> items
+            <div className="px-6 py-3 border-t border-border bg-fg/[0.01]">
+              <p className="text-iron-text-secondary text-xs">
+                Showing <span className="text-fg font-semibold">{equipment.length}</span> items
               </p>
             </div>
           )}
@@ -425,10 +432,10 @@ export default function Equipment() {
             <div className="px-5 py-4 border-b border-border flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <CalendarClock size={15} className="text-iron-text-secondary" />
-                <h3 className="text-white font-space font-black tracking-widest text-sm italic">Maintenance</h3>
+                <h3 className="text-fg font-space font-bold tracking-widest text-sm">Maintenance</h3>
               </div>
               {urgentCount > 0 && (
-                <span className="px-2.5 py-1 bg-red-500 text-white text-[11px] font-black tracking-widest rounded">
+                <span className="px-2.5 py-1 bg-red-600 text-white text-[11px] font-bold tracking-widest rounded">
                   Urgent
                 </span>
               )}
@@ -436,7 +443,7 @@ export default function Equipment() {
 
             <div className="px-5 py-4 space-y-5 flex-1">
               {panelItems.length === 0 ? (
-                <p className="text-iron-text-secondary text-xs italic text-center py-4">
+                <p className="text-iron-text-secondary text-xs text-center py-4">
                   No upcoming maintenance scheduled.
                 </p>
               ) : (
@@ -449,7 +456,7 @@ export default function Equipment() {
             {/* View full schedule */}
             <button
               onClick={() => setShowMaintenanceModal(true)}
-              className="mx-5 mb-5 mt-auto flex items-center justify-center gap-2 py-3 bg-white/[0.03] border border-white/5 rounded-xl text-[11px] font-black tracking-[0.2em] text-iron-text-secondary hover:text-white hover:border-white/20 transition-all"
+              className="mx-5 mb-5 mt-auto flex items-center justify-center gap-2 py-3 bg-fg/[0.03] border border-fg/5 rounded-xl text-[11px] font-bold tracking-[0.2em] text-iron-text-secondary hover:text-fg hover:border-fg/20 transition-all"
             >
               <Clock size={12} /> Full Log
             </button>
@@ -457,7 +464,7 @@ export default function Equipment() {
 
           {/* Quick stats card */}
           <div className="card space-y-3">
-            <p className="text-xs font-space font-black tracking-widest text-iron-text-secondary mb-3">Condition Breakdown</p>
+            <p className="text-xs font-space font-bold tracking-widest text-iron-text-secondary mb-3">Condition Breakdown</p>
             {[
               { label: 'New',          color: 'bg-iron-lime',    key: 'New'           },
               { label: 'Good',         color: 'bg-emerald-400',  key: 'Good'          },
@@ -470,9 +477,9 @@ export default function Equipment() {
                 <div key={key} className="space-y-1">
                   <div className="flex justify-between items-center">
                     <span className="text-xs text-iron-text-secondary font-medium">{label}</span>
-                    <span className="text-xs font-bold text-white font-space">{count}</span>
+                    <span className="text-xs font-bold text-fg font-space">{count}</span>
                   </div>
-                  <div className="w-full bg-white/5 rounded-full h-1 overflow-hidden">
+                  <div className="w-full bg-fg/5 rounded-full h-1 overflow-hidden">
                     <div className={`h-full ${color} rounded-full transition-all duration-700`} style={{ width: `${pct}%` }} />
                   </div>
                 </div>
@@ -487,13 +494,13 @@ export default function Equipment() {
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div ref={modalDialogRef} role="dialog" aria-modal="true" aria-labelledby="equipment-showModal-title" tabIndex={-1} className="bg-surface border border-border rounded-2xl w-full max-w-md shadow-2xl">
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-border">
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 px-6 py-5 border-b border-border">
               <div>
-                <h2 id="equipment-showModal-title" className="text-white font-space font-bold text-base tracking-wide">Add Equipment</h2>
-                <p className="text-iron-text-secondary text-xs italic mt-0.5">Register a new asset to the inventory</p>
+                <h2 id="equipment-showModal-title" className="text-fg font-space font-bold text-base tracking-wide">Add Equipment</h2>
+                <p className="text-iron-text-secondary text-xs mt-0.5">Register a new asset to the inventory</p>
               </div>
               <button aria-label="Close dialog" onClick={() => setShowModal(false)}
-                className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center text-iron-text-secondary hover:text-white transition-colors">
+                className="w-8 h-8 rounded-lg bg-fg/[0.03] border border-fg/5 flex items-center justify-center text-iron-text-secondary hover:text-fg transition-colors">
                 <X size={15} />
               </button>
             </div>
@@ -519,7 +526,7 @@ export default function Equipment() {
                 <input id="equipment-equipment-name" required type="text" placeholder="e.g. SteelForce Power Rack"
                   value={formData.equipment_name}
                   onChange={e => setFormData({ ...formData, equipment_name: e.target.value })}
-                  className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors placeholder:text-iron-text-secondary/50" />
+                  className="w-full bg-raised border border-border rounded-xl px-4 py-3 text-sm text-fg outline-none focus:border-iron-lime/50 transition-colors placeholder:text-iron-text-secondary/50" />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -530,7 +537,7 @@ export default function Equipment() {
                   <input id="equipment-purchase-date" type="date"
                     value={formData.purchase_date}
                     onChange={e => setFormData({ ...formData, purchase_date: e.target.value })}
-                    className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors" />
+                    className="w-full bg-raised border border-border rounded-xl px-4 py-3 text-sm text-fg outline-none focus:border-iron-lime/50 transition-colors" />
                 </div>
                 <div className="space-y-1">
                   <label htmlFor="equipment-condition-status" className="text-iron-text-secondary text-xs tracking-widest font-space font-semibold">
@@ -538,7 +545,7 @@ export default function Equipment() {
                   </label>
                   <select id="equipment-condition-status" required value={formData.condition_status}
                     onChange={e => setFormData({ ...formData, condition_status: e.target.value })}
-                    className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors">
+                    className="w-full bg-raised border border-border rounded-xl px-4 py-3 text-sm text-fg outline-none focus:border-iron-lime/50 transition-colors">
                     {CONDITION_OPTIONS.map(c => <option key={c}>{c}</option>)}
                   </select>
                 </div>
@@ -551,7 +558,7 @@ export default function Equipment() {
                 <input id="equipment-location" type="text" placeholder="e.g. Main Floor, Zone A"
                   value={formData.location}
                   onChange={e => setFormData({ ...formData, location: e.target.value })}
-                  className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors placeholder:text-iron-text-secondary/50" />
+                  className="w-full bg-raised border border-border rounded-xl px-4 py-3 text-sm text-fg outline-none focus:border-iron-lime/50 transition-colors placeholder:text-iron-text-secondary/50" />
               </div>
 
               <div className="flex gap-3 pt-2">
@@ -560,7 +567,7 @@ export default function Equipment() {
                   {submitting ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Plus size={13} /> Add Equipment</>}
                 </button>
                 <button type="button" onClick={() => setShowModal(false)}
-                  className="flex-1 py-3 px-6 bg-white/[0.03] border border-white/10 rounded text-white text-xs font-space font-semibold tracking-wider hover:bg-white/5 transition-colors">
+                  className="flex-1 py-3 px-6 bg-fg/[0.03] border border-fg/10 rounded text-fg text-xs font-space font-semibold tracking-wider hover:bg-fg/5 transition-colors">
                   Cancel
                 </button>
               </div>
@@ -574,12 +581,12 @@ export default function Equipment() {
              onClick={() => setRepairModalOpen(false)}>
           <div ref={repairModalDialogRef} role="dialog" aria-modal="true" aria-labelledby="equipment-repairModalOpen-title" tabIndex={-1} className="bg-surface border border-border rounded-2xl w-full max-w-md shadow-2xl"
                onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-6 py-5 border-b border-border">
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 px-6 py-5 border-b border-border">
               <div>
-                <h2 id="equipment-repairModalOpen-title" className="text-white font-space font-bold text-base tracking-wide">Send to Repair</h2>
-                <p className="text-iron-text-secondary text-xs italic mt-0.5">Log maintenance details</p>
+                <h2 id="equipment-repairModalOpen-title" className="text-fg font-space font-bold text-base tracking-wide">Send to Repair</h2>
+                <p className="text-iron-text-secondary text-xs mt-0.5">Log maintenance details</p>
               </div>
-              <button aria-label="Close dialog" onClick={() => setRepairModalOpen(false)} className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center text-iron-text-secondary hover:text-white transition-colors">
+              <button aria-label="Close dialog" onClick={() => setRepairModalOpen(false)} className="w-8 h-8 rounded-lg bg-fg/[0.03] border border-fg/5 flex items-center justify-center text-iron-text-secondary hover:text-fg transition-colors">
                 <X size={15} />
               </button>
             </div>
@@ -592,7 +599,7 @@ export default function Equipment() {
                   required
                   value={repairDesc}
                   onChange={e => setRepairDesc(e.target.value)}
-                  className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors h-24 resize-none"
+                  className="w-full bg-raised border border-border rounded-xl px-4 py-3 text-sm text-fg outline-none focus:border-iron-lime/50 transition-colors h-24 resize-none"
                 />
               </div>
               <div className="space-y-1">
@@ -602,14 +609,14 @@ export default function Equipment() {
                   step="0.01"
                   value={repairCost}
                   onChange={e => setRepairCost(e.target.value)}
-                  className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors"
+                  className="w-full bg-raised border border-border rounded-xl px-4 py-3 text-sm text-fg outline-none focus:border-iron-lime/50 transition-colors"
                 />
               </div>
               <div className="flex gap-3 pt-2">
                 <button type="submit" disabled={repairSubmitting} className="flex-1 btn flex items-center justify-center gap-2">
                   {repairSubmitting ? <><Loader2 size={14} className="animate-spin" /> Sending...</> : 'Send to Repair'}
                 </button>
-                <button type="button" onClick={() => setRepairModalOpen(false)} className="flex-1 py-3 px-6 bg-white/[0.03] border border-white/10 rounded text-white text-xs font-space font-semibold tracking-wider hover:bg-white/5 transition-colors">
+                <button type="button" onClick={() => setRepairModalOpen(false)} className="flex-1 py-3 px-6 bg-fg/[0.03] border border-fg/10 rounded text-fg text-xs font-space font-semibold tracking-wider hover:bg-fg/5 transition-colors">
                   Cancel
                 </button>
               </div>
@@ -622,35 +629,35 @@ export default function Equipment() {
              onClick={() => setShowMaintenanceModal(false)}>
           <div ref={maintenanceModalDialogRef} role="dialog" aria-modal="true" aria-labelledby="equipment-showMaintenanceModal-title" tabIndex={-1} className="bg-surface border border-border rounded-2xl w-full max-w-2xl shadow-2xl max-h-[80vh] overflow-hidden"
                onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-6 py-5 border-b border-border">
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 px-6 py-5 border-b border-border">
               <div>
-                <h2 id="equipment-showMaintenanceModal-title" className="text-white font-space font-bold text-base tracking-wide">Maintenance Schedule</h2>
-                <p className="text-iron-text-secondary text-xs italic mt-0.5">Latest maintenance item per equipment</p>
+                <h2 id="equipment-showMaintenanceModal-title" className="text-fg font-space font-bold text-base tracking-wide">Maintenance Schedule</h2>
+                <p className="text-iron-text-secondary text-xs mt-0.5">Latest maintenance item per equipment</p>
               </div>
-              <button aria-label="Close dialog" onClick={() => setShowMaintenanceModal(false)} className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center text-iron-text-secondary hover:text-white transition-colors">
+              <button aria-label="Close dialog" onClick={() => setShowMaintenanceModal(false)} className="w-8 h-8 rounded-lg bg-fg/[0.03] border border-fg/5 flex items-center justify-center text-iron-text-secondary hover:text-fg transition-colors">
                 <X size={15} />
               </button>
             </div>
             <div className="overflow-y-auto max-h-[65vh] px-6 py-5 space-y-4">
               {maintenance.length === 0 ? (
-                <p className="text-iron-text-secondary text-sm italic text-center py-8">No maintenance records found.</p>
+                <p className="text-iron-text-secondary text-sm text-center py-8">No maintenance records found.</p>
               ) : (
                 maintenance.map(item => (
-                  <div key={item.maintenance_id} className="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                  <div key={item.maintenance_id} className="p-4 rounded-xl bg-fg/[0.02] border border-fg/5">
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="text-white font-bold text-sm">{item.equipment_name}</p>
-                        <p className="text-iron-text-secondary text-xs italic mt-1">{item.description || 'No description provided'}</p>
+                        <p className="text-fg font-bold text-sm">{item.equipment_name}</p>
+                        <p className="text-iron-text-secondary text-xs mt-1">{item.description || 'No description provided'}</p>
                       </div>
-                      <span className={`text-[11px] font-black tracking-widest ${
+                      <span className={`text-[11px] font-bold tracking-widest ${
                         item.condition_status === 'Needs Repair' || item.condition_status === 'Out of Order' ? 'text-red-400' : 'text-iron-lime'
                       }`}>
                         {item.date_label}
                       </span>
                     </div>
                     <div className="mt-3 flex items-center justify-between text-xs">
-                      <span className="text-iron-text-secondary">Condition: <span className="text-white">{item.condition_status}</span></span>
-                      <span className="text-iron-text-secondary">Date: <span className="text-white">{formatDate(item.maintenance_date)}</span></span>
+                      <span className="text-iron-text-secondary">Condition: <span className="text-fg">{item.condition_status}</span></span>
+                      <span className="text-iron-text-secondary">Date: <span className="text-fg">{formatDate(item.maintenance_date)}</span></span>
                     </div>
                   </div>
                 ))

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE } from '../api';
 import {
   AreaChart,
   Area,
@@ -23,7 +24,7 @@ import {
   Plus
 } from 'lucide-react';
 
-const API = 'http://localhost:5000/api';
+const API = API_BASE;
 
 function getHeaders() {
   const token = localStorage.getItem('token');
@@ -160,10 +161,7 @@ export default function Dashboard() {
           <div className="mt-6 h-1 w-full bg-border/40 rounded-full overflow-hidden">
             <div
               className="h-full bg-iron-lime rounded-full"
-              style={{ 
-                width: totalMembers > 0 ? `${Math.round((activeMembers / totalMembers) * 100)}%` : '0%',
-                boxShadow: isLight ? '0 0 10px rgba(37,99,235,0.3)' : '0 0 10px rgba(223,255,0,0.5)'
-              }}
+              style={{ width: totalMembers > 0 ? `${Math.round((activeMembers / totalMembers) * 100)}%` : '0%' }}
             />
           </div>
         </div>
@@ -176,7 +174,7 @@ export default function Dashboard() {
               <p className="stat-value">{checkinsTodayVal}</p>
             </div>
             <div className="p-2 bg-iron-blue/10 rounded-lg group-hover:bg-iron-blue/20 transition-colors">
-              <Calendar size={18} className="text-iron-blue" />
+              <Calendar size={18} className="text-blue-400" />
             </div>
           </div>
           <div className="stat-change text-iron-text-secondary">
@@ -184,8 +182,7 @@ export default function Dashboard() {
           </div>
           <div className="mt-6 flex gap-1">
             {Array.from({ length: 6 }, (_, i) => (
-              <div key={i} className={`h-1 flex-1 rounded-full ${i < Math.round((checkinsTodayVal / Math.max(activeMembers, 1)) * 6) ? 'bg-iron-lime' : 'bg-border/40'}`} 
-                style={{ boxShadow: i < Math.round((checkinsTodayVal / Math.max(activeMembers, 1)) * 6) && !isLight ? '0 0 8px rgba(223,255,0,0.3)' : 'none' }}
+              <div key={i} className={`h-1 flex-1 rounded-full ${i < Math.round((checkinsTodayVal / Math.max(activeMembers, 1)) * 6) ? 'bg-iron-lime' : 'bg-border/40'}`}
               />
             ))}
           </div>
@@ -206,7 +203,7 @@ export default function Dashboard() {
             <ArrowUpRight size={14} />
             <span>{revPctChange !== null ? `${revPctChange > 0 ? '+' : ''}${revPctChange}% vs last month` : 'No prior data'}</span>
           </div>
-          <p className="mt-4 text-xs text-iron-text-secondary font-medium italic">
+          <p className="mt-4 text-xs text-iron-text-secondary font-medium">
             {new Date().toLocaleString('en-IN', { month: 'long', year: 'numeric' })}
           </p>
         </div>
@@ -222,11 +219,11 @@ export default function Dashboard() {
               <TrendingUp size={18} className="text-amber-400" />
             </div>
           </div>
-          <div className="stat-change text-iron-blue">
+          <div className="stat-change text-blue-400">
             <span>{fullyBooked} fully booked</span>
           </div>
           <div className="mt-4 flex -space-x-2">
-            <div className={`w-6 h-6 rounded-full bg-amber-400 border-2 border-surface flex items-center justify-center text-[10px] font-bold ${isLight ? 'text-white' : 'text-dark'}`}>H</div>
+            <div className={`w-6 h-6 rounded-full bg-amber-400 border-2 border-surface flex items-center justify-center text-[10px] font-bold text-ink`}>H</div>
             <div className="w-6 h-6 rounded-full bg-iron-blue border-2 border-surface flex items-center justify-center text-[10px] font-bold text-white">C</div>
             <div className="w-6 h-6 rounded-full bg-border border-2 border-surface flex items-center justify-center text-[10px] font-bold text-iron-text-secondary">+{Math.max(0, classesToday - 2)}</div>
           </div>
@@ -245,11 +242,11 @@ export default function Dashboard() {
               <AreaChart data={revenueChartData} title="Revenue, last 6 months" desc={revenueChartData.map(d => `${d.month}: ${d.total}`).join(", ")}>
                 <defs>
                   <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={isLight ? '#2563EB' : '#DFFF00'} stopOpacity={isLight ? 0.2 : 0.1} />
-                    <stop offset="95%" stopColor={isLight ? '#2563EB' : '#DFFF00'} stopOpacity={0} />
+                    <stop offset="5%" stopColor="var(--color-iron-lime)" stopOpacity={isLight ? 0.2 : 0.1} />
+                    <stop offset="95%" stopColor="var(--color-iron-lime)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isLight ? '#E4E4EB' : '#1F1F26'} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={'var(--color-border)'} />
                 <XAxis
                   dataKey="month"
                   axisLine={false}
@@ -260,13 +257,13 @@ export default function Dashboard() {
                 <YAxis hide />
                 <Tooltip
                   formatter={(v) => [formatRevenue(v), 'Revenue']}
-                  contentStyle={{ background: isLight ? '#FFFFFF' : '#111116', border: `1px solid ${isLight ? '#E4E4EB' : '#1F1F26'}`, borderRadius: '8px', color: isLight ? '#0A0A0E' : '#FFFFFF' }}
-                  itemStyle={{ color: isLight ? '#2563EB' : '#DFFF00' }}
+                  contentStyle={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '8px', color: 'var(--color-fg)' }}
+                  itemStyle={{ color: 'var(--color-iron-lime)' }}
                 />
                 <Area
                   type="monotone"
                   dataKey="total"
-                  stroke={isLight ? '#2563EB' : '#DFFF00'}
+                  stroke={'var(--color-iron-lime)'}
                   strokeWidth={2}
                   fillOpacity={1}
                   fill="url(#revenueGradient)"
@@ -379,11 +376,8 @@ export default function Dashboard() {
                   {i < attendanceLog.length - 1 && (
                     <div className="absolute left-5 top-10 bottom-[-20px] w-px bg-border/50" />
                   )}
-                  <div className="w-10 h-10 rounded-full border-2 border-border/50 overflow-hidden relative z-10 shrink-0">
-                    <img
-                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${isLight ? 'E4E4EB' : '1F1F26'}&color=${isLight ? '52525B' : 'FFFFFF'}`}
-                      alt=""
-                    />
+                  <div aria-hidden="true" className="w-10 h-10 rounded-full border-2 border-border bg-raised relative z-10 shrink-0 flex items-center justify-center text-xs font-bold text-iron-text-secondary">
+                    {name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start gap-2">
@@ -399,7 +393,7 @@ export default function Dashboard() {
                 </div>
               );
             }) : (
-              <p className="text-iron-text-secondary text-xs italic text-center py-4">No check-ins today</p>
+              <p className="text-iron-text-secondary text-xs text-center py-4">No check-ins today</p>
             )}
           </div>
           <button 

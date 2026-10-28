@@ -1,54 +1,56 @@
-import React from 'react';
+import React, { lazy, Suspense, useCallback, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import Members from './pages/Members';
-import Trainers from './pages/Trainers';
-import Plans from './pages/Plans';
-import Attendance from './pages/Attendance';
-import Payments from './pages/Payments';
-import AssignPlan from './pages/AssignPlan';
-import Equipment from './pages/Equipment';
-import Supplements from './pages/Supplements';
-import Reports from './pages/Reports';
-import DBFeatures from './pages/DBFeatures';
-import './index.css';
-
 import TopBar from './components/TopBar';
 import { ThemeProvider } from './context/ThemeContext';
+import './index.css';
+
+const Login = lazy(() => import('./pages/Login'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Members = lazy(() => import('./pages/Members'));
+const Trainers = lazy(() => import('./pages/Trainers'));
+const Plans = lazy(() => import('./pages/Plans'));
+const Attendance = lazy(() => import('./pages/Attendance'));
+const Payments = lazy(() => import('./pages/Payments'));
+const AssignPlan = lazy(() => import('./pages/AssignPlan'));
+const Equipment = lazy(() => import('./pages/Equipment'));
+const Supplements = lazy(() => import('./pages/Supplements'));
+const Reports = lazy(() => import('./pages/Reports'));
+const DBFeatures = lazy(() => import('./pages/DBFeatures'));
+
+const TITLES = {
+  '/': 'Performance Overview',
+  '/members': 'Members Management',
+  '/attendance': 'Attendance Records',
+  '/payments': 'Financial Transactions',
+  '/trainers': 'Trainer Directory',
+  '/plans': 'Class Schedules',
+  '/equipment': 'Equipment Inventory',
+  '/reports': 'Detailed Metrics',
+  '/supplements': 'Supplement Shop',
+  '/assign': 'Assign Plans',
+  '/db': 'Database Features',
+};
+
+const PageFallback = () => (
+  <p role="status" className="py-20 text-center text-iron-text-secondary text-sm">Loading…</p>
+);
 
 const ProtectedRoute = ({ children }) => {
   const location = useLocation();
+  const [navOpen, setNavOpen] = useState(false);
+  const closeNav = useCallback(() => setNavOpen(false), []);
   const token = localStorage.getItem('token');
   if (!token) return <Navigate to="/login" replace />;
-
-  // Simple titles based on path
-  const getTitle = () => {
-    switch(location.pathname) {
-      case '/': return 'Performance Overview';
-      case '/members': return 'Members Management';
-      case '/attendance': return 'Attendance Records';
-      case '/payments': return 'Financial Transactions';
-      case '/trainers': return 'Trainer Directory';
-      case '/plans': return 'Class Schedules';
-      case '/equipment': return 'Equipment Inventory';
-      case '/reports': return 'Detailed Metrics';
-      case '/supplements': return 'Supplement Shop';
-      case '/assign': return 'Assign Plans';
-      case '/db': return 'Database Features';
-      default: return 'Gym Ecosystem';
-    }
-  };
 
   return (
     <div className="app-container">
       <a href="#main-content" className="skip-link">Skip to main content</a>
-      <Sidebar />
+      <Sidebar open={navOpen} onClose={closeNav} />
       <div className="main-wrapper">
-        <TopBar title={getTitle()} />
+        <TopBar title={TITLES[location.pathname] || 'Gym Ecosystem'} navOpen={navOpen} onMenu={() => setNavOpen(true)} />
         <main id="main-content" className="main-content" tabIndex={-1}>
-          {children}
+          <Suspense fallback={<PageFallback />}>{children}</Suspense>
         </main>
       </div>
     </div>
@@ -60,7 +62,7 @@ function App() {
     <ThemeProvider>
     <Router>
       <Routes>
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<Suspense fallback={null}><Login /></Suspense>} />
         <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/members" element={<ProtectedRoute><Members /></ProtectedRoute>} />
         <Route path="/trainers" element={<ProtectedRoute><Trainers /></ProtectedRoute>} />

@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
+import { API_BASE } from '../api';
 import {
   Users, TrendingUp, Clock, BarChart2, LogIn, LogOut,
   Download, Filter, ChevronDown, CheckCircle, AlertCircle,
   QrCode, Search, ChevronLeft, ChevronRight, Loader2, Info
 } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
 
-const API = 'http://localhost:5000/api/attendance';
+const API = `${API_BASE}/attendance`;
 
 function getHeaders() {
   const token = localStorage.getItem('token');
@@ -52,8 +52,6 @@ function downloadCSV(records) {
 }
 
 export default function Attendance() {
-  const { theme } = useTheme();
-  const isLight = theme === 'light';
   const [memberIdInput, setMemberIdInput] = useState('');
   const [actionMode, setActionMode] = useState('checkin'); // 'checkin' | 'checkout'
   const [actionFeedback, setActionFeedback] = useState(null); // { type: 'success'|'error', message }
@@ -142,10 +140,10 @@ export default function Attendance() {
   return (
     <div className="space-y-8 pb-12 font-manrope">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
         <div>
-          <h2 className="text-4xl font-space font-bold tracking-tighter mb-2" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Attendance</h2>
-          <p className="text-iron-text-secondary font-medium italic text-sm">Monitor facility access and member activity</p>
+          <h2 className="text-4xl font-space font-bold tracking-tighter mb-2 text-fg">Attendance</h2>
+          <p className="text-iron-text-secondary font-medium text-sm">Monitor facility access and member activity</p>
         </div>
       </div>
 
@@ -161,8 +159,8 @@ export default function Attendance() {
               <QrCode size={16} />
             </div>
             <div>
-              <h3 className="font-space font-bold tracking-widest" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Quick Scan</h3>
-              <p className="text-xs text-iron-text-secondary font-medium italic">Enter ID to grant entry or exit</p>
+              <h3 className="font-space font-bold tracking-widest text-fg">Quick Scan</h3>
+              <p className="text-xs text-iron-text-secondary font-medium">Enter ID to grant entry or exit</p>
             </div>
           </div>
           
@@ -176,8 +174,7 @@ export default function Attendance() {
                 onChange={e => setMemberIdInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 maxLength={10}
-                className="w-full bg-surface border border-border rounded-xl px-4 py-4 text-center text-sm font-space font-bold tracking-[0.2em] outline-none focus:border-iron-lime transition-all placeholder:text-iron-text-secondary/50 placeholder:font-manrope placeholder:tracking-normal placeholder:font-normal"
-                style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}
+                className="w-full bg-surface border border-border rounded-xl px-4 py-4 text-center text-sm font-space font-bold tracking-[0.2em] outline-none focus:border-iron-lime transition-all placeholder:text-iron-text-secondary/50 placeholder:font-manrope placeholder:tracking-normal placeholder:font-normal text-fg"
               />
             </div>
             
@@ -185,7 +182,7 @@ export default function Attendance() {
               <button
                 onClick={() => handleAction('checkin')}
                 disabled={actionLoading || !memberIdInput.trim()}
-                className="flex-1 flex justify-center items-center gap-2 bg-iron-lime text-dark py-3 rounded-xl font-space font-bold text-xs tracking-widest transition-all hover:shadow-[0_0_20px_rgba(223,255,0,0.3)] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none"
+                className="flex-1 flex justify-center items-center gap-2 bg-iron-lime text-on-accent py-3 rounded-xl font-space font-bold text-xs tracking-widest transition-all hover:shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none"
               >
                 {actionLoading && actionMode === 'checkin' ? <Loader2 size={14} className="animate-spin" /> : <LogIn size={14} />}
                 Check In
@@ -193,7 +190,7 @@ export default function Attendance() {
               <button
                 onClick={() => handleAction('checkout')}
                 disabled={actionLoading || !memberIdInput.trim()}
-                className="flex-1 flex justify-center items-center gap-2 bg-white/[0.03] text-white border border-white/10 py-3 rounded-xl font-space font-bold text-xs tracking-widest transition-all hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 flex justify-center items-center gap-2 bg-fg/[0.03] text-fg border border-fg/10 py-3 rounded-xl font-space font-bold text-xs tracking-widest transition-all hover:bg-fg/5 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {actionLoading && actionMode === 'checkout' ? <Loader2 size={14} className="animate-spin" /> : <LogOut size={14} />}
                 Check Out
@@ -209,18 +206,18 @@ export default function Attendance() {
                 <div className="flex flex-col">
                   {actionFeedback.type === 'success' && actionFeedback.member_name ? (
                     <>
-                      <span className="font-bold mb-1" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>{actionFeedback.member_name}</span>
-                      <span className="opacity-80 italic">Successfully checked {actionFeedback.mode === 'checkin' ? 'in' : 'out'} at {actionFeedback.time}.</span>
+                      <span className="font-bold mb-1 text-fg">{actionFeedback.member_name}</span>
+                      <span className="opacity-80">Successfully checked {actionFeedback.mode === 'checkin' ? 'in' : 'out'} at {actionFeedback.time}.</span>
                       {actionFeedback.member_status && (
                         <div className="mt-2">
-                          <span className="px-2 py-0.5 bg-iron-lime/20 text-iron-lime text-[11px] rounded font-black tracking-widest">
+                          <span className="px-2 py-0.5 bg-iron-lime/20 text-iron-lime text-[11px] rounded font-bold tracking-widest">
                             {actionFeedback.member_status}
                           </span>
                         </div>
                       )}
                     </>
                   ) : (
-                    <span className="font-medium italic">{actionFeedback.message}</span>
+                    <span className="font-medium">{actionFeedback.message}</span>
                   )}
                 </div>
               </div>
@@ -235,14 +232,14 @@ export default function Attendance() {
               <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform">
                 <Users size={18} />
               </div>
-              <span className="px-2 py-1 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full text-[11px] font-black tracking-widest italic flex items-center gap-1">
+              <span className="px-2 py-1 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full text-[11px] font-bold tracking-widest flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                 Live
               </span>
             </div>
             <div>
               <p className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] mb-1">Currently Inside</p>
-              <p className="text-4xl font-space font-bold tracking-tighter" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>{stats.currently_inside}</p>
+              <p className="text-4xl font-space font-bold tracking-tighter text-fg">{stats.currently_inside}</p>
             </div>
           </div>
           
@@ -254,34 +251,34 @@ export default function Attendance() {
             </div>
             <div>
               <p className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] mb-1">Checked In Today</p>
-              <p className="text-4xl font-space font-bold tracking-tighter" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>{stats.checked_in_today}</p>
+              <p className="text-4xl font-space font-bold tracking-tighter text-fg">{stats.checked_in_today}</p>
             </div>
           </div>
 
           <div className="card flex flex-col justify-between group">
             <div className="flex justify-between items-start">
-              <div className="w-10 h-10 rounded-lg bg-iron-blue/10 flex items-center justify-center text-iron-blue group-hover:scale-110 transition-transform">
+              <div className="w-10 h-10 rounded-lg bg-iron-blue/10 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
                 <Clock size={18} />
               </div>
             </div>
             <div>
               <p className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] mb-1">Avg Session</p>
               <div className="flex items-baseline gap-1">
-                <p className="text-4xl font-space font-bold tracking-tighter" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>{stats.avg_session || 0}</p>
-                <span className="text-sm font-bold text-iron-text-secondary italic">min</span>
+                <p className="text-4xl font-space font-bold tracking-tighter text-fg">{stats.avg_session || 0}</p>
+                <span className="text-sm font-bold text-iron-text-secondary">min</span>
               </div>
             </div>
           </div>
 
           <div className="card flex flex-col justify-between group">
             <div className="flex justify-between items-start">
-              <div className="w-10 h-10 rounded-lg bg-white/[0.03] flex items-center justify-center text-white/50 group-hover:scale-110 transition-transform">
+              <div className="w-10 h-10 rounded-lg bg-fg/[0.03] flex items-center justify-center text-fg/50 group-hover:scale-110 transition-transform">
                 <BarChart2 size={18} />
               </div>
             </div>
             <div>
               <p className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] mb-1">Peak Hour</p>
-              <p className="text-2xl mt-2 font-space font-bold tracking-tighter" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>{stats.peak_hour || '—'}</p>
+              <p className="text-2xl mt-2 font-space font-bold tracking-tighter text-fg">{stats.peak_hour || '—'}</p>
             </div>
           </div>
         </div>
@@ -291,16 +288,16 @@ export default function Attendance() {
       <div className="card !p-0 overflow-hidden shadow-2xl">
         <div className="p-4 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded bg-white/[0.03] flex items-center justify-center text-iron-text-secondary">
+            <div className="w-8 h-8 rounded bg-fg/[0.03] flex items-center justify-center text-iron-text-secondary">
               <BarChart2 size={16} />
             </div>
-            <h3 className="text-white font-space font-bold tracking-widest text-sm">Today's Activity Log</h3>
+            <h3 className="text-fg font-space font-bold tracking-widest text-sm">Today's Activity Log</h3>
           </div>
           
           <div className="flex items-center gap-3">
             <button
               onClick={() => downloadCSV(records)}
-              className="flex items-center gap-2 px-4 py-2 bg-white/[0.03] hover:bg-white/[0.05] border border-white/5 rounded-lg text-xs font-bold text-iron-text-secondary hover:text-white tracking-widest transition-all"
+              className="flex items-center gap-2 px-4 py-2 bg-fg/[0.03] hover:bg-fg/[0.05] border border-fg/5 rounded-lg text-xs font-bold text-iron-text-secondary hover:text-fg tracking-widest transition-all"
             >
               <Download size={14} />
               Export
@@ -308,7 +305,7 @@ export default function Attendance() {
             
             <div className="relative group/filter hover:z-50">
               <button
-                className="flex items-center gap-2 px-4 py-2 bg-white/[0.03] hover:bg-white/[0.05] border border-white/5 rounded-lg text-xs font-bold text-iron-text-secondary hover:text-white tracking-widest transition-all"
+                className="flex items-center gap-2 px-4 py-2 bg-fg/[0.03] hover:bg-fg/[0.05] border border-fg/5 rounded-lg text-xs font-bold text-iron-text-secondary hover:text-fg tracking-widest transition-all"
               >
                 <Filter size={14} />
                 {filterStatus === 'all' ? 'Filter' : filterStatus}
@@ -320,7 +317,7 @@ export default function Attendance() {
                     key={val}
                     onClick={() => { setFilterStatus(val); }}
                     className={`w-full text-left px-4 py-3 rounded-lg text-xs font-bold tracking-widest transition-colors flex items-center justify-between ${
-                      filterStatus === val ? 'bg-iron-lime/10 text-iron-lime' : 'text-iron-text-secondary hover:bg-black/5 hover:text-white'
+                      filterStatus === val ? 'bg-iron-lime/10 text-iron-lime' : 'text-iron-text-secondary hover:bg-black/5 hover:text-fg'
                     }`}
                   >
                     {label}
@@ -335,7 +332,7 @@ export default function Attendance() {
         <div className="overflow-x-auto">
           <table className="iron-table relative">
             <thead>
-              <tr className="bg-white/[0.01]">
+              <tr className="bg-fg/[0.01]">
                 <th>Member Details</th>
                 <th>In Time</th>
                 <th>Out Time</th>
@@ -343,7 +340,7 @@ export default function Attendance() {
                 <th>Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.03]">
+            <tbody className="divide-y divide-fg/[0.03]">
               {loadingRecords ? (
                 <tr>
                   <td colSpan="5" className="py-20">
@@ -355,7 +352,7 @@ export default function Attendance() {
                 </tr>
               ) : filteredRecords.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="py-20 text-center text-iron-text-secondary italic font-medium">
+                  <td colSpan="5" className="py-20 text-center text-iron-text-secondary font-medium">
                     <div className="flex flex-col items-center gap-3">
                       <Info size={24} className="text-iron-text-secondary" />
                       No records found matching the current view.
@@ -366,14 +363,14 @@ export default function Attendance() {
                 filteredRecords.map((record) => {
                   const isInside = !record.check_out_time;
                   return (
-                    <tr key={record.attendance_id} className="group hover:bg-white/[0.02] transition-colors">
+                    <tr key={record.attendance_id} className="group hover:bg-fg/[0.02] transition-colors">
                       <td>
                         <div className="flex items-center gap-4">
-                          <div className={`w-10 h-10 rounded-xl bg-white/[0.03] border border-white/5 flex items-center justify-center font-bold text-xs transition-all ${isInside ? 'text-emerald-400 group-hover:border-emerald-500/30' : 'text-iron-text-secondary group-hover:border-white/20'}`}>
+                          <div className={`w-10 h-10 rounded-xl bg-fg/[0.03] border border-fg/5 flex items-center justify-center font-bold text-xs transition-all ${isInside ? 'text-emerald-400 group-hover:border-emerald-500/30' : 'text-iron-text-secondary group-hover:border-fg/20'}`}>
                             {getInitials(record.name)}
                           </div>
                           <div className="flex flex-col">
-                            <span className="font-bold text-white group-hover:text-iron-lime transition-colors">{record.name}</span>
+                            <span className="font-bold text-fg group-hover:text-iron-lime transition-colors">{record.name}</span>
                             <span className="text-xs font-bold text-iron-text-secondary tracking-tighter">ID: IC-{record.member_id}</span>
                           </div>
                         </div>
@@ -381,21 +378,21 @@ export default function Attendance() {
                       <td>
                         <div className="flex items-center gap-2">
                           <LogIn size={14} className="text-iron-text-secondary" />
-                          <span className="text-xs text-white/80 font-medium">{formatTime(record.check_in_time)}</span>
+                          <span className="text-xs text-fg/80 font-medium">{formatTime(record.check_in_time)}</span>
                         </div>
                       </td>
                       <td>
                         {record.check_out_time ? (
                           <div className="flex items-center gap-2">
                             <LogOut size={14} className="text-iron-text-secondary" />
-                            <span className="text-xs text-white/80 font-medium">{formatTime(record.check_out_time)}</span>
+                            <span className="text-xs text-fg/80 font-medium">{formatTime(record.check_out_time)}</span>
                           </div>
                         ) : (
-                          <span className="text-xs text-iron-text-secondary font-medium tracking-widest italic">—</span>
+                          <span className="text-xs text-iron-text-secondary font-medium tracking-widest">—</span>
                         )}
                       </td>
                       <td>
-                        <span className="px-3 py-1 bg-white/[0.03] text-iron-text-secondary border border-white/5 rounded-lg text-xs font-black tracking-widest italic flex w-fit items-center justify-center">
+                        <span className="px-3 py-1 bg-fg/[0.03] text-iron-text-secondary border border-fg/5 rounded-lg text-xs font-bold tracking-widest flex w-fit items-center justify-center">
                           {formatDuration(record.duration_minutes)}
                         </span>
                       </td>
@@ -403,13 +400,13 @@ export default function Attendance() {
                         <div className="flex items-center gap-2">
                            {isInside ? (
                              <>
-                               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
-                               <span className="text-xs font-black tracking-widest text-emerald-400">Inside Now</span>
+                               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                               <span className="text-xs font-bold tracking-widest text-emerald-400">Inside Now</span>
                              </>
                            ) : (
                              <>
                                <div className="w-1.5 h-1.5 rounded-full bg-iron-text-secondary"></div>
-                               <span className="text-xs font-black tracking-widest text-iron-text-secondary">Completed</span>
+                               <span className="text-xs font-bold tracking-widest text-iron-text-secondary">Completed</span>
                              </>
                            )}
                         </div>
@@ -424,11 +421,11 @@ export default function Attendance() {
 
         {/* Load More */}
         {hasMore && !loadingRecords && (
-          <div className="p-4 bg-white/[0.01] border-t border-white/[0.03] flex items-center justify-center">
+          <div className="p-4 bg-fg/[0.01] border-t border-fg/[0.03] flex items-center justify-center">
             <button
                onClick={() => fetchToday(false)}
                disabled={loadingMore}
-               className="flex items-center gap-2 px-6 py-2 bg-white/[0.03] hover:bg-white/[0.05] border border-white/5 rounded-full text-xs font-bold text-white tracking-widest transition-all disabled:opacity-50"
+               className="flex items-center gap-2 px-6 py-2 bg-fg/[0.03] hover:bg-fg/[0.05] border border-fg/5 rounded-full text-xs font-bold text-fg tracking-widest transition-all disabled:opacity-50"
              >
                {loadingMore ? <Loader2 size={14} className="animate-spin" /> : <ChevronDown size={14} />}
                {loadingMore ? 'Loading More...' : 'Load Older Records'}

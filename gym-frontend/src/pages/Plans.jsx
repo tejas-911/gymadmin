@@ -1,14 +1,16 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
-import { useTheme } from '../context/ThemeContext';
+import { API_BASE } from '../api';
 import {
   CalendarDays, TrendingUp, Gauge, ChevronLeft, ChevronRight,
   Plus, X, Loader2, AlertCircle, CheckCircle, MoreHorizontal,
-  Users, Clock, Trash2, ChevronDown, CalendarOff
+  Users, Clock, Trash2, ChevronDown, CalendarOff, Pencil
 } from 'lucide-react';
 import useDialog from '../hooks/useDialog';
+import useDismiss from '../hooks/useDismiss';
+import ConfirmDialog from '../components/ConfirmDialog';
 
-const API = 'http://localhost:5000/api/classes';
+const API = `${API_BASE}/classes`;
 
 function getHeaders() {
   const token = localStorage.getItem('token');
@@ -33,14 +35,14 @@ const STATUS_CFG = {
   'Booking Open': 'bg-iron-lime/15 text-iron-lime border-iron-lime/20',
   'Full':         'bg-red-500/15 text-red-400 border-red-500/20',
   'Waitlist':     'bg-orange-500/15 text-orange-400 border-orange-500/20',
-  'Cancelled':    'bg-white/5 text-iron-text-secondary border-white/10',
-  'Completed':    'bg-white/5 text-iron-text-secondary/50 border-white/5 grayscale',
+  'Cancelled':    'bg-fg/5 text-iron-text-secondary border-fg/10',
+  'Completed':    'bg-fg/5 text-iron-text-secondary/50 border-fg/5 grayscale',
   'In Progress':  'bg-blue-500/15 text-blue-400 border-blue-500/20',
 };
 
 function StatusBadge({ status }) {
   return (
-    <span className={`px-2.5 py-1 rounded text-[11px] font-black tracking-widest border ${STATUS_CFG[status] || STATUS_CFG['Booking Open']}`}>
+    <span className={`px-2.5 py-1 rounded text-[11px] font-bold tracking-widest border ${STATUS_CFG[status] || STATUS_CFG['Booking Open']}`}>
       {status}
     </span>
   );
@@ -96,12 +98,12 @@ function CapBar({ registered, capacity, color }) {
   const p = pal(color);
   return (
     <div className="mt-2 space-y-1">
-      <div className="w-full bg-white/5 rounded-full h-1 overflow-hidden">
+      <div className="w-full bg-fg/5 rounded-full h-1 overflow-hidden">
         <div className="h-full rounded-full transition-all duration-500"
           style={{ width: `${pct}%`, backgroundColor: pct >= 100 ? '#EF4444' : pct >= 90 ? '#FB923C' : p.hex }} />
       </div>
       <div className="flex justify-between">
-        <span className={`text-[11px] font-black ${p.text}`}>{registered}/{capacity}</span>
+        <span className={`text-[11px] font-bold ${p.text}`}>{registered}/{capacity}</span>
       </div>
     </div>
   );
@@ -114,8 +116,6 @@ const initForm = {
 };
 
 export default function Plans() {
-  const { theme } = useTheme();
-  const isLight = theme === 'light';
 
   const [stats, setStats]           = useState({ classes_today: 0, total_bookings: 0, avg_capacity: 0 });
   const [weekClasses, setWeekClasses] = useState([]);
@@ -135,6 +135,8 @@ export default function Plans() {
   const [formOk, setFormOk]         = useState(false);
 
   const [openAction, setOpenAction] = useState(null);
+  const filterRef = useDismiss(showFilterDrop, () => setShowFilterDrop(false));
+  const actionRef = useDismiss(openAction !== null, () => setOpenAction(null));
 
   // Registration Modal
   const [showRegModal, setShowRegModal] = useState(false);
@@ -148,7 +150,7 @@ export default function Plans() {
   const [trainers, setTrainers] = useState([]);
   const fetchTrainers = useCallback(async () => {
     try {
-      const { data } = await axios.get(`http://localhost:5000/api/trainers`, { headers: getHeaders(), params: { limit: 100 } });
+      const { data } = await axios.get(`${API_BASE}/trainers`, { headers: getHeaders(), params: { limit: 100 } });
       setTrainers(Array.isArray(data.trainers) ? data.trainers : []);
     } catch(e) { console.error(e); }
   }, []);
@@ -235,13 +237,12 @@ export default function Plans() {
     } finally { setSubmitting(false); }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Delete this class?')) return;
-    try {
-      await axios.delete(`${API}/${id}`, { headers: getHeaders() });
-      fetchStats(); fetchWeek(weekStart); fetchUpcoming(upFilter);
-    } catch(e) { console.error(e); }
-    setOpenAction(null);
+  const [pendingDelete, setPendingDelete] = useState(null);
+  const handleDelete = (id) => { setOpenAction(null); setPendingDelete(id); };
+  const confirmDelete = async () => {
+    await axios.delete(`${API}/${pendingDelete}`, { headers: getHeaders() });
+    setPendingDelete(null);
+    fetchStats(); fetchWeek(weekStart); fetchUpcoming(upFilter);
   };
 
   const handleOpenRegistration = (cls) => {
@@ -286,7 +287,9 @@ export default function Plans() {
   ];
 
   return (
-    <div className="space-y-6 pb-10 font-manrope" onClick={() => { setShowFilterDrop(false); setOpenAction(null); }}>
+    <div className="space-y-6 pb-10 font-manrope">
+      <ConfirmDialog open={pendingDelete !== null} title="Delete this class?" message="This permanently removes the class from the schedule."
+        onConfirm={confirmDelete} onCancel={() => setPendingDelete(null)} />
 
       {/* ── Stats ───────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -297,7 +300,7 @@ export default function Plans() {
               <CalendarDays size={16} />
             </div>
           </div>
-          <p className="text-5xl font-space font-black text-white tracking-tighter">
+          <p className="text-5xl font-space font-bold text-fg tracking-tighter">
             {String(stats.classes_today).padStart(2,'0')}
           </p>
         </div>
@@ -310,7 +313,7 @@ export default function Plans() {
             </div>
           </div>
           <div className="flex items-end gap-3">
-            <p className="text-5xl font-space font-black text-white tracking-tighter">{stats.total_bookings}</p>
+            <p className="text-5xl font-space font-bold text-fg tracking-tighter">{stats.total_bookings}</p>
             <span className="text-emerald-400 text-xs font-bold mb-2">+13%</span>
           </div>
         </div>
@@ -318,30 +321,30 @@ export default function Plans() {
         <div className="stat-card">
           <div className="flex items-start justify-between mb-4">
             <p className="text-xs font-space font-bold tracking-[0.2em] text-iron-text-secondary">Avg. Capacity</p>
-            <div className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-iron-text-secondary">
+            <div className="w-9 h-9 rounded-lg bg-fg/5 flex items-center justify-center text-iron-text-secondary">
               <Gauge size={16} />
             </div>
           </div>
-          <p className="text-5xl font-space font-black text-white tracking-tighter">{stats.avg_capacity}%</p>
+          <p className="text-5xl font-space font-bold text-fg tracking-tighter">{stats.avg_capacity}%</p>
         </div>
       </div>
 
       {/* ── Weekly Schedule ──────────────────────────────────────── */}
       <div className="card !p-0 overflow-hidden">
         {/* Calendar header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 px-6 py-4 border-b border-border">
           <div className="flex items-center gap-4">
-            <h2 className="text-white font-space font-bold text-base tracking-tight">Weekly Schedule</h2>
-            <div className="flex items-center gap-2 bg-white/[0.03] border border-white/5 rounded-lg px-3 py-1.5">
+            <h2 className="text-fg font-space font-bold text-base tracking-tight">Weekly Schedule</h2>
+            <div className="flex items-center gap-2 bg-fg/[0.03] border border-fg/5 rounded-lg px-3 py-1.5">
               <button aria-label="Previous week" onClick={(e) => { e.stopPropagation(); prevWeek(); }}
-                className="text-iron-text-secondary hover:text-white transition-colors">
+                className="w-7 h-7 -my-1 rounded-md flex items-center justify-center text-iron-text-secondary hover:text-fg hover:bg-fg/5 transition-colors">
                 <ChevronLeft size={14} />
               </button>
-              <span className="text-white text-xs font-space font-bold tracking-wide px-2">
+              <span className="text-fg text-xs font-space font-bold tracking-wide px-2">
                 {fmtWeekRange(weekStart)}
               </span>
               <button aria-label="Next week" onClick={(e) => { e.stopPropagation(); nextWeek(); }}
-                className="text-iron-text-secondary hover:text-white transition-colors">
+                className="w-7 h-7 -my-1 rounded-md flex items-center justify-center text-iron-text-secondary hover:text-fg hover:bg-fg/5 transition-colors">
                 <ChevronRight size={14} />
               </button>
             </div>
@@ -365,8 +368,8 @@ export default function Plans() {
               <div key={i} className={`flex flex-col ${todayDay ? 'bg-iron-lime/[0.03]' : ''}`}>
                 {/* Day header */}
                 <div className={`py-3 px-2 text-center border-b border-border ${todayDay ? 'border-iron-lime/30' : ''}`}>
-                  <p className={`text-xs font-black tracking-widest font-space ${todayDay ? 'text-iron-lime' : 'text-iron-text-secondary'}`}>{label}</p>
-                  <p className={`text-lg font-space font-bold mt-0.5 ${todayDay ? 'text-iron-lime' : 'text-white'}`}>{dateNum}</p>
+                  <p className={`text-xs font-bold tracking-widest font-space ${todayDay ? 'text-iron-lime' : 'text-iron-text-secondary'}`}>{label}</p>
+                  <p className={`text-lg font-space font-bold mt-0.5 ${todayDay ? 'text-iron-lime' : 'text-fg'}`}>{dateNum}</p>
                 </div>
 
                 {/* Classes */}
@@ -378,8 +381,8 @@ export default function Plans() {
                   ) : classes.length === 0 ? (
                     isSun ? (
                       <div className="flex flex-col items-center justify-center h-full py-8 gap-2 opacity-20">
-                        <CalendarOff size={20} className="text-white" />
-                        <p className="text-[11px] font-bold tracking-widest text-white text-center">Gym Closed</p>
+                        <CalendarOff size={20} className="text-fg" />
+                        <p className="text-[11px] font-bold tracking-widest text-fg text-center">Gym Closed</p>
                       </div>
                     ) : null
                   ) : (
@@ -388,21 +391,25 @@ export default function Plans() {
                       const isDone = cls.status === 'Completed';
                       return (
                         <div key={cls.class_id}
+                          role={isDone ? undefined : 'button'}
+                          tabIndex={isDone ? undefined : 0}
+                          aria-label={isDone ? undefined : `Book ${cls.class_name}, ${cls.time_display}`}
                           onClick={() => !isDone && handleOpenRegistration(cls)}
-                          className={`rounded-lg p-2 bg-white/[0.03] border-l-2 ${p.border} hover:bg-white/[0.05] transition-colors cursor-pointer group ${isDone ? 'opacity-40 grayscale-[0.5]' : ''}`}>
-                          <p className={`text-[11px] font-black tracking-wider ${isDone ? 'text-iron-text-secondary' : p.text}`}>
+                          onKeyDown={e => { if (!isDone && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); handleOpenRegistration(cls); } }}
+                          className={`rounded-lg p-2 ${p.bg} hover:brightness-125 transition-colors cursor-pointer group ${isDone ? 'opacity-40 grayscale-[0.5]' : ''}`}>
+                          <p className={`text-[11px] font-bold tracking-wider ${isDone ? 'text-iron-text-secondary' : p.text}`}>
                             {cls.time_display}
                           </p>
-                          <p className="text-white text-[11px] font-bold leading-tight mt-0.5 group-hover:text-white/90 truncate">
+                          <p className="text-fg text-[11px] font-bold leading-tight mt-0.5 group-hover:text-fg/90 truncate">
                             {cls.class_name}
                           </p>
-                          <p className="text-iron-text-secondary text-[11px] italic truncate mt-0.5">
+                          <p className="text-iron-text-secondary text-[11px] truncate mt-0.5">
                             {cls.trainer_name}
                           </p>
                           <CapBar registered={cls.registered} capacity={cls.capacity} color={cls.color} />
                           {!isDone && (
-                            <div className="mt-2 pt-3 border-t border-white/5 opacity-0 group-hover:opacity-100 transition-all transform translate-y-1 group-hover:translate-y-0">
-                              <span className={`text-[9px] font-black tracking-[0.1em] px-2 py-0.5 rounded-full bg-white/5 ${p.text}`}>Book Spot</span>
+                            <div className="mt-2 pt-3 border-t border-fg/5 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity">
+                              <span className={`text-[9px] font-bold tracking-[0.1em] px-2 py-0.5 rounded-full bg-fg/5 ${p.text}`}>Book Spot</span>
                             </div>
                           )}
                         </div>
@@ -419,27 +426,28 @@ export default function Plans() {
       {/* ── Upcoming Sessions ────────────────────────────────────── */}
       <div className="card !p-0 overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 px-6 py-4 border-b border-border">
           <div>
-            <h3 className="text-white font-space font-bold text-sm tracking-widest">Upcoming Sessions</h3>
+            <h3 className="text-fg font-space font-bold text-sm tracking-widest">Upcoming Sessions</h3>
           </div>
-          <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
+          <div className="flex items-center gap-2">
             <span className="text-iron-text-secondary text-xs font-bold tracking-widest">Filter by:</span>
-            <div className="relative">
+            <div ref={filterRef} className="relative">
               <button
+                aria-expanded={showFilterDrop}
                 onClick={() => setShowFilterDrop(v => !v)}
-                className="flex items-center gap-2 px-3 py-1.5 bg-white/[0.03] border border-white/5 rounded-lg text-xs font-bold text-white tracking-widest hover:bg-white/5 transition-colors"
+                className="flex items-center gap-2 px-3 py-1.5 bg-fg/[0.03] border border-fg/5 rounded-lg text-xs font-bold text-fg tracking-widest hover:bg-fg/5 transition-colors"
               >
                 {FILTER_OPTS.find(([v]) => v === upFilter)?.[1] || 'Status'}
                 <ChevronDown size={12} className={`transition-transform ${showFilterDrop ? 'rotate-180' : ''}`} />
               </button>
               {showFilterDrop && (
-                <div className="absolute right-0 top-full mt-1 w-44 bg-[#18181A] border border-border rounded-xl shadow-xl z-20 overflow-hidden py-1">
+                <div className="absolute right-0 top-full mt-1 w-44 bg-raised border border-border rounded-xl shadow-xl z-20 overflow-hidden py-1">
                   {FILTER_OPTS.map(([val, label]) => (
                     <button key={val}
                       onClick={() => { setUpFilter(val); setShowFilterDrop(false); }}
                       className={`w-full text-left px-4 py-2.5 text-xs font-bold tracking-widest transition-colors ${
-                        upFilter === val ? 'text-iron-lime bg-iron-lime/5' : 'text-iron-text-secondary hover:text-white hover:bg-white/5'
+                        upFilter === val ? 'text-iron-lime bg-iron-lime/5' : 'text-iron-text-secondary hover:text-fg hover:bg-fg/5'
                       }`}>
                       {label}
                     </button>
@@ -451,16 +459,16 @@ export default function Plans() {
         </div>
 
         {/* Column headers */}
-        <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_80px] px-6 py-2 border-b border-border bg-white/[0.01]">
+        <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_80px] px-6 py-2 border-b border-border bg-fg/[0.01]">
           {['Class Name','Trainer','Time','Registered','Status','Actions'].map(h => (
-            <span key={h} className="text-xs font-black tracking-widest text-iron-text-secondary font-space">{h}</span>
+            <span key={h} className="text-xs font-bold tracking-widest text-iron-text-secondary font-space">{h}</span>
           ))}
         </div>
 
         {/* Rows */}
-        <div className="divide-y divide-white/[0.03]">
+        <div className="divide-y divide-fg/[0.03]">
           {upcoming.length === 0 ? (
-            <div className="py-16 text-center text-iron-text-secondary italic text-sm">
+            <div className="py-16 text-center text-iron-text-secondary text-sm">
               No upcoming sessions found.
             </div>
           ) : (
@@ -469,10 +477,10 @@ export default function Plans() {
               const pct = cls.capacity > 0 ? Math.min(Math.round((cls.registered / cls.capacity) * 100), 100) : 0;
               return (
                 <div key={cls.class_id}
-                  className={`grid grid-cols-[2fr_1fr_1fr_1fr_1fr_80px] px-0 py-0 items-center hover:bg-white/[0.015] transition-colors group border-l-2 ${p.border}`}>
+                  className={`grid grid-cols-[2fr_1fr_1fr_1fr_1fr_80px] px-0 py-0 items-center hover:bg-fg/[0.015] transition-colors group`}>
                   {/* Class name */}
                   <div className="px-6 py-4">
-                    <p className={`text-white font-bold text-sm group-hover:${p.text} transition-colors`}>{cls.class_name}</p>
+                    <p className={`flex items-center gap-2 text-fg font-bold text-sm group-hover:${p.text} transition-colors`}><span aria-hidden="true" className="w-2 h-2 rounded-full shrink-0" style={{ background: p.hex }} />{cls.class_name}</p>
                   </div>
                   {/* Trainer */}
                   <div className="px-2 py-4">
@@ -480,7 +488,7 @@ export default function Plans() {
                   </div>
                   {/* Time */}
                   <div className="px-2 py-4">
-                    <p className="text-white text-xs font-bold">
+                    <p className="text-fg text-xs font-bold">
                       <span className="text-iron-text-secondary">{cls.date_label},</span>{' '}
                       {cls.time_display}
                     </p>
@@ -488,10 +496,10 @@ export default function Plans() {
                   {/* Registered */}
                   <div className="px-2 py-4">
                     <div className="flex items-center gap-2">
-                      <span className={`text-xs font-black font-space ${pct >= 100 ? 'text-red-400' : 'text-white'}`}>
+                      <span className={`text-xs font-bold font-space ${pct >= 100 ? 'text-red-400' : 'text-fg'}`}>
                         {cls.registered}/{cls.capacity}
                       </span>
-                      <div className="flex-1 h-1 bg-white/5 rounded-full overflow-hidden min-w-[40px]">
+                      <div className="flex-1 h-1 bg-fg/5 rounded-full overflow-hidden min-w-[40px]">
                         <div className="h-full rounded-full transition-all duration-500"
                           style={{ width: `${pct}%`, backgroundColor: pct >= 100 ? '#EF4444' : p.hex }} />
                       </div>
@@ -504,27 +512,27 @@ export default function Plans() {
                       {cls.status === 'Booking Open' && (
                         <button
                           onClick={() => handleOpenRegistration(cls)}
-                          className="px-3 py-1 bg-iron-lime text-dark text-[10px] font-black tracking-widest rounded-lg hover:shadow-[0_0_15px_rgba(223,255,0,0.3)] transition-all">
+                          className="px-3 py-1 bg-iron-lime text-on-accent text-[10px] font-bold tracking-widest rounded-lg hover:shadow-[0_4px_15px_rgba(0,0,0,0.25)] transition-all">
                           Register
                         </button>
                       )}
                     </div>
                   </div>
                   {/* Actions */}
-                  <div className="px-4 py-4 flex justify-center" onClick={e => e.stopPropagation()}>
-                    <div className="relative">
+                  <div className="px-4 py-4 flex justify-center">
+                    <div ref={openAction === cls.class_id ? actionRef : null} className="relative">
                       <button
                         aria-label={`Actions for ${cls.class_name}`}
                         aria-expanded={openAction === cls.class_id}
                         onClick={() => setOpenAction(openAction === cls.class_id ? null : cls.class_id)}
-                        className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center text-iron-text-secondary hover:text-white hover:bg-white/5 transition-colors">
+                        className="w-8 h-8 rounded-lg bg-fg/[0.03] border border-fg/5 flex items-center justify-center text-iron-text-secondary hover:text-fg hover:bg-fg/5 transition-colors">
                         <MoreHorizontal size={14} />
                       </button>
                       {openAction === cls.class_id && (
-                        <div className="absolute right-0 top-full mt-1 w-36 bg-[#18181A] border border-border rounded-xl shadow-xl z-20 overflow-hidden py-1">
+                        <div className="absolute right-0 top-full mt-1 w-36 bg-raised border border-border rounded-xl shadow-xl z-20 overflow-hidden py-1">
                           <button onClick={() => openModal(cls)}
-                            className="w-full text-left px-4 py-2.5 text-xs font-bold tracking-widest text-white hover:bg-white/5 transition-colors flex items-center gap-2 border-b border-white/5">
-                            <Plus size={12} className="rotate-45" /> Edit
+                            className="w-full text-left px-4 py-2.5 text-xs font-bold tracking-widest text-fg hover:bg-fg/5 transition-colors flex items-center gap-2 border-b border-fg/5">
+                            <Pencil size={12} /> Edit
                           </button>
                           <button onClick={() => handleDelete(cls.class_id)}
                             className="w-full text-left px-4 py-2.5 text-xs font-bold tracking-widest text-red-400 hover:bg-red-500/10 transition-colors flex items-center gap-2">
@@ -546,15 +554,15 @@ export default function Plans() {
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
           onClick={() => setShowModal(false)}>
           <div ref={modalDialogRef} role="dialog" aria-modal="true" aria-labelledby="plans-showModal-title" tabIndex={-1} className="bg-surface border border-border rounded-2xl w-full max-w-lg shadow-2xl"
-            onClick={e => e.stopPropagation()}>
+           >
             {/* Modal header */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-border">
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 px-6 py-5 border-b border-border">
               <div>
-                <h2 id="plans-showModal-title" className="text-white font-space font-bold text-base tracking-wide">{isEditing ? 'Edit Class' : 'Add New Class'}</h2>
-                <p className="text-iron-text-secondary text-xs italic mt-0.5">{isEditing ? 'Update existing class details' : 'Schedule a new fitness session'}</p>
+                <h2 id="plans-showModal-title" className="text-fg font-space font-bold text-base tracking-wide">{isEditing ? 'Edit Class' : 'Add New Class'}</h2>
+                <p className="text-iron-text-secondary text-xs mt-0.5">{isEditing ? 'Update existing class details' : 'Schedule a new fitness session'}</p>
               </div>
               <button aria-label="Close dialog" onClick={() => setShowModal(false)}
-                className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center text-iron-text-secondary hover:text-white transition-colors">
+                className="w-8 h-8 rounded-lg bg-fg/[0.03] border border-fg/5 flex items-center justify-center text-iron-text-secondary hover:text-fg transition-colors">
                 <X size={15} />
               </button>
             </div>
@@ -581,14 +589,14 @@ export default function Plans() {
                   <input id="plans-class-name" required type="text" placeholder="e.g. Power Lifting"
                     value={formData.class_name}
                     onChange={e => setFormData({ ...formData, class_name: e.target.value })}
-                    className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors placeholder:text-iron-text-secondary/50" />
+                    className="w-full bg-raised border border-border rounded-xl px-4 py-3 text-sm text-fg outline-none focus:border-iron-lime/50 transition-colors placeholder:text-iron-text-secondary/50" />
                 </div>
                 <div className="space-y-1">
                   <label htmlFor="plans-trainer-name" className="text-iron-text-secondary text-xs tracking-widest font-space font-bold">Trainer</label>
                   <select id="plans-trainer-name"
                     value={formData.trainer_name}
                     onChange={e => setFormData({ ...formData, trainer_name: e.target.value })}
-                    className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors">
+                    className="w-full bg-raised border border-border rounded-xl px-4 py-3 text-sm text-fg outline-none focus:border-iron-lime/50 transition-colors">
                     <option value="">— Select Trainer —</option>
                     {trainers.map(t => (
                       <option key={t.trainer_id} value={t.name}>{t.name} ({t.specialization})</option>
@@ -606,7 +614,7 @@ export default function Plans() {
                   <input id="plans-scheduled-date" required type="date"
                     value={formData.scheduled_date}
                     onChange={e => setFormData({ ...formData, scheduled_date: e.target.value })}
-                    className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors" />
+                    className="w-full bg-raised border border-border rounded-xl px-4 py-3 text-sm text-fg outline-none focus:border-iron-lime/50 transition-colors" />
                 </div>
                 <div className="space-y-1">
                   <label htmlFor="plans-scheduled-time" className="text-iron-text-secondary text-xs tracking-widest font-space font-bold">
@@ -615,7 +623,7 @@ export default function Plans() {
                   <input id="plans-scheduled-time" required type="time"
                     value={formData.scheduled_time}
                     onChange={e => setFormData({ ...formData, scheduled_time: e.target.value })}
-                    className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors" />
+                    className="w-full bg-raised border border-border rounded-xl px-4 py-3 text-sm text-fg outline-none focus:border-iron-lime/50 transition-colors" />
                 </div>
               </div>
 
@@ -626,14 +634,14 @@ export default function Plans() {
                   <input id="plans-duration-minutes" type="number" min="15" max="240" placeholder="60"
                     value={formData.duration_minutes}
                     onChange={e => setFormData({ ...formData, duration_minutes: Number(e.target.value) })}
-                    className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors" />
+                    className="w-full bg-raised border border-border rounded-xl px-4 py-3 text-sm text-fg outline-none focus:border-iron-lime/50 transition-colors" />
                 </div>
                 <div className="space-y-1">
                   <label htmlFor="plans-capacity" className="text-iron-text-secondary text-xs tracking-widest font-space font-bold">Capacity</label>
                   <input id="plans-capacity" type="number" min="1" max="200" placeholder="20"
                     value={formData.capacity}
                     onChange={e => setFormData({ ...formData, capacity: Number(e.target.value) })}
-                    className="w-full bg-[#18181A] border border-border rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-iron-lime/50 transition-colors" />
+                    className="w-full bg-raised border border-border rounded-xl px-4 py-3 text-sm text-fg outline-none focus:border-iron-lime/50 transition-colors" />
                 </div>
               </div>
 
@@ -649,7 +657,7 @@ export default function Plans() {
                       value={formData.registered}
                       onChange={e => setFormData({ ...formData, registered: Number(e.target.value) })}
                       className="flex-1 accent-iron-lime" />
-                    <span className="text-white font-bold text-sm w-12 text-right">{formData.registered}/{formData.capacity}</span>
+                    <span className="text-fg font-bold text-sm w-12 text-right">{formData.registered}/{formData.capacity}</span>
                   </div>
                 </div>
               )}
@@ -676,7 +684,7 @@ export default function Plans() {
                   {submitting ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Plus size={13} /> Schedule Class</>}
                 </button>
                 <button type="button" onClick={() => setShowModal(false)}
-                  className="flex-1 py-3 px-6 bg-white/[0.03] border border-white/10 rounded text-white text-xs font-space font-semibold tracking-wider hover:bg-white/5 transition-colors">
+                  className="flex-1 py-3 px-6 bg-fg/[0.03] border border-fg/10 rounded text-fg text-xs font-space font-semibold tracking-wider hover:bg-fg/5 transition-colors">
                   Cancel
                 </button>
               </div>
@@ -688,18 +696,16 @@ export default function Plans() {
       {showRegModal && selectedClass && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowRegModal(false)} />
-          <div ref={regModalDialogRef} role="dialog" aria-modal="true" aria-labelledby="plans-showRegModal-title" tabIndex={-1} className="relative w-full max-w-md shadow-2xl rounded-3xl overflow-hidden animate-in fade-in zoom-in duration-300"
-               style={{ backgroundColor: isLight ? '#FFFFFF' : '#0A0A0E', border: isLight ? '1px solid #E4E4EB' : '1px solid var(--color-border)' }}>
+          <div ref={regModalDialogRef} role="dialog" aria-modal="true" aria-labelledby="plans-showRegModal-title" tabIndex={-1} className="relative w-full max-w-md shadow-2xl rounded-3xl overflow-hidden bg-surface border border-border">
             <div className={`h-2 w-full`} style={{ backgroundColor: pal(selectedClass.color).hex }} />
             
             <div className="p-8">
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 mb-6">
                 <div>
-                  <h3 id="plans-showRegModal-title" className="font-space font-bold text-2xl tracking-tight" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Register for Class</h3>
-                  <p className="text-xs italic mt-1" style={{ color: isLight ? '#71717A' : 'rgba(255,255,255,0.6)' }}>{selectedClass.class_name} with {selectedClass.trainer_name}</p>
+                  <h3 id="plans-showRegModal-title" className="font-space font-bold text-2xl tracking-tight text-fg">Register for Class</h3>
+                  <p className="text-xs mt-1 text-iron-text-secondary">{selectedClass.class_name} with {selectedClass.trainer_name}</p>
                 </div>
-                <button aria-label="Close dialog" onClick={() => setShowRegModal(false)} className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors"
-                        style={{ backgroundColor: isLight ? '#F4F4F9' : 'rgba(255,255,255,0.1)', color: isLight ? '#71717A' : 'rgba(255,255,255,0.75)' }}>
+                <button aria-label="Close dialog" onClick={() => setShowRegModal(false)} className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors bg-fg/10 text-iron-text-secondary hover:text-fg">
                   <X size={18} />
                 </button>
               </div>
@@ -717,30 +723,26 @@ export default function Plans() {
 
               <form onSubmit={handleRegister} className="space-y-6">
                 <div className="space-y-2">
-                  <p id="plans-seats-label" className="font-black tracking-[0.2em] text-[10px] pl-1 opacity-60" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>Number of Seats</p>
-                  <div role="group" aria-labelledby="plans-seats-label" className="flex items-center gap-4 rounded-2xl p-4 border"
-                       style={{ backgroundColor: isLight ? '#F8F8FB' : 'rgba(255,255,255,0.05)', borderColor: isLight ? '#E4E4EB' : 'rgba(255,255,255,0.1)' }}>
+                  <p id="plans-seats-label" className="font-bold tracking-[0.2em] text-[10px] pl-1 text-iron-text-secondary">Number of Seats</p>
+                  <div role="group" aria-labelledby="plans-seats-label" className="flex items-center gap-4 rounded-2xl p-4 border bg-raised border-border">
                     <button type="button" aria-label="Decrease seats" onClick={() => setRegCount(c => Math.max(1, c - 1))}
-                            className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors border"
-                            style={{ backgroundColor: isLight ? '#FFF' : 'rgba(255,255,255,0.05)', borderColor: isLight ? '#E4E4EB' : 'transparent', color: isLight ? '#0A0A0E' : 'white' }}>
+                            className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors border bg-surface border-border text-fg hover:border-iron-lime/40">
                       <ChevronDown size={14} />
                     </button>
-                    <span aria-live="polite" className="flex-1 text-center text-3xl font-space font-black tracking-tighter" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>{regCount}</span>
+                    <span aria-live="polite" className="flex-1 text-center text-3xl font-space font-bold tracking-tighter text-fg">{regCount}</span>
                     <button type="button" aria-label="Increase seats" onClick={() => setRegCount(c => Math.min(selectedClass.capacity - (selectedClass.registered || 0), c + 1))} 
-                            className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors border"
-                            style={{ backgroundColor: isLight ? '#FFF' : 'rgba(255,255,255,0.05)', borderColor: isLight ? '#E4E4EB' : 'transparent', color: isLight ? '#0A0A0E' : 'white' }}>
+                            className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors border bg-surface border-border text-fg hover:border-iron-lime/40">
                       <Plus size={14} className="rotate-0" />
                     </button>
                   </div>
-                  <p className="text-xs italic px-1 font-medium" style={{ color: isLight ? '#71717A' : 'rgba(255,255,255,0.7)' }}>
+                  <p className="text-xs px-1 font-medium text-iron-text-secondary">
                     Available: {selectedClass.capacity - (selectedClass.registered || 0)} seats left
                   </p>
                 </div>
 
                 <div className="pt-2">
                   <button type="submit" disabled={regSubmitting || regMsg} 
-                    className="w-full py-4 font-space font-bold tracking-[0.2em] text-xs rounded-2xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:scale-100"
-                    style={{ backgroundColor: isLight ? '#2563EB' : 'var(--color-iron-lime)', color: isLight ? '#FFFFFF' : '#0A0A0E' }}>
+                    className="w-full py-4 font-space font-bold tracking-[0.2em] text-xs rounded-2xl shadow-xl active:scale-95 transition-[scale,opacity] disabled:opacity-50 disabled:scale-100 bg-iron-lime text-on-accent">
                     {regSubmitting ? 'Processing...' : regMsg ? 'Subscription Recorded' : 'Confirm Registration'}
                   </button>
                 </div>

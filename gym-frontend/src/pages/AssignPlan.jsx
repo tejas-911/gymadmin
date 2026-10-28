@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE } from '../api';
 import {
   ClipboardList, Dumbbell, Apple, Loader2, CheckCircle, AlertCircle,
   Users, Calendar, ChevronRight, ChevronDown, ChevronUp, Zap, Target, Clock
 } from 'lucide-react';
 
-const API = 'http://localhost:5000/api';
+const API = API_BASE;
 
 function getHeaders() {
   const token = localStorage.getItem('token');
@@ -29,7 +30,7 @@ const MUSCLE_COLORS = {
   Core: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
   Cardio: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
 };
-const getMuscleColor = (group) => MUSCLE_COLORS[group] || 'text-iron-text-secondary bg-white/5 border-white/10';
+const getMuscleColor = (group) => MUSCLE_COLORS[group] || 'text-iron-text-secondary bg-fg/5 border-fg/10';
 
 export default function AssignPlan() {
   const [formData, setFormData] = useState(initialFormState);
@@ -145,27 +146,27 @@ export default function AssignPlan() {
     <div className="space-y-6 pb-12 font-manrope">
       {/* Header */}
       <div>
-        <h2 className="text-4xl font-space font-bold tracking-tighter text-white mb-2">Assign Plans</h2>
-        <p className="text-iron-text-secondary font-medium italic text-sm">Assign workout or diet plans to members</p>
+        <h2 className="text-4xl font-space font-bold tracking-tighter text-fg mb-2">Assign Plans</h2>
+        <p className="text-iron-text-secondary font-medium text-sm">Assign workout or diet plans to members</p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         <div className="stat-card">
           <p className="text-xs font-space font-bold tracking-[0.2em] text-iron-text-secondary mb-3">Active Members</p>
-          <p className="text-4xl font-space font-black text-white">{members.length}</p>
+          <p className="text-4xl font-space font-bold text-fg">{members.length}</p>
         </div>
         <div className="stat-card">
           <p className="text-xs font-space font-bold tracking-[0.2em] text-iron-text-secondary mb-3">Workout Plans</p>
           <div className="flex items-end gap-2">
-            <p className="text-4xl font-space font-black text-iron-lime">{workouts.length}</p>
+            <p className="text-4xl font-space font-bold text-iron-lime">{workouts.length}</p>
             <Dumbbell size={16} className="text-iron-lime mb-2" />
           </div>
         </div>
         <div className="stat-card">
           <p className="text-xs font-space font-bold tracking-[0.2em] text-iron-text-secondary mb-3">Diet Plans</p>
           <div className="flex items-end gap-2">
-            <p className="text-4xl font-space font-black text-emerald-400">{diets.length}</p>
+            <p className="text-4xl font-space font-bold text-emerald-400">{diets.length}</p>
             <Apple size={16} className="text-emerald-400 mb-2" />
           </div>
         </div>
@@ -180,8 +181,8 @@ export default function AssignPlan() {
                 <ClipboardList size={18} />
               </div>
               <div>
-                <h3 className="text-white font-space font-bold tracking-widest text-sm">Assign Plan</h3>
-                <p className="text-iron-text-secondary text-xs italic">Select member, plan type, and date range</p>
+                <h3 className="text-fg font-space font-bold tracking-widest text-sm">Assign Plan</h3>
+                <p className="text-iron-text-secondary text-xs">Select member, plan type, and date range</p>
               </div>
             </div>
 
@@ -208,7 +209,7 @@ export default function AssignPlan() {
                     <Users size={10} className="inline mr-1.5" />Select Member <span aria-hidden="true" className="text-red-400">*</span>
                   </label>
                   <select id="assignplan-member-id" required value={formData.member_id} onChange={e => setFormData({ ...formData, member_id: e.target.value })}
-                    className="w-full bg-[#18181A] border border-white/5 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-iron-lime/30">
+                    className="w-full bg-raised border border-fg/5 rounded-xl py-3 px-4 text-sm text-fg focus:outline-none focus:border-iron-lime/30">
                     <option value="">Choose member...</option>
                     {members.map(m => (
                       <option key={m.member_id} value={m.member_id}>{m.member_name || m.name} (ID: {m.member_id})</option>
@@ -225,8 +226,8 @@ export default function AssignPlan() {
                       onClick={() => setFormData({ ...formData, type: 'workout', plan_id: '' })}
                       className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-space font-bold tracking-widest transition-all ${
                         formData.type === 'workout'
-                          ? 'bg-iron-lime text-dark shadow-[0_4px_20px_rgba(217,255,0,0.3)]'
-                          : 'bg-white/[0.03] border border-white/10 text-iron-text-secondary hover:text-white'
+                          ? 'bg-iron-lime text-on-accent shadow-[0_4px_20px_rgba(217,255,0,0.3)]'
+                          : 'bg-fg/[0.03] border border-fg/10 text-iron-text-secondary hover:text-fg'
                       }`}>
                       <Dumbbell size={14} /> Workout
                     </button>
@@ -235,8 +236,8 @@ export default function AssignPlan() {
                       onClick={() => setFormData({ ...formData, type: 'diet', plan_id: '' })}
                       className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-space font-bold tracking-widest transition-all ${
                         formData.type === 'diet'
-                          ? 'bg-emerald-500 text-dark shadow-[0_4px_20px_rgba(16,185,129,0.3)]'
-                          : 'bg-white/[0.03] border border-white/10 text-iron-text-secondary hover:text-white'
+                          ? 'bg-emerald-500 text-ink shadow-[0_4px_20px_rgba(16,185,129,0.3)]'
+                          : 'bg-fg/[0.03] border border-fg/10 text-iron-text-secondary hover:text-fg'
                       }`}>
                       <Apple size={14} /> Diet
                     </button>
@@ -249,7 +250,7 @@ export default function AssignPlan() {
                     <Target size={10} className="inline mr-1.5" />Select {formData.type === 'workout' ? 'Workout' : 'Diet'} Plan <span aria-hidden="true" className="text-red-400">*</span>
                   </label>
                   <select id="assignplan-plan-id" required value={formData.plan_id} onChange={e => setFormData({ ...formData, plan_id: e.target.value })}
-                    className="w-full bg-[#18181A] border border-white/5 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-iron-lime/30">
+                    className="w-full bg-raised border border-fg/5 rounded-xl py-3 px-4 text-sm text-fg focus:outline-none focus:border-iron-lime/30">
                     <option value="">Choose {formData.type}...</option>
                     {currentPlans.map(p => {
                       const id = formData.type === 'workout' ? p.workout_id : p.diet_id;
@@ -265,14 +266,14 @@ export default function AssignPlan() {
                       <Calendar size={10} className="inline mr-1.5" />Start Date <span aria-hidden="true" className="text-red-400">*</span>
                     </label>
                     <input id="assignplan-start-date" type="date" required value={formData.start_date} onChange={e => setFormData({ ...formData, start_date: e.target.value })}
-                      className="w-full bg-[#18181A] border border-white/5 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-iron-lime/30 [color-scheme:dark]" />
+                      className="w-full bg-raised border border-fg/5 rounded-xl py-3 px-4 text-sm text-fg focus:outline-none focus:border-iron-lime/30 [color-scheme:dark]" />
                   </div>
                   <div className="space-y-1.5">
                     <label htmlFor="assignplan-end-date" className="text-[10px] font-bold text-iron-text-secondary tracking-[0.2em] block">
                       <Calendar size={10} className="inline mr-1.5" />End Date <span aria-hidden="true" className="text-red-400">*</span>
                     </label>
                     <input id="assignplan-end-date" type="date" required value={formData.end_date} onChange={e => setFormData({ ...formData, end_date: e.target.value })}
-                      className="w-full bg-[#18181A] border border-white/5 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-iron-lime/30 [color-scheme:dark]" />
+                      className="w-full bg-raised border border-fg/5 rounded-xl py-3 px-4 text-sm text-fg focus:outline-none focus:border-iron-lime/30 [color-scheme:dark]" />
                   </div>
                 </div>
 
@@ -298,25 +299,25 @@ export default function AssignPlan() {
                     <Zap size={14} />
                   </div>
                   <div className="text-left">
-                    <h3 className="text-white font-space font-bold text-xs tracking-widest">
+                    <h3 className="text-fg font-space font-bold text-xs tracking-widest">
                       Exercise Breakdown
                     </h3>
-                    <p className="text-iron-text-secondary text-[10px] italic">
+                    <p className="text-iron-text-secondary text-[10px]">
                       {exercisesLoading ? 'Loading...' : `${exercises.length} exercise${exercises.length !== 1 ? 's' : ''} in this plan`}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   {exercises.length > 0 && (
-                    <span className="px-2 py-0.5 rounded text-[9px] font-black tracking-widest bg-iron-lime/10 text-iron-lime border border-iron-lime/20">
+                    <span className="px-2 py-0.5 rounded text-[9px] font-bold tracking-widest bg-iron-lime/10 text-iron-lime border border-iron-lime/20">
                       {Object.keys(groupedExercises).length} muscle groups
                     </span>
                   )}
                   {exercisesLoading
                     ? <Loader2 size={14} className="animate-spin text-iron-lime" />
                     : showExercises
-                      ? <ChevronUp size={14} className="text-iron-text-secondary group-hover:text-white transition-colors" />
-                      : <ChevronDown size={14} className="text-iron-text-secondary group-hover:text-white transition-colors" />
+                      ? <ChevronUp size={14} className="text-iron-text-secondary group-hover:text-fg transition-colors" />
+                      : <ChevronDown size={14} className="text-iron-text-secondary group-hover:text-fg transition-colors" />
                   }
                 </div>
               </button>
@@ -324,14 +325,14 @@ export default function AssignPlan() {
               {showExercises && !exercisesLoading && (
                 <div className="mt-5 space-y-4">
                   {exercises.length === 0 ? (
-                    <div className="text-center py-6 text-iron-text-secondary text-xs italic">
+                    <div className="text-center py-6 text-iron-text-secondary text-xs">
                       No exercises linked to this plan yet.
                     </div>
                   ) : (
                     Object.entries(groupedExercises).map(([group, exList]) => (
                       <div key={group}>
                         <div className="flex items-center gap-2 mb-2">
-                          <span className={`px-2 py-0.5 rounded text-[9px] font-black tracking-widest border ${getMuscleColor(group)}`}>
+                          <span className={`px-2 py-0.5 rounded text-[9px] font-bold tracking-widest border ${getMuscleColor(group)}`}>
                             {group}
                           </span>
                           <span className="text-iron-text-secondary text-[10px]">{exList.length} exercise{exList.length !== 1 ? 's' : ''}</span>
@@ -340,11 +341,11 @@ export default function AssignPlan() {
                         <div className="space-y-1.5 pl-1">
                           {exList.map(ex => (
                             <div key={ex.exercise_id}
-                              className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors">
+                              className="flex items-center justify-between p-3 rounded-xl bg-fg/[0.02] border border-fg/5 hover:bg-fg/[0.04] transition-colors">
                               <div className="flex-1 min-w-0">
-                                <p className="text-white text-xs font-bold truncate">{ex.exercise_name}</p>
+                                <p className="text-fg text-xs font-bold truncate">{ex.exercise_name}</p>
                                 {ex.equipment_required && (
-                                  <p className="text-iron-text-secondary text-[10px] italic truncate">{ex.equipment_required}</p>
+                                  <p className="text-iron-text-secondary text-[10px] truncate">{ex.equipment_required}</p>
                                 )}
                               </div>
                               <div className="flex items-center gap-3 ml-3 shrink-0">
@@ -374,29 +375,29 @@ export default function AssignPlan() {
         {/* Right Column: Preview Sidebar */}
         <div className="space-y-4">
           <div className="card">
-            <h3 className="text-white font-space font-bold text-xs tracking-widest mb-4">Assignment Preview</h3>
+            <h3 className="text-fg font-space font-bold text-xs tracking-widest mb-4">Assignment Preview</h3>
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
                 <span className="text-iron-text-secondary text-xs">Member</span>
-                <span className="text-white text-xs font-bold">{selectedMember ? (selectedMember.member_name || selectedMember.name) : '—'}</span>
+                <span className="text-fg text-xs font-bold">{selectedMember ? (selectedMember.member_name || selectedMember.name) : '—'}</span>
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
                 <span className="text-iron-text-secondary text-xs">Type</span>
-                <span className={`px-2.5 py-0.5 rounded text-[11px] font-black tracking-widest ${
+                <span className={`px-2.5 py-0.5 rounded text-[11px] font-bold tracking-widest ${
                   formData.type === 'workout' ? 'bg-iron-lime/10 text-iron-lime border border-iron-lime/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                 }`}>{formData.type}</span>
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
                 <span className="text-iron-text-secondary text-xs">Plan</span>
-                <span className="text-white text-xs font-bold">{selectedPlan ? selectedPlan.plan_name : '—'}</span>
+                <span className="text-fg text-xs font-bold">{selectedPlan ? selectedPlan.plan_name : '—'}</span>
               </div>
               {selectedPlan && formData.type === 'workout' && (
                 <>
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
                     <span className="text-iron-text-secondary text-xs">Goal</span>
-                    <span className="text-white text-xs">{selectedPlan.goal || '—'}</span>
+                    <span className="text-fg text-xs">{selectedPlan.goal || '—'}</span>
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
                     <span className="text-iron-text-secondary text-xs">Difficulty</span>
                     <span className={`text-xs font-bold ${
                       selectedPlan.difficulty_level === 'Advanced' ? 'text-red-400' :
@@ -406,15 +407,15 @@ export default function AssignPlan() {
                 </>
               )}
               {selectedPlan && formData.type === 'diet' && (
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
                   <span className="text-iron-text-secondary text-xs">Calories/Day</span>
                   <span className="text-iron-lime text-xs font-bold font-space">{selectedPlan.calories_per_day || '—'} kcal</span>
                 </div>
               )}
-              <hr className="border-white/5" />
-              <div className="flex items-center justify-between">
+              <hr className="border-fg/5" />
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
                 <span className="text-iron-text-secondary text-xs">Period</span>
-                <span className="text-white text-xs font-medium">
+                <span className="text-fg text-xs font-medium">
                   {formData.start_date && formData.end_date
                     ? `${new Date(formData.start_date).toLocaleDateString()} → ${new Date(formData.end_date).toLocaleDateString()}`
                     : '—'}
@@ -424,7 +425,7 @@ export default function AssignPlan() {
           </div>
 
           <div className="card">
-            <h3 className="text-white font-space font-bold text-xs tracking-widest mb-4 flex items-center gap-2">
+            <h3 className="text-fg font-space font-bold text-xs tracking-widest mb-4 flex items-center gap-2">
               {formData.type === 'workout' ? <Dumbbell size={12} className="text-iron-lime" /> : <Apple size={12} className="text-emerald-400" />}
               Quick Select {formData.type === 'workout' ? 'Workouts' : 'Diets'}
             </h3>
@@ -437,10 +438,10 @@ export default function AssignPlan() {
                     onClick={() => setFormData({ ...formData, plan_id: String(id) })}
                     className={`w-full text-left p-3 rounded-xl text-xs transition-all border ${
                       isSelected
-                        ? 'bg-iron-lime/10 border-iron-lime/20 text-white'
-                        : 'bg-white/[0.02] border-white/5 text-iron-text-secondary hover:text-white hover:bg-white/[0.04]'
+                        ? 'bg-iron-lime/10 border-iron-lime/20 text-fg'
+                        : 'bg-fg/[0.02] border-fg/5 text-iron-text-secondary hover:text-fg hover:bg-fg/[0.04]'
                     }`}>
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
                       <span className="font-bold">{p.plan_name}</span>
                       {isSelected && <CheckCircle size={12} className="text-iron-lime" />}
                     </div>

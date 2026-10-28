@@ -1,50 +1,50 @@
 import React from 'react';
-import { Search, Bell, Sun, Moon } from 'lucide-react';
+import { Sun, Moon, Menu } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
-export default function TopBar({ title }) {
+export default function TopBar({ title, navOpen, onMenu }) {
   const { theme, toggle } = useTheme();
   const isLight = theme === 'light';
 
   return (
-    <header className="top-bar backdrop-blur-md px-10" style={{ background: isLight ? 'rgba(255,255,255,0.9)' : 'rgba(10,10,14,0.8)' }}>
-      <h1 className="font-space font-bold text-xl tracking-widest" style={{ color: isLight ? '#0A0A0E' : '#FFFFFF' }}>{title}</h1>
+    <header className="top-bar">
+      <div className="flex items-center gap-3 min-w-0">
+        <button
+          id="nav-toggle"
+          onClick={onMenu}
+          aria-label="Open navigation"
+          aria-controls="app-sidebar"
+          aria-expanded={navOpen}
+          className="lg:hidden w-10 h-10 -ml-2 shrink-0 rounded-lg flex items-center justify-center text-fg hover:bg-fg/5"
+        >
+          <Menu size={22} />
+        </button>
+        <h1 className="font-space font-bold text-[1.05rem] tracking-wider lg:text-[1.6rem] lg:tracking-widest text-fg truncate">{title}</h1>
+      </div>
 
-      <div className="flex items-center gap-8">
-        <div className="flex items-center gap-6">
-          {/* Theme toggle */}
-          <button
-            onClick={toggle}
-            title={isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
-            aria-label={isLight ? 'Switch to dark mode' : 'Switch to light mode'}
-            className={`relative w-14 h-7 rounded-full transition-all duration-300 flex items-center border ${isLight
-                ? 'bg-blue-601 border-blue-500'
-                : 'bg-white/10 border-white/10 hover:border-white/20'
-              }`}
-          >
-            <span className={`absolute w-5 h-5 rounded-full flex items-center justify-center transition-all duration-300 shadow-md ${isLight
-                ? 'translate-x-7 bg-white'
-                : 'translate-x-1 bg-white/80'
-              }`}>
-              {isLight
-                ? <Moon size={11} className="text-blue-600" />
-                : <Sun size={11} className="text-dark" />
-              }
-            </span>
-          </button>
-        </div>
+      <div className="flex items-center gap-4 sm:gap-8 shrink-0">
+        {/* Theme toggle */}
+        <button
+          onClick={toggle}
+          role="switch"
+          aria-checked={isLight}
+          aria-label="Light mode"
+          title={isLight ? 'Switch to dark mode' : 'Switch to light mode'}
+          className={`relative w-14 h-7 rounded-full transition-colors duration-300 flex items-center border ${isLight ? 'bg-iron-lime border-iron-lime' : 'bg-fg/10 border-fg/10 hover:border-fg/20'}`}
+        >
+          <span className={`absolute w-5 h-5 rounded-full flex items-center justify-center transition-[translate] duration-300 shadow-md bg-white ${isLight ? 'translate-x-7' : 'translate-x-1'}`}>
+            {isLight
+              ? <Moon size={11} className="text-iron-lime" />
+              : <Sun size={11} className="text-ink" />
+            }
+          </span>
+        </button>
 
-        <div className="flex items-center gap-3 pl-6 border-l border-border">
-          <div className="w-9 h-9 rounded-full bg-surface border-2 border-iron-lime/20 p-0.5 overflow-hidden hover:border-iron-lime transition-all">
-            <img
-              src={`https://ui-avatars.com/api/?name=Admin&background=${isLight ? '2563EB' : 'DFFF00'}&color=${isLight ? 'FFFFFF' : '0A0A0E'}`}
-              alt=""
-              className="w-full h-full rounded-full object-cover"
-            />
+        <div className="flex items-center gap-3 sm:pl-6 sm:border-l border-border">
+          <div aria-hidden="true" className="w-9 h-9 rounded-full bg-iron-lime text-on-accent flex items-center justify-center text-xs font-bold font-space">
+            AD
           </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-bold text-iron-lime tracking-widest cursor-default">Admin</span>
-          </div>
+          <span className="hidden sm:inline text-xs font-bold text-iron-lime tracking-widest">Admin</span>
         </div>
       </div>
     </header>

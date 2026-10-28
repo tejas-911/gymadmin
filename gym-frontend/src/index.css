@@ -1,19 +1,39 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
+/* Dark theme is the default; html.light redefines the same tokens below. */
 @theme {
-  --color-dark: #0A0A0E;
-  --color-surface: #111116;
+  --color-dark: #0A0A0E;      /* app chrome background */
+  --color-canvas: #0D0D12;    /* content area behind cards */
+  --color-surface: #111116;   /* cards */
+  --color-raised: #18181A;    /* inputs, menus, popovers */
   --color-border: #1F1F26;
+  --color-fg: #FFFFFF;        /* primary text; also the base for subtle tints (bg-fg/5) */
+  --color-ink: #0A0A0E;       /* text on bright fills, same in both themes */
+  --color-on-accent: #0A0A0E; /* text on bg-iron-lime */
   --color-iron-lime: #DFFF00;
   --color-iron-blue: #1A3AFF;
   --color-iron-text-primary: #FFFFFF;
-  --color-iron-text-secondary: #A1A1AA; /* 7.6:1 on dark bg (was #71717A, 4.1:1) */
+  --color-iron-text-secondary: #A1A1AA; /* 7.6:1 on dark bg */
 
   --font-space: "Space Grotesk", sans-serif;
   --font-manrope: "Manrope", sans-serif;
 
   --sidebar-width: 280px;
+}
+
+html.light {
+  --color-dark: #F0F0F5;
+  --color-canvas: #E8E8F0;
+  --color-surface: #FFFFFF;
+  --color-raised: #F8F8FC;
+  --color-border: #E4E4EB;
+  --color-fg: #0A0A0E;
+  --color-on-accent: #FFFFFF;
+  --color-iron-lime: #1D4ED8; /* brand blue in light mode; 6.7:1 on white */
+  --color-iron-text-primary: #0A0A0E;
+  --color-iron-text-secondary: #52525B;
+  color-scheme: light;
 }
 
 @layer base {
@@ -22,12 +42,13 @@
   }
 
   html {
-    font-size: 20px; /* Base for all rem units */
+    font-size: 125%; /* 20px at the default 16px, but follows the user's browser font setting */
+    color-scheme: dark;
     @apply bg-dark;
   }
 
   body {
-    @apply bg-dark text-white font-manrope h-full text-base antialiased;
+    @apply bg-dark text-fg font-manrope h-full text-base antialiased;
     overflow: hidden;
   }
 
@@ -36,10 +57,10 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-space font-bold text-white;
+    @apply font-space font-bold text-fg;
   }
 
-  /* Robust scaling for Tailwind utility classes */
+  /* Type scale tuned for the 125% root */
   .text-xs { font-size: 0.85rem !important; }
   .text-sm { font-size: 1rem !important; }
   .text-base { font-size: 1.15rem !important; }
@@ -57,6 +78,11 @@
   [class*="text-[12px]"] {
     font-size: 0.8rem !important;
   }
+
+  ::selection {
+    background: var(--color-iron-lime);
+    color: var(--color-on-accent);
+  }
 }
 
 /* Layout components */
@@ -64,28 +90,38 @@
   @apply flex min-h-screen w-full bg-dark;
 }
 
+/* Off-canvas drawer below lg, pinned column from lg up */
 .sidebar {
-  @apply fixed left-0 top-0 w-(--sidebar-width) h-screen bg-dark border-r border-border flex flex-col py-8 z-50;
+  @apply fixed left-0 top-0 w-(--sidebar-width) max-w-[85vw] h-dvh bg-dark border-r border-border flex flex-col py-6 z-50;
+  @apply max-lg:-translate-x-full max-lg:invisible transition-[translate,visibility] duration-300 ease-out;
+}
+
+.sidebar.is-open {
+  @apply translate-x-0 visible;
+}
+
+.sidebar-backdrop {
+  @apply fixed inset-0 z-40 bg-black/50 lg:hidden;
 }
 
 .top-bar {
-  @apply fixed top-0 left-(--sidebar-width) right-0 h-[72px] bg-dark border-b border-border flex items-center justify-between px-8 z-40;
+  @apply fixed top-0 left-0 lg:left-(--sidebar-width) right-0 h-[72px] bg-dark/85 backdrop-blur-md border-b border-border flex items-center justify-between gap-4 px-4 sm:px-8 z-30;
 }
 
 .main-wrapper {
-  @apply flex-1 flex flex-col pl-(--sidebar-width);
+  @apply flex-1 min-w-0 flex flex-col lg:pl-(--sidebar-width);
 }
 
 .main-content {
-  @apply ml-0 mt-[72px] p-8 bg-[#0D0D12];
-  height: calc(100vh - 72px);
+  @apply mt-[72px] p-4 sm:p-8 bg-canvas;
+  height: calc(100dvh - 72px);
   overflow-y: auto;
   overflow-x: hidden;
 }
 
 /* Dashboard components */
 .stat-card {
-  @apply bg-surface border border-border rounded-lg p-6 relative transition-all duration-300 hover:border-iron-lime/30 hover:-translate-y-1;
+  @apply bg-surface border border-border rounded-lg p-6 relative transition-[border-color,translate] duration-300 hover:border-iron-lime/30 hover:-translate-y-1;
 }
 
 .stat-label {
@@ -93,7 +129,7 @@
 }
 
 .stat-value {
-  @apply text-5xl font-space font-black text-iron-text-primary tracking-tighter block;
+  @apply text-5xl font-space font-bold text-iron-text-primary tracking-tighter block;
 }
 
 .stat-change {
@@ -101,11 +137,11 @@
 }
 
 .card {
-  @apply bg-surface border border-border rounded-lg p-6 transition-all duration-300 hover:border-iron-lime/20;
+  @apply bg-surface border border-border rounded-lg p-6 transition-[border-color] duration-300 hover:border-iron-lime/20;
 }
 
 .btn {
-  @apply bg-iron-lime text-dark border border-iron-lime px-6 py-3 rounded font-space font-semibold text-base tracking-wider transition-all duration-200 hover:shadow-[0_0_20px_rgba(223,255,0,0.3)] hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply bg-iron-lime text-on-accent border border-iron-lime px-6 py-3 rounded font-space font-semibold text-base tracking-wider transition-[box-shadow,scale] duration-200 hover:shadow-[0_4px_20px_rgba(223,255,0,0.25)] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
 }
 
 /* Badges */
@@ -135,11 +171,12 @@
 }
 
 .iron-table td {
-  @apply px-5 py-5 border-b border-border/50 text-white text-xl font-medium;
+  @apply px-5 py-5 border-b border-border/50 text-fg text-xl font-medium;
+  font-variant-numeric: tabular-nums;
 }
 
 .iron-table tr:hover {
-  @apply bg-white/[0.02];
+  @apply bg-fg/[0.02];
 }
 
 /* Scrollbar */
@@ -152,12 +189,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-border rounded-full hover:bg-iron-lime transition-colors;
-}
-
-/* Transition for smooth theme switch */
-*, *::before, *::after {
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+  @apply bg-border rounded-full hover:bg-iron-lime;
 }
 
 /* ===================== ACCESSIBILITY ===================== */
@@ -178,6 +210,10 @@ main:focus-visible {
   opacity: 1;
 }
 
+html.light ::placeholder {
+  color: #71717A;
+}
+
 .skip-link {
   position: absolute;
   left: 1rem;
@@ -186,7 +222,7 @@ main:focus-visible {
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
   background: var(--color-iron-lime);
-  color: var(--color-dark);
+  color: var(--color-on-accent);
   font-weight: 700;
 }
 
@@ -194,150 +230,35 @@ main:focus-visible {
   top: 1rem;
 }
 
+/* Keep state changes (colors, opacity) and loading spinners; drop movement */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+    translate: none !important;
+    scale: none !important;
+    transition-property: color, background-color, border-color, opacity, visibility !important;
+  }
+  *:not(.animate-spin) {
+    animation: none !important;
   }
 }
 
-/* ===================== LIGHT THEME ===================== */
-html.light {
-  --color-dark: #F0F0F5;
-  --color-surface: #FFFFFF;
-  --color-border: #E4E4EB;
-  --color-iron-lime: #2563EB; /* Brand Blue in light mode */
-  --color-iron-blue: #1A3AFF;
-  --color-iron-text-primary: #0A0A0E;
-  --color-iron-text-secondary: #52525B;
-  color-scheme: light;
-}
-
-html.light body {
-  color: #0A0A0E;
-  background: #F0F0F5;
-}
-
-html.light h1, html.light h2, html.light h3, html.light h4, html.light h5, html.light h6 {
-  color: #0A0A0E;
-}
-
-/* btn uses text-dark which is too dark on blue bg — make it white */
-html.light .btn {
-  color: #FFFFFF;
-  border-color: #2563EB;
-}
-
-html.light .main-content {
-  background: #E8E8F0;
-}
-
-html.light .top-bar,
-html.light .sidebar {
-  background: #FFFFFF;
-  border-color: #E4E4EB;
-}
-
-/* Cards in light mode */
+/* ===================== LIGHT THEME EXTRAS ===================== */
 html.light .card,
 html.light .stat-card {
-  background: #FFFFFF;
-  border-color: #E4E4EB;
   box-shadow: 0 4px 20px rgba(0,0,0,0.04);
 }
 
-/* Table styling */
-html.light .iron-table th {
-  border-color: #E4E4EB;
-  color: #71717A;
+html.light .btn {
+  @apply hover:shadow-[0_4px_20px_rgba(29,78,216,0.25)];
 }
 
-html.light .iron-table td {
-  color: #0A0A0E;
-  border-color: #F0F0F5;
-}
-
-html.light .iron-table tr:hover {
-  background: rgba(0,0,0,0.02);
-}
-
-/* ===================== ROBUST UTILITY OVERRIDES ===================== */
-
-/* Critical Fix: text-white/opacity patterns */
-html.light [class*="text-white"] {
-  color: #0A0A0E !important;
-}
-
-html.light [class*="text-white/80"],
-html.light [class*="text-white/70"] {
-  color: rgba(10, 10, 14, 0.8) !important;
-}
-
-html.light [class*="text-white/50"],
-html.light [class*="text-white/40"] {
-  color: rgba(10, 10, 14, 0.5) !important;
-}
-
-/* Fix: text-iron-text-secondary for better contrast */
-html.light .text-iron-text-secondary {
-  color: #52525B !important;
-}
-
-/* Fix: bg-white/opacity patterns (mostly for tracks and subtle buttons) */
-html.light [class*="bg-white/"] {
-  background-color: rgba(0, 0, 0, 0.05) !important;
-}
-
-/* Ensure progress bar tracks are visible */
-html.light .bg-white\/5 {
-  background-color: #E4E4EB !important;
-}
-
-/* Fixed inputs and selects */
-html.light input,
-html.light select,
-html.light textarea,
-html.light [class*="bg-[#18181A]"],
-html.light [class*="bg-[#0D0D12]"],
-html.light [class*="bg-[#111116]"] {
-  background-color: #F8F8FC !important;
-  color: #0A0A0E !important;
-  border-color: #D4D4DC !important;
-}
-
-html.light ::placeholder {
-  color: #71717A !important;
-}
-
-/* Tailwind's -400 text colors are too light on white; darken them for AA */
-html.light .text-red-400, html.light .text-red-500 { color: #B91C1C !important; }
-html.light .text-emerald-400, html.light .text-emerald-500 { color: #047857 !important; }
-html.light .text-amber-400, html.light .text-amber-500 { color: #B45309 !important; }
-html.light .text-blue-400, html.light .text-blue-500 { color: #1D4ED8 !important; }
-html.light .text-purple-400 { color: #7E22CE !important; }
-html.light .text-orange-400 { color: #C2410C !important; }
-html.light .text-cyan-400 { color: #0E7490 !important; }
-html.light .text-pink-400 { color: #BE185D !important; }
-
-/* Modals */
-html.light .bg-dark\/80 {
-  background-color: rgba(240, 240, 245, 0.8) !important;
-}
-
-/* Specific Badge handling */
-html.light .badge-active {
-  background-color: rgba(5, 150, 105, 0.1) !important;
-  color: #059669 !important;
-  border-color: rgba(5, 150, 105, 0.2) !important;
-}
-
-/* Scrollbar in light mode */
-html.light ::-webkit-scrollbar-track {
-  background: #F0F0F5;
-}
-
-html.light ::-webkit-scrollbar-thumb {
-  background: #D4D4DC;
-}
+/* Tailwind's -400/-500 text colors are too light on white; darken them for AA */
+html.light .text-red-400, html.light .text-red-500 { color: #B91C1C; }
+html.light .text-emerald-400, html.light .text-emerald-500 { color: #065F46; }
+html.light .text-amber-400, html.light .text-amber-500 { color: #92400E; }
+html.light .text-blue-400, html.light .text-blue-500 { color: #1D4ED8; }
+html.light .text-purple-400 { color: #7E22CE; }
+html.light .text-orange-400 { color: #C2410C; }
+html.light .text-cyan-400 { color: #0E7490; }
+html.light .text-pink-400 { color: #BE185D; }

@@ -22,21 +22,25 @@ TRUNCATE TABLE Member;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
+-- Sample dates below were written up to 2023-06-05; shift them so that day becomes today.
+-- Keeps the data current (recent payments, active subscriptions) whenever the seed is run.
+SET @shift = DATEDIFF(CURDATE(), '2023-06-05');
+
 -- 1. Member
 INSERT INTO Member (name, gender, phone, email, date_of_birth, join_date, status) VALUES
-('John Doe', 'Male', '1234567890', 'john@example.com', '1990-05-15', '2023-01-10', 'Active'),
-('Jane Smith', 'Female', '0987654321', 'jane@example.com', '1995-08-22', '2023-02-15', 'Active'),
-('Mike Johnson', 'Male', '1112223333', 'mike@example.com', '1988-11-30', '2023-03-20', 'Inactive'),
-('Emily Davis', 'Female', '4445556666', 'emily@example.com', '1992-04-10', '2023-04-05', 'Active'),
-('Chris Wilson', 'Male', '7778889999', 'chris@example.com', '1985-07-25', '2023-05-12', 'Active');
+('John Doe', 'Male', '1234567890', 'john@example.com', '1990-05-15', '2023-01-10' + INTERVAL @shift DAY, 'Active'),
+('Jane Smith', 'Female', '0987654321', 'jane@example.com', '1995-08-22', '2023-02-15' + INTERVAL @shift DAY, 'Active'),
+('Mike Johnson', 'Male', '1112223333', 'mike@example.com', '1988-11-30', '2023-03-20' + INTERVAL @shift DAY, 'Inactive'),
+('Emily Davis', 'Female', '4445556666', 'emily@example.com', '1992-04-10', '2023-04-05' + INTERVAL @shift DAY, 'Active'),
+('Chris Wilson', 'Male', '7778889999', 'chris@example.com', '1985-07-25', '2023-05-12' + INTERVAL @shift DAY, 'Active');
 
 -- 2. Trainer
 INSERT INTO Trainer (name, specialization, phone, salary, hire_date) VALUES
-('Tom Hanks', 'Weightlifting', '5551112222', 50000.00, '2022-01-15'),
-('Emma Stone', 'Yoga', '5553334444', 45000.00, '2022-03-10'),
-('Dwayne Johnson', 'Bodybuilding', '5555556666', 60000.00, '2021-11-01'),
-('Scarlett Johansson', 'Cardio', '5557778888', 48000.00, '2022-05-20'),
-('Chris Hemsworth', 'Crossfit', '5559990000', 55000.00, '2022-08-15');
+('Tom Hanks', 'Weightlifting', '5551112222', 50000.00, '2022-01-15' + INTERVAL @shift DAY),
+('Emma Stone', 'Yoga', '5553334444', 45000.00, '2022-03-10' + INTERVAL @shift DAY),
+('Dwayne Johnson', 'Bodybuilding', '5555556666', 60000.00, '2021-11-01' + INTERVAL @shift DAY),
+('Scarlett Johansson', 'Cardio', '5557778888', 48000.00, '2022-05-20' + INTERVAL @shift DAY),
+('Chris Hemsworth', 'Crossfit', '5559990000', 55000.00, '2022-08-15' + INTERVAL @shift DAY);
 
 -- 3. Membership_Plan
 INSERT INTO Membership_Plan (plan_name, duration_months, price, description) VALUES
@@ -48,19 +52,19 @@ INSERT INTO Membership_Plan (plan_name, duration_months, price, description) VAL
 
 -- 4. Subscription
 INSERT INTO Subscription (member_id, plan_id, start_date, end_date, status) VALUES
-(1, 3, '2023-01-10', '2024-01-10', 'Active'),
-(2, 2, '2023-02-15', '2023-08-15', 'Expired'),
-(3, 1, '2023-03-20', '2023-04-20', 'Expired'),
-(4, 3, '2023-04-05', '2024-04-05', 'Active'),
-(5, 2, '2023-05-12', '2023-11-12', 'Active');
+(1, 3, '2023-01-10' + INTERVAL @shift DAY, '2024-01-10' + INTERVAL @shift DAY, 'Active'),
+(2, 2, '2023-02-15' + INTERVAL @shift DAY, '2023-08-15' + INTERVAL @shift DAY, 'Expired'),
+(3, 1, '2023-03-20' + INTERVAL @shift DAY, '2023-04-20' + INTERVAL @shift DAY, 'Expired'),
+(4, 3, '2023-04-05' + INTERVAL @shift DAY, '2024-04-05' + INTERVAL @shift DAY, 'Active'),
+(5, 2, '2023-05-12' + INTERVAL @shift DAY, '2023-11-12' + INTERVAL @shift DAY, 'Active');
 
 -- 5. Payment
 INSERT INTO Payment (subscription_id, amount, payment_date, payment_method) VALUES
-(1, 11999.00, '2023-01-10', 'Card'),
-(2, 6999.00, '2023-02-15', 'UPI'),
-(3, 1999.00, '2023-03-20', 'Cash'),
-(4, 11999.00, '2023-04-05', 'Bank Transfer'),
-(5, 6999.00, '2023-05-12', 'Card');
+(1, 11999.00, '2023-01-10' + INTERVAL @shift DAY, 'Card'),
+(2, 6999.00, '2023-02-15' + INTERVAL @shift DAY, 'UPI'),
+(3, 1999.00, '2023-03-20' + INTERVAL @shift DAY, 'Cash'),
+(4, 11999.00, '2023-04-05' + INTERVAL @shift DAY, 'Bank Transfer'),
+(5, 6999.00, '2023-05-12' + INTERVAL @shift DAY, 'Card');
 
 -- 6. Attendance
 INSERT INTO Attendance (member_id, check_in_time, check_out_time) VALUES
@@ -96,11 +100,11 @@ INSERT INTO Workout_Exercise (workout_id, exercise_id, sets, reps, rest_time) VA
 
 -- 10. Member_Workout
 INSERT INTO Member_Workout (member_id, workout_id, trainer_id, start_date, end_date) VALUES
-(1, 2, 3, '2023-01-15', '2023-03-15'),
-(2, 1, 4, '2023-02-20', '2023-03-20'),
-(4, 3, 2, '2023-04-10', '2023-05-22'),
-(5, 2, 3, '2023-05-15', '2023-07-10'),
-(1, 5, 5, '2023-04-01', '2023-04-29');
+(1, 2, 3, '2023-01-15' + INTERVAL @shift DAY, '2023-03-15' + INTERVAL @shift DAY),
+(2, 1, 4, '2023-02-20' + INTERVAL @shift DAY, '2023-03-20' + INTERVAL @shift DAY),
+(4, 3, 2, '2023-04-10' + INTERVAL @shift DAY, '2023-05-22' + INTERVAL @shift DAY),
+(5, 2, 3, '2023-05-15' + INTERVAL @shift DAY, '2023-07-10' + INTERVAL @shift DAY),
+(1, 5, 5, '2023-04-01' + INTERVAL @shift DAY, '2023-04-29' + INTERVAL @shift DAY);
 
 -- 11. Diet_Plan
 INSERT INTO Diet_Plan (plan_name, goal, calories_per_day) VALUES
@@ -112,27 +116,27 @@ INSERT INTO Diet_Plan (plan_name, goal, calories_per_day) VALUES
 
 -- 12. Member_Diet
 INSERT INTO Member_Diet (member_id, diet_id, trainer_id, start_date, end_date) VALUES
-(1, 2, 3, '2023-01-15', '2023-03-15'),
-(2, 1, 4, '2023-02-20', '2023-03-20'),
-(4, 3, 2, '2023-04-10', '2023-05-22'),
-(5, 2, 3, '2023-05-15', '2023-07-10'),
-(1, 4, 5, '2023-04-01', '2023-04-29');
+(1, 2, 3, '2023-01-15' + INTERVAL @shift DAY, '2023-03-15' + INTERVAL @shift DAY),
+(2, 1, 4, '2023-02-20' + INTERVAL @shift DAY, '2023-03-20' + INTERVAL @shift DAY),
+(4, 3, 2, '2023-04-10' + INTERVAL @shift DAY, '2023-05-22' + INTERVAL @shift DAY),
+(5, 2, 3, '2023-05-15' + INTERVAL @shift DAY, '2023-07-10' + INTERVAL @shift DAY),
+(1, 4, 5, '2023-04-01' + INTERVAL @shift DAY, '2023-04-29' + INTERVAL @shift DAY);
 
 -- 13. Equipment
 INSERT INTO Equipment (equipment_name, purchase_date, condition_status, location) VALUES
-('Treadmill 1', '2021-01-10', 'Good', 'Cardio Zone'),
-('Treadmill 2', '2021-01-10', 'Needs Repair', 'Cardio Zone'),
-('Bench Press Station', '2021-02-15', 'Good', 'Weight Room'),
-('Squat Rack', '2021-03-20', 'Good', 'Weight Room'),
-('Dumbbell Set 5-50lbs', '2021-04-05', 'New', 'Free Weights');
+('Treadmill 1', '2021-01-10' + INTERVAL @shift DAY, 'Good', 'Cardio Zone'),
+('Treadmill 2', '2021-01-10' + INTERVAL @shift DAY, 'Needs Repair', 'Cardio Zone'),
+('Bench Press Station', '2021-02-15' + INTERVAL @shift DAY, 'Good', 'Weight Room'),
+('Squat Rack', '2021-03-20' + INTERVAL @shift DAY, 'Good', 'Weight Room'),
+('Dumbbell Set 5-50lbs', '2021-04-05' + INTERVAL @shift DAY, 'New', 'Free Weights');
 
 -- 14. Maintenance
 INSERT INTO Maintenance (equipment_id, maintenance_date, description, cost) VALUES
-(2, '2022-05-10', 'Belt alignment and motor check', 2500.00),
-(1, '2022-06-15', 'Routine oiling and inspection', 1000.00),
-(4, '2023-01-20', 'Tightened bolts, replaced J-cups', 1500.00),
-(3, '2023-02-10', 'Re-upholstered bench pad', 2000.00),
-(2, '2023-06-05', 'Motor replacement needed', 5000.00);
+(2, '2022-05-10' + INTERVAL @shift DAY, 'Belt alignment and motor check', 2500.00),
+(1, '2022-06-15' + INTERVAL @shift DAY, 'Routine oiling and inspection', 1000.00),
+(4, '2023-01-20' + INTERVAL @shift DAY, 'Tightened bolts, replaced J-cups', 1500.00),
+(3, '2023-02-10' + INTERVAL @shift DAY, 'Re-upholstered bench pad', 2000.00),
+(2, '2023-06-05' + INTERVAL @shift DAY, 'Motor replacement needed', 5000.00);
 
 -- 15. Supplement
 INSERT INTO Supplement (name, brand, price, stock_quantity) VALUES
@@ -144,12 +148,15 @@ INSERT INTO Supplement (name, brand, price, stock_quantity) VALUES
 
 -- 16. Supplement_Sale
 INSERT INTO Supplement_Sale (member_id, supplement_id, quantity, sale_date, total_amount) VALUES
-(1, 1, 2, '2023-01-15', 7998.00),
-(2, 3, 1, '2023-02-20', 1999.00),
-(4, 2, 1, '2023-04-10', 1499.00),
-(5, 1, 1, '2023-05-15', 3999.00),
-(1, 4, 2, '2023-06-01', 3598.00);
+(1, 1, 2, '2023-01-15' + INTERVAL @shift DAY, 7998.00),
+(2, 3, 1, '2023-02-20' + INTERVAL @shift DAY, 1999.00),
+(4, 2, 1, '2023-04-10' + INTERVAL @shift DAY, 1499.00),
+(5, 1, 1, '2023-05-15' + INTERVAL @shift DAY, 3999.00),
+(1, 4, 2, '2023-06-01' + INTERVAL @shift DAY, 3598.00);
 
 -- 17. Admin (demo login: admin@gym.com / admin123)
-INSERT INTO Admin (name, email, password) VALUES
+INSERT IGNORE INTO Admin (name, email, password) VALUES
 ('Admin', 'admin@gym.com', '$2b$10$9GY0yKdCZVV0CZ1NoXGno.bWf.DNcpizP4L4NT8GMufqRI5gnSLN.');
+
+-- 18. Sync subscription status with the shifted dates
+UPDATE Subscription SET status = IF(end_date < CURDATE(), 'Expired', 'Active');
