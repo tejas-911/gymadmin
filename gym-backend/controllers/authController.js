@@ -11,27 +11,29 @@ exports.login = async (req, res) => {
         admin:   { table: 'Admin',   idCol: 'admin_id' },
     };
 
-    const target = tableMap[role];
-    if (!target) return res.status(400).json({ message: 'Invalid role' });
+    if (role && !tableMap[role]) return res.status(400).json({ message: 'Invalid role' });
+
+    // No role sent (login page auto-detects): try each table in turn
+    const roles = role ? [role] : ['admin', 'trainer', 'member'];
 
     try {
-        const [rows] = await db.query(
-            `SELECT * FROM ${target.table} WHERE email = ?`, [email]
-        );
+        for (const r of roles) {
+            const target = tableMap[r];
+            const [rows] = await db.query(
+                `SELECT * FROM ${target.table} WHERE email = ?`, [email]
+            );
+            const user = rows[0];
+            if (!user || !user.password || !(await bcrypt.compare(password, user.password))) continue;
 
-        if (!rows.length) return res.status(401).json({ message: 'Invalid credentials' });
+            const token = jwt.sign(
+                { id: user[target.idCol], role: r },
+                process.env.JWT_SECRET,
+                { expiresIn: '8h' }
+            );
+            return res.json({ token, role: r, name: user.name });
+        }
 
-        const user = rows[0];
-        const match = await bcrypt.compare(password, user.password);
-        if (!match) return res.status(401).json({ message: 'Invalid credentials' });
-
-        const token = jwt.sign(
-            { id: user[target.idCol], role },
-            process.env.JWT_SECRET,
-            { expiresIn: '8h' }
-        );
-
-        res.json({ token, role, name: user.name });
+        res.status(401).json({ message: 'Invalid credentials' });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

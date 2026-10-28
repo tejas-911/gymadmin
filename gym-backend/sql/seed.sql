@@ -149,3 +149,7 @@ INSERT INTO Supplement_Sale (member_id, supplement_id, quantity, sale_date, tota
 (4, 2, 1, '2023-04-10', 1499.00),
 (5, 1, 1, '2023-05-15', 3999.00),
 (1, 4, 2, '2023-06-01', 3598.00);
+
+-- 17. Admin (demo login: admin@gym.com / admin123)
+INSERT INTO Admin (name, email, password) VALUES
+('Admin', 'admin@gym.com', '$2b$10$9GY0yKdCZVV0CZ1NoXGno.bWf.DNcpizP4L4NT8GMufqRI5gnSLN.');

@@ -63,8 +63,8 @@ BEGIN
 END //
 DELIMITER ;
 
-CALL _create_index_if_not_exists('idx_attendance_date',     'Attendance',     'date');
-CALL _create_index_if_not_exists('idx_attendance_member',   'Attendance',     'member_id, date');
+CALL _create_index_if_not_exists('idx_attendance_date',     'Attendance',     'check_in_time');
+CALL _create_index_if_not_exists('idx_attendance_member',   'Attendance',     'member_id, check_in_time');
 CALL _create_index_if_not_exists('idx_subscription_status', 'Subscription',   'status');
 CALL _create_index_if_not_exists('idx_payment_date',        'Payment',        'payment_date');
 CALL _create_index_if_not_exists('idx_class_schedule_date', 'class_schedule', 'scheduled_date');
@@ -360,16 +360,16 @@ BEGIN
         ROUND(AVG(TIMESTAMPDIFF(MINUTE, check_in_time,
             IFNULL(check_out_time, check_in_time))), 0) AS avg_session_minutes
     FROM Attendance
-    WHERE MONTH(date) = p_report_month
-      AND YEAR(date) = p_report_year;
+    WHERE MONTH(check_in_time) = p_report_month
+      AND YEAR(check_in_time) = p_report_year;
 
     -- 4. Top 5 most active members
     SELECT 'TOP 5 ACTIVE MEMBERS' AS report_section;
     SELECT m.member_id, m.name, COUNT(*) AS visits
     FROM Attendance a
     JOIN Member m ON a.member_id = m.member_id
-    WHERE MONTH(a.date) = p_report_month
-      AND YEAR(a.date) = p_report_year
+    WHERE MONTH(a.check_in_time) = p_report_month
+      AND YEAR(a.check_in_time) = p_report_year
     GROUP BY m.member_id, m.name
     ORDER BY visits DESC
     LIMIT 5;
