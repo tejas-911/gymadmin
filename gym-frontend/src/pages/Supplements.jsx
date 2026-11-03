@@ -253,7 +253,7 @@ export default function Supplements() {
       {showModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-dark/80 backdrop-blur-md" onClick={() => setShowModal(false)} />
-          <div ref={modalDialogRef} role="dialog" aria-modal="true" aria-labelledby="supplements-showModal-title" tabIndex={-1} className="bg-surface border border-border rounded-xl w-full max-w-md relative z-[210] shadow-[0_30px_100px_rgba(0,0,0,0.5)] overflow-hidden">
+          <div ref={modalDialogRef} role="dialog" aria-modal="true" aria-labelledby="supplements-showModal-title" tabIndex={-1} className="bg-surface border border-border rounded-xl w-full max-w-md relative z-[210] shadow-[0_30px_100px_rgba(0,0,0,0.5)]">
             <div className="p-6 pb-4 flex items-center justify-between">
               <div>
                 <h2 id="supplements-showModal-title" className="text-xl font-bold text-fg">Record Sale</h2>
@@ -346,7 +346,7 @@ export default function Supplements() {
       {showRestockModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-dark/80 backdrop-blur-md" onClick={() => setShowRestockModal(false)} />
-          <div ref={restockModalDialogRef} role="dialog" aria-modal="true" aria-labelledby="supplements-showRestockModal-title" tabIndex={-1} className="bg-surface border border-border rounded-xl w-full max-w-md relative z-[210] shadow-[0_30px_100px_rgba(0,0,0,0.5)] overflow-hidden">
+          <div ref={restockModalDialogRef} role="dialog" aria-modal="true" aria-labelledby="supplements-showRestockModal-title" tabIndex={-1} className="bg-surface border border-border rounded-xl w-full max-w-md relative z-[210] shadow-[0_30px_100px_rgba(0,0,0,0.5)]">
             <div className="p-6 pb-4 flex items-center justify-between">
               <div>
                 <h2 id="supplements-showRestockModal-title" className="text-xl font-bold text-fg">Restock Supplement</h2>

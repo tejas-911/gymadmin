@@ -1,17 +1,5 @@
 const db = require('../db');
-const { isBlank, isEmail, isPhone, isDate, GENDERS } = require('../validate');
-
-// Returns an error message for the shared member fields, or null if they are valid
-const memberFieldError = ({ name, gender, phone, email, date_of_birth }) => {
-    if (isBlank(name)) return 'Name is required';
-    if (String(name).length > 100) return 'Name must be 100 characters or fewer';
-    if (!isEmail(email)) return 'A valid email is required';
-    if (!isBlank(phone) && !isPhone(phone)) return 'Phone must be 7-15 digits, spaces or dashes, optionally starting with +';
-    if (!isBlank(gender) && !GENDERS.includes(gender)) return `Gender must be one of: ${GENDERS.join(', ')}`;
-    if (!isBlank(date_of_birth) && (!isDate(date_of_birth) || date_of_birth > new Date().toISOString().slice(0, 10)))
-        return 'Date of birth must be a valid past date (YYYY-MM-DD)';
-    return null;
-};
+const { isBlank, isDate, memberFieldError } = require('../validate');
 
 const dupEmail = (error, res) =>
     error.code === 'ER_DUP_ENTRY' && res.status(400).json({ message: 'That email is already in use' });
@@ -62,7 +50,7 @@ exports.createMember = async (req, res) => {
             // Call stored procedure with validation
             await db.query(
                 'CALL sp_register_member(?, ?, ?, ?, ?, @new_id, @msg)',
-                [name, gender || 'Male', phone, email, date_of_birth || null]
+                [name.trim(), gender || 'Male', phone, email, date_of_birth || null]
             );
             const [[result]] = await db.query('SELECT @new_id AS member_id, @msg AS message');
 
@@ -75,7 +63,7 @@ exports.createMember = async (req, res) => {
             // Fallback: direct insert if procedure not yet created
             const [result] = await db.query(
                 'INSERT INTO Member (name, gender, phone, email, date_of_birth, join_date, status) VALUES (?, ?, ?, ?, ?, CURDATE(), ?)',
-                [name, gender || 'Male', phone || null, email, date_of_birth || null, 'Active']
+                [name.trim(), gender || 'Male', phone || null, email, date_of_birth || null, 'Active']
             );
             return res.status(201).json({ id: result.insertId, message: 'Member created' });
         }
@@ -94,7 +82,7 @@ exports.updateMember = async (req, res) => {
 
         const [result] = await db.query(
             'UPDATE Member SET name=?, gender=?, phone=?, email=?, date_of_birth=?, join_date=?, status=? WHERE member_id=?',
-            [name, gender || 'Male', phone || null, email, date_of_birth || null, join_date || null, status, req.params.id]
+            [name.trim(), gender || 'Male', phone || null, email, date_of_birth || null, join_date || null, status, req.params.id]
         );
         if (!result.affectedRows) return res.status(404).json({ message: 'Member not found' });
         res.json({ message: 'Member updated' });

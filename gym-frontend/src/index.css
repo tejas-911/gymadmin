@@ -56,6 +56,12 @@ html.light {
     @apply h-full;
   }
 
+  /* Keep every modal inside the viewport: tall content scrolls instead of pushing the action buttons off screen */
+  [role="dialog"] {
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
+  }
+
   h1, h2, h3, h4, h5, h6 {
     @apply font-space font-bold text-fg;
   }

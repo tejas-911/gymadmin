@@ -104,9 +104,10 @@ export default function Members() {
         payment_method: subForm.payment_method,
       }, { headers: getHeaders() });
       if (result.subscription_id > 0) {
+        setShowSubModal(false);
         setSubSuccess(result.message || 'Subscription assigned successfully!');
         fetchMembers();
-        setTimeout(() => { setShowSubModal(false); setSubSuccess(''); }, 2500);
+        setTimeout(() => setSubSuccess(''), 5000);
       } else {
         setSubError(result.message || 'Failed to assign subscription.');
       }
@@ -224,6 +225,12 @@ export default function Members() {
           <span>Register Member</span>
         </button>
       </div>
+
+      {subSuccess && (
+        <div role="status" className="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 text-xs font-medium">
+          <CheckCircle size={14} className="shrink-0" /> {subSuccess}
+        </div>
+      )}
 
       {/* Filters */}
       <div className="card p-4 flex flex-col md:flex-row gap-4">
@@ -410,7 +417,7 @@ export default function Members() {
       {showModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-dark/80 backdrop-blur-md" onClick={() => setShowModal(false)} />
-          <div ref={modalDialogRef} role="dialog" aria-modal="true" aria-labelledby="members-showModal-title" tabIndex={-1} className="bg-surface border border-border rounded-xl w-full max-w-[640px] relative z-[210] shadow-[0_30px_100px_rgba(0,0,0,0.5)] overflow-hidden">
+          <div ref={modalDialogRef} role="dialog" aria-modal="true" aria-labelledby="members-showModal-title" tabIndex={-1} className="bg-surface border border-border rounded-xl w-full max-w-[640px] relative z-[210] shadow-[0_30px_100px_rgba(0,0,0,0.5)]">
             <div className="p-6 pb-4 flex items-center justify-between">
               <div>
                 <h2 id="members-showModal-title" className="text-xl font-bold text-fg">{editingId ? 'Edit Member' : 'Register Member'}</h2>
@@ -443,6 +450,7 @@ export default function Members() {
                 <div className="space-y-2">
                   <label htmlFor="members-name" className="text-xs font-bold text-iron-text-secondary tracking-[0.2em] block">Full Name <span aria-hidden="true" className="text-red-400">*</span></label>
                   <input id="members-name" required type="text" placeholder="e.g. Arjun Sharma"
+                    pattern="\s*[\p{L}\p{M}]+( +[\p{L}\p{M}]+)*\s*" title="Letters and spaces only, no numbers or symbols"
                     className="w-full bg-surface border border-border rounded py-3 px-4 text-sm focus:outline-none focus:border-iron-lime transition-all placeholder:text-iron-text-secondary"
                     value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
                 </div>
@@ -514,7 +522,7 @@ export default function Members() {
       {showSubModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-dark/80 backdrop-blur-md" onClick={() => setShowSubModal(false)} />
-          <div ref={subModalDialogRef} role="dialog" aria-modal="true" aria-labelledby="members-showSubModal-title" tabIndex={-1} className="bg-surface border border-border rounded-xl w-full max-w-[560px] relative z-[210] shadow-[0_30px_100px_rgba(0,0,0,0.5)] overflow-hidden">
+          <div ref={subModalDialogRef} role="dialog" aria-modal="true" aria-labelledby="members-showSubModal-title" tabIndex={-1} className="bg-surface border border-border rounded-xl w-full max-w-[560px] relative z-[210] shadow-[0_30px_100px_rgba(0,0,0,0.5)]">
 
             {/* Header */}
             <div className="p-6 pb-4 border-b border-fg/5">
@@ -543,12 +551,6 @@ export default function Members() {
                 <div role="alert" className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-xl flex items-center gap-3">
                   <AlertCircle size={14} className="shrink-0" />
                   <span>{subError}</span>
-                </div>
-              )}
-              {subSuccess && (
-                <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs rounded-xl flex items-center gap-3">
-                  <CheckCircle size={14} className="shrink-0" />
-                  <span>{subSuccess}</span>
                 </div>
               )}
 
@@ -653,8 +655,8 @@ export default function Members() {
                 </div>
               </div>
 
-              {/* Actions */}
-              <div className="flex justify-end gap-3 pt-2 border-t border-fg/5">
+              {/* Actions — pinned to the dialog's bottom edge so Confirm stays visible while the plan list scrolls */}
+              <div className="sticky bottom-0 -mx-6 -mb-6 px-6 py-4 bg-surface flex justify-end gap-3 border-t border-fg/5">
                 <button
                   type="button"
                   onClick={() => setShowSubModal(false)}

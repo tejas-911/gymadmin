@@ -696,7 +696,7 @@ export default function Plans() {
       {showRegModal && selectedClass && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowRegModal(false)} />
-          <div ref={regModalDialogRef} role="dialog" aria-modal="true" aria-labelledby="plans-showRegModal-title" tabIndex={-1} className="relative w-full max-w-md shadow-2xl rounded-3xl overflow-hidden bg-surface border border-border">
+          <div ref={regModalDialogRef} role="dialog" aria-modal="true" aria-labelledby="plans-showRegModal-title" tabIndex={-1} className="relative w-full max-w-md shadow-2xl rounded-3xl bg-surface border border-border">
             <div className={`h-2 w-full`} style={{ backgroundColor: pal(selectedClass.color).hex }} />
             
             <div className="p-8">

@@ -86,6 +86,7 @@ SELECT
     m.gender,
     m.phone,
     m.email,
+    m.date_of_birth,
     m.status         AS member_status,
     m.join_date,
     -- Active subscription info (most recent)

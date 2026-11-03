@@ -1,4 +1,5 @@
 const db = require('../db');
+const { memberFieldError } = require('../validate');
 
 // ═══════════════════════════════════════════════════════════════
 // VIEWS — Query the MySQL views created in advanced_db_features.sql
@@ -48,9 +49,11 @@ exports.getEquipmentHealth = async (req, res) => {
 exports.callRegisterMember = async (req, res) => {
     try {
         const { name, gender, phone, email, date_of_birth } = req.body;
+        const fieldError = memberFieldError(req.body);
+        if (fieldError) return res.status(400).json({ member_id: -1, message: fieldError });
         await db.query(
             'CALL sp_register_member(?, ?, ?, ?, ?, @new_id, @msg)',
-            [name, gender, phone, email, date_of_birth || null]
+            [name.trim(), gender, phone || null, email, date_of_birth || null]
         );
         const [[result]] = await db.query('SELECT @new_id AS member_id, @msg AS message');
         const status = result.member_id > 0 ? 201 : 400;
