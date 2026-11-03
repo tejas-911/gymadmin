@@ -1,4 +1,5 @@
 const db = require('../db');
+const { isId, isAmount, isDate, PAYMENT_METHODS } = require('../validate');
 
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -48,6 +49,10 @@ exports.getAllPayments = async (req, res) => {
 exports.createPayment = async (req, res) => {
     try {
         const { subscription_id, amount, payment_date, payment_method } = req.body;
+        if (!isId(subscription_id)) return res.status(400).json({ message: 'A valid subscription is required' });
+        if (!isAmount(amount) || Number(amount) === 0) return res.status(400).json({ message: 'Amount must be a positive number' });
+        if (!isDate(payment_date)) return res.status(400).json({ message: 'Payment date must be a valid date (YYYY-MM-DD)' });
+        if (!PAYMENT_METHODS.includes(payment_method)) return res.status(400).json({ message: `Payment method must be one of: ${PAYMENT_METHODS.join(', ')}` });
         const [result] = await db.query(
             'INSERT INTO Payment (subscription_id, amount, payment_date, payment_method) VALUES (?, ?, ?, ?)',
             [subscription_id, amount, payment_date, payment_method]

@@ -95,7 +95,7 @@ export default function Supplements() {
       setSuccessMsg('Sale recorded successfully! Stock updated via trigger.');
       setTimeout(() => setSuccessMsg(''), 5000);
     } catch (err) {
-      setModalError(err.response?.data?.error || 'Failed to record sale. Insufficient stock?');
+      setModalError(err.response?.data?.message || err.response?.data?.error || 'Failed to record sale. Insufficient stock?');
     } finally { setIsSubmitting(false); }
   };
 
