@@ -554,7 +554,7 @@ export default function Plans() {
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
           onClick={() => setShowModal(false)}>
           <div ref={modalDialogRef} role="dialog" aria-modal="true" aria-labelledby="plans-showModal-title" tabIndex={-1} className="bg-surface border border-border rounded-2xl w-full max-w-lg shadow-2xl"
-           >
+            onClick={e => e.stopPropagation()}>
             {/* Modal header */}
             <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 px-6 py-5 border-b border-border">
               <div>
